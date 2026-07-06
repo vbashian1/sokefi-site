@@ -11,7 +11,7 @@ npm run dev
 
 Content Collections:
 - Articles live in `src/content/articles`.
-- Collection schema is in `src/content/config.ts`.
+- Collection schema is in `src/content.config.ts`.
 
 GitHub:
 - Create a repository on GitHub and run:

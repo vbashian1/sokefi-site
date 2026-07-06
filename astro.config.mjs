@@ -1,5 +1,3 @@
 import { defineConfig } from 'astro/config';
 
-export default defineConfig({
-  site: '',
-});
+export default defineConfig({});
