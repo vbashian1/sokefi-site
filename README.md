@@ -14,6 +14,10 @@ Content Collections:
 - Articles live in `src/content/articles`.
 - Collection schema is in `src/content.config.ts`.
 
+Code quality:
+
+- Runs Prettier and ESLint automatically on staged files before commit via Husky + lint-staged.
+
 GitHub:
 
 - Create a repository on GitHub and run:
