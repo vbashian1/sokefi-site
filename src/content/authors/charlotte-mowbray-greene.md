@@ -6,7 +6,7 @@ pillars:
   - 'Awenvida'
   - 'The Uncommon Traveller'
 column: 'Musings from the Corner Office'
-shortBio: 'Charlotte is the editor of Sokéfi and the writer of the Corner Office column.'
+shortBio: "I started Sokéfi because I looked around and didn't see myself — not in the lifestyle magazines, not in the travel sites, and not in the content that kept telling me what mid life was supposed to look like. So I built the place I couldn't find."
 longBio: 'Charlotte shapes Sokéfi at the brand level and brings a composed, wry voice to the publication.'
 firstPersonBio: 'I help shape Sokéfi and write about the world with curiosity and a little wit.'
 voiceNotes: 'Composed, wry, authoritative, and personal without becoming confessional.'
