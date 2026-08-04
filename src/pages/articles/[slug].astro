@@ -1,0 +1,62 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const slug = Astro.params.slug ?? '';
+const entry = await getEntry('articles', slug);
+
+if (!entry) {
+  Astro.response.status = 404;
+}
+
+const { Content } = entry ? await render(entry) : { Content: null };
+const authorEntry = entry ? await getEntry(entry.data.author) : null;
+
+const articleSchema = entry
+  ? {
+      '@type': 'Article',
+      headline: entry.data.title,
+      description: entry.data.metaDescription,
+      datePublished: entry.data.date.toISOString(),
+      image: [
+        new URL(
+          entry.data.cover ?? '/images/positano-new.avif',
+          Astro.site ?? new URL('https://sokefi.com'),
+        ).toString(),
+      ],
+      ...(authorEntry
+        ? {
+            author: {
+              '@type': 'Person',
+              name: authorEntry.data.name,
+            },
+          }
+        : {}),
+    }
+  : undefined;
+---
+
+<Base
+  title={entry ? `${entry.data.title} — Sokéfi` : 'Article not found — Sokéfi'}
+  description={entry ? entry.data.metaDescription : 'This article could not be found.'}
+  image={entry?.data.cover ?? '/images/positano-new.avif'}
+  structuredData={articleSchema}
+>
+  <main>
+    {
+      entry ? (
+        <article class="section" aria-labelledby="article-title">
+          <p class="eyebrow">{entry.data.pillar}</p>
+          <h1 id="article-title">{entry.data.title}</h1>
+          <p>{entry.data.metaDescription}</p>
+          <Content />
+        </article>
+      ) : (
+        <section class="section" aria-labelledby="article-missing-title">
+          <h1 id="article-missing-title">Article not found</h1>
+          <p>This article could not be found.</p>
+        </section>
+      )
+    }
+  </main>
+</Base>

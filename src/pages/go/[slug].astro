@@ -1,0 +1,36 @@
+---
+import { AFFILIATES } from '../../data/affiliates';
+
+export const prerender = false;
+
+const slug = Astro.params.slug ?? '';
+const affiliate = AFFILIATES[slug as keyof typeof AFFILIATES];
+
+if (affiliate) {
+  const referer = Astro.request.headers.get('referer') ?? 'direct';
+  const clickEvent = {
+    slug,
+    partner: affiliate.partner,
+    timestamp: new Date().toISOString(),
+    referer,
+  };
+
+  console.info('[affiliate-click]', JSON.stringify(clickEvent));
+
+  return Astro.redirect(affiliate.destination, 302);
+}
+
+Astro.response.status = 404;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Link not found — Sokéfi</title>
+  </head>
+  <body>
+    <p>Sorry, this link is unavailable.</p>
+  </body>
+</html>

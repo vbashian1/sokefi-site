@@ -1,1 +1,440 @@
-﻿
+﻿---
+import Base from '../layouts/Base.astro';
+import { ROUTES } from '../config/routes';
+
+const heroImage = {
+  src: 'images/positano-new.webp',
+  alt: 'A panoramic Amalfi Coast view in Positano with a colorful cliffside village on the left, a domed church near the middle, lush green foliage in the foreground, and a bright blue bay opening to the sea on the right with boats visible in crisp daylight.',
+};
+
+const featuredItems = [
+  {
+    title: 'A new way to read the world',
+    description: 'Placeholder editorial copy for the latest Sokéfi Edit preview.',
+    section: 'Awenvida',
+  },
+  {
+    title: 'The quiet luxury of going slowly',
+    description: 'A sample preview to show how featured content will appear on the homepage.',
+    section: 'The Uncommon Traveller',
+  },
+];
+
+const brands = [
+  {
+    name: 'Awenvida',
+    noteLine1: 'From the Cornish word awen',
+    noteLine2: '(inspiration) and vida (life).',
+    tagline: 'The inspired' + String.fromCharCode(160) + 'life.',
+    href: ROUTES.awenvida,
+    image: '/images/awenvida-breakfast-balcony.avif',
+    imageAlt:
+      'A breakfast table on an ocean-view balcony seen through a window frame, with wicker chairs and a wooden ceiling beam overhead.',
+    imagePosition: 'center 80%',
+  },
+  {
+    name: 'Beyond the Guidebook',
+    taglineLine1: 'The world.',
+    taglineLine2: 'Seen differently.',
+    href: ROUTES.beyondTheGuidebook,
+    image: '/images/beyond-camels-stable.webp',
+    imageAlt:
+      'A camel caravan led by a walking guide in the desert with strong sun flare and long shadows on the sand.',
+  },
+  {
+    name: 'The' + String.fromCharCode(160) + 'Uncommon Traveller',
+    tagline: 'Wander intelligently. Live' + String.fromCharCode(160) + 'curiously.',
+    href: ROUTES.theUncommonTraveller,
+    image: '/images/uncommon-lanterns.webp',
+    imageAlt:
+      'Rows of hanging paper lanterns with Japanese text in a warm lit interior, with no person in frame.',
+  },
+  {
+    name: 'Reservation for One',
+    titleLines: ['Reservation', 'for One'],
+    tagline: 'The intentional' + String.fromCharCode(160) + 'adventure.',
+    href: ROUTES.reservationForOne,
+    image: '/images/reservation-selfie-hat.webp',
+    imageAlt:
+      'A woman in a tan fedora hat photographing a neon-lit night market street on her phone, with a backpack visible and a tuk-tuk in the background.',
+  },
+];
+---
+
+<Base title="Sokéfi - Experience It">
+  <main>
+    <section class="hero-media" aria-label="Featured destination">
+      <img src={heroImage.src} alt={heroImage.alt} loading="eager" decoding="async" />
+      <span class="hero-media-rule" aria-hidden="true"></span>
+    </section>
+
+    <section class="section brand-intro-frame" aria-label="Sokefi brand introduction">
+      <div class="brand-intro-band">
+        <div class="brand-intro-media">
+          <span class="brand-intro-rule" aria-hidden="true"></span>
+          <img
+            src="/images/about-brand-plane.webp"
+            alt="Guests boarding a small propeller plane on a sunlit airstrip under a clear blue sky."
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="brand-intro-rule" aria-hidden="true"></span>
+        </div>
+
+        <div class="brand-intro-copy">
+          <p class="brand-intro-eyebrow">SOKÉFI</p>
+          <p class="brand-intro-tagline">You know it when you feel it.</p>
+        </div>
+
+        <div class="brand-intro-cta">
+          <a class="brand-intro-button" href={ROUTES.about}>READ OUR STORY</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="edit-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-label">The Sokéfi Edit</p>
+          <h2 id="edit-title">Fresh from the latest edition</h2>
+        </div>
+        <a class="button" href={ROUTES.theSokefiEdit}>READ THE FULL EDIT</a>
+      </div>
+
+      <div class="feature-grid">
+        {
+          featuredItems.map((article) => (
+            <article class="card">
+              <p class="card-meta">{article.section}</p>
+              <h3>{article.title}</h3>
+              <p>{article.description}</p>
+              <a class="button" href={ROUTES.theSokefiEdit}>
+                READ PREVIEW
+              </a>
+            </article>
+          ))
+        }
+      </div>
+
+      <div class="subscribe">
+        <p>Get the latest dispatches, editorial picks, and the stories shaping the next edition.</p>
+        <a class="button button-secondary" href={ROUTES.subscribe}
+          >GET THE SOKÉFI EDIT IN YOUR INBOX</a
+        >
+      </div>
+    </section>
+
+    <section class="section sokefi-pillars-section" aria-labelledby="brands-title">
+      <div class="section-heading">
+        <div>
+          <h2 id="brands-title">Your Sokéfi begins here</h2>
+        </div>
+      </div>
+
+      <div class="brand-grid">
+        {
+          brands.map((brand) => (
+            <a class="brand-card" href={brand.href}>
+              <div class="brand-heading">
+                <h3
+                  class:list={[
+                    'brand-title',
+                    brand.titleLines && 'brand-title-centered',
+                    brand.noteLine1 && brand.noteLine2 && 'brand-title-singleline',
+                  ]}
+                  style="text-align: center;"
+                >
+                  {Array.isArray(brand.titleLines) ? (
+                    <>
+                      {brand.titleLines[0]}
+                      <br />
+                      {brand.titleLines[1]}
+                    </>
+                  ) : (
+                    brand.name
+                  )}
+                </h3>
+                {brand.noteLine1 && brand.noteLine2 ? (
+                  <p class="brand-note brand-note-lines brand-note-etymology">
+                    <span>{brand.noteLine1}</span>
+                    <br />
+                    <span>{brand.noteLine2}</span>
+                  </p>
+                ) : (
+                  <p class:list={['brand-note', !brand.note && 'brand-note-empty']}>
+                    {brand.note || String.fromCharCode(160)}
+                  </p>
+                )}
+              </div>
+              {brand.image && (
+                <div class="brand-image-wrap">
+                  <img
+                    class="brand-image"
+                    src={brand.image}
+                    alt={brand.imageAlt || brand.name}
+                    loading="lazy"
+                    decoding="async"
+                    style={
+                      brand.imagePosition ? `object-position: ${brand.imagePosition};` : undefined
+                    }
+                  />
+                </div>
+              )}
+              <p class="brand-tagline">
+                {brand.taglineLine1 && brand.taglineLine2 ? (
+                  <>
+                    {brand.taglineLine1}
+                    <br />
+                    {brand.taglineLine2}
+                  </>
+                ) : (
+                  brand.tagline
+                )}
+              </p>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .hero-media-rule {
+    display: block;
+    width: 100%;
+    height: 1.5px;
+    margin-top: 0.62rem;
+    background: #c8922a;
+  }
+
+  .brand-intro-frame {
+    padding: 0;
+  }
+
+  .brand-intro-band {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(360px, 540px) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(1.4rem, 2.6vw, 2.5rem);
+    padding: clamp(1.4rem, 2.8vw, 2.25rem) clamp(1.25rem, 3.6vw, 2.35rem);
+    background: #1a5f6e;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .brand-intro-media {
+    width: min(100%, 540px);
+  }
+
+  .brand-intro-media img {
+    width: 100%;
+    aspect-ratio: 540 / 350;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+    border: 1px solid rgba(247, 244, 239, 0.35);
+  }
+
+  .brand-intro-rule {
+    display: block;
+    width: 100%;
+    height: 1.5px;
+    margin: 0;
+    background: #c9a227;
+  }
+
+  .brand-intro-media .brand-intro-rule:first-child {
+    margin: 0 0 0.62rem;
+  }
+
+  .brand-intro-media .brand-intro-rule:last-child {
+    margin: 0.62rem 0 0;
+  }
+
+  .brand-intro-copy {
+    color: #f7f4ef;
+    min-width: 0;
+    padding-right: clamp(0.75rem, 1.8vw, 1.6rem);
+  }
+
+  .brand-intro-eyebrow {
+    margin: 0 0 0.58rem;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #c9a227;
+  }
+
+  .brand-intro-tagline {
+    margin: 0 0 0.86rem;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.15rem, 1.85vw, 1.6rem);
+    line-height: 1.15;
+    color: #f7f4ef;
+    white-space: normal;
+    max-width: 20ch;
+  }
+
+  .brand-intro-body {
+    margin: 0;
+    max-width: 48ch;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: clamp(0.95rem, 1.05vw, 1.02rem);
+    line-height: 1.58;
+    color: #f7f4ef;
+    opacity: 0.96;
+  }
+
+  .brand-intro-cta {
+    align-self: center;
+  }
+
+  .brand-intro-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 0;
+    padding: 0.78rem 1.34rem;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #fffdf8;
+    background: #c9a227;
+    white-space: nowrap;
+    transition:
+      background-color 180ms ease,
+      transform 180ms ease;
+  }
+
+  .brand-intro-button:hover,
+  .brand-intro-button:focus-visible {
+    background: #b88426;
+    transform: translateY(-1px);
+  }
+
+  .sokefi-pillars-section {
+    background: #1a5f6e;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .sokefi-pillars-section .section-heading {
+    margin-bottom: 1.15rem;
+  }
+
+  .sokefi-pillars-section .section-heading h2 {
+    color: #f7f4ef !important;
+  }
+
+  .sokefi-pillars-section .brand-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+  }
+
+  .sokefi-pillars-section .brand-card {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0 1.1rem;
+    border-right: 1px solid #c9a227;
+  }
+
+  .sokefi-pillars-section .brand-card,
+  .sokefi-pillars-section .brand-card h3,
+  .sokefi-pillars-section .brand-note,
+  .sokefi-pillars-section .brand-tagline {
+    color: #f7f4ef !important;
+  }
+
+  .sokefi-pillars-section .brand-card:last-child {
+    border-right: 0;
+  }
+
+  .sokefi-pillars-section .brand-card h3 {
+    color: #f7f4ef;
+  }
+
+  .sokefi-pillars-section .brand-note {
+    color: #c9a227;
+  }
+
+  .sokefi-pillars-section .brand-image-wrap {
+    border: 0;
+  }
+
+  .sokefi-pillars-section .brand-tagline {
+    color: #f7f4ef;
+  }
+
+  @media (max-width: 1060px) {
+    .brand-intro-band {
+      grid-template-columns: 1fr;
+      gap: 1.1rem;
+    }
+
+    .brand-intro-media {
+      width: min(100%, 680px);
+    }
+
+    .brand-intro-copy {
+      width: 100%;
+    }
+
+    .brand-intro-body {
+      max-width: none;
+    }
+
+    .brand-intro-cta {
+      justify-self: start;
+    }
+
+    .sokefi-pillars-section .brand-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .sokefi-pillars-section .brand-card {
+      border-right: 0;
+      border-bottom: 1px solid #c9a227;
+      padding: 0 1rem 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .sokefi-pillars-section .brand-card:nth-child(odd) {
+      border-right: 1px solid #c9a227;
+    }
+
+    .sokefi-pillars-section .brand-card:nth-last-child(-n + 2) {
+      border-bottom: 0;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .sokefi-pillars-section .brand-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .sokefi-pillars-section .brand-card,
+    .sokefi-pillars-section .brand-card:nth-child(odd) {
+      border-right: 0;
+      border-bottom: 1px solid #c9a227;
+      margin-bottom: 0;
+      padding: 0 0 1rem;
+    }
+
+    .sokefi-pillars-section .brand-card:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+  }
+</style>
