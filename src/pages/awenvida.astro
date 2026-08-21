@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import awenvidaBalcony from '../assets/images/awenvida-breakfast-balcony.avif';
 import { getAuthorRoute } from '../config/routes';
 ---
 
@@ -8,7 +9,7 @@ import { getAuthorRoute } from '../config/routes';
     <section class="pillar-header-card awenvida-header-card" aria-labelledby="awenvida-title">
       <div class="pillar-header-media">
         <img
-          src="/images/awenvida-breakfast-balcony.avif"
+          src={awenvidaBalcony.src}
           alt="A breakfast table on an ocean-view balcony seen through a window frame, with wicker chairs and a wooden ceiling beam overhead."
           loading="eager"
           decoding="async"

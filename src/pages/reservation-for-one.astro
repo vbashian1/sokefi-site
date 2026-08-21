@@ -1,6 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
+import reservationSelfieHat from '../assets/images/reservation-selfie-hat.webp';
 import { getCollection, getEntry } from 'astro:content';
+import { getThumbnailSrc } from '../utils/pillarFallback';
 import { getAuthorRoute } from '../config/routes';
 
 const allArticles = await getCollection('articles');
@@ -35,7 +37,7 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
     <section class="pillar-header-card" aria-labelledby="reservation-title">
       <div class="pillar-header-media">
         <img
-          src="/images/reservation-selfie-hat.webp"
+          src={reservationSelfieHat.src}
           alt="A woman in a tan fedora hat photographing a neon-lit night market street on her phone, with a backpack visible and a tuk-tuk in the background."
           loading="eager"
           decoding="async"
@@ -60,10 +62,7 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
         orderedArticles.length > 0 ? (
           <div class="feed-list">
             {orderedArticles.map((article) => {
-              const thumbnailSrc =
-                typeof article.data.thumbnail === 'string'
-                  ? article.data.thumbnail
-                  : (article.data.thumbnail?.src ?? '/images/placeholder.webp');
+              const thumbnailSrc = getThumbnailSrc(article);
               const byline =
                 article.data.byline ||
                 authorNameMap[article.data.authorSlug ?? article.data.author] ||
@@ -71,13 +70,15 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
 
               return (
                 <article class:list={['feed-card', article.data.featured && 'feed-card-featured']}>
-                  <img
-                    class="feed-card-image"
-                    src={thumbnailSrc}
-                    alt={article.data.title}
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  {thumbnailSrc && (
+                    <img
+                      class="feed-card-image"
+                      src={thumbnailSrc}
+                      alt={article.data.title}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )}
                   <div class="feed-card-body">
                     <p class="feed-card-eyebrow">{article.data.eyebrow || 'Reservation for One'}</p>
                     <p class="feed-card-byline">{byline}</p>
@@ -157,7 +158,7 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
 
   .feed-card-image {
     width: 100%;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
     display: block;
     border-radius: 0;

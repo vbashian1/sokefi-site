@@ -1,9 +1,15 @@
 ﻿---
 import Base from '../layouts/Base.astro';
 import { ROUTES } from '../config/routes';
+import positanoHero from '../assets/images/positano-new.webp';
+import awenvidaBalcony from '../assets/images/awenvida-breakfast-balcony.avif';
+import beyondCamels from '../assets/images/beyond-camels-stable.webp';
+import uncommonLanterns from '../assets/images/uncommon-lanterns.webp';
+import reservationSelfieHat from '../assets/images/reservation-selfie-hat.webp';
+import aboutPlane from '../assets/images/about-brand-plane.webp';
 
 const heroImage = {
-  src: 'images/positano-new.webp',
+  src: positanoHero.src,
   alt: 'A panoramic Amalfi Coast view in Positano with a colorful cliffside village on the left, a domed church near the middle, lush green foliage in the foreground, and a bright blue bay opening to the sea on the right with boats visible in crisp daylight.',
 };
 
@@ -27,7 +33,7 @@ const brands = [
     noteLine2: '(inspiration) and vida (life).',
     tagline: 'The inspired' + String.fromCharCode(160) + 'life.',
     href: ROUTES.awenvida,
-    image: '/images/awenvida-breakfast-balcony.avif',
+    image: awenvidaBalcony.src,
     imageAlt:
       'A breakfast table on an ocean-view balcony seen through a window frame, with wicker chairs and a wooden ceiling beam overhead.',
     imagePosition: 'center 80%',
@@ -37,7 +43,7 @@ const brands = [
     taglineLine1: 'The world.',
     taglineLine2: 'Seen differently.',
     href: ROUTES.beyondTheGuidebook,
-    image: '/images/beyond-camels-stable.webp',
+    image: beyondCamels.src,
     imageAlt:
       'A camel caravan led by a walking guide in the desert with strong sun flare and long shadows on the sand.',
   },
@@ -45,7 +51,7 @@ const brands = [
     name: 'The' + String.fromCharCode(160) + 'Uncommon Traveller',
     tagline: 'Wander intelligently. Live' + String.fromCharCode(160) + 'curiously.',
     href: ROUTES.theUncommonTraveller,
-    image: '/images/uncommon-lanterns.webp',
+    image: uncommonLanterns.src,
     imageAlt:
       'Rows of hanging paper lanterns with Japanese text in a warm lit interior, with no person in frame.',
   },
@@ -54,7 +60,7 @@ const brands = [
     titleLines: ['Reservation', 'for One'],
     tagline: 'The intentional' + String.fromCharCode(160) + 'adventure.',
     href: ROUTES.reservationForOne,
-    image: '/images/reservation-selfie-hat.webp',
+    image: reservationSelfieHat.src,
     imageAlt:
       'A woman in a tan fedora hat photographing a neon-lit night market street on her phone, with a backpack visible and a tuk-tuk in the background.',
   },
@@ -73,7 +79,7 @@ const brands = [
         <div class="brand-intro-media">
           <span class="brand-intro-rule" aria-hidden="true"></span>
           <img
-            src="/images/about-brand-plane.webp"
+            src={aboutPlane.src}
             alt="Guests boarding a small propeller plane on a sunlit airstrip under a clear blue sky."
             loading="lazy"
             decoding="async"

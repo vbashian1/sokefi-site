@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import beyondCamels from '../assets/images/beyond-camels-stable.webp';
 ---
 
 <Base title="Beyond the Guidebook — Sokéfi">
@@ -7,7 +8,7 @@ import Base from '../layouts/Base.astro';
     <section class="pillar-header-card" aria-labelledby="guidebook-title">
       <div class="pillar-header-media">
         <img
-          src="/images/beyond-camels-stable.webp"
+          src={beyondCamels.src}
           alt="A camel caravan led by a walking guide in the desert with strong sun flare and long shadows on the sand."
           loading="eager"
           decoding="async"

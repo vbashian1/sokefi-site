@@ -1,5 +1,6 @@
 ---
 import { getCollection, getEntry } from 'astro:content';
+import { getThumbnailSrc } from '../../utils/pillarFallback';
 import Base from '../../layouts/Base.astro';
 
 const slug = Astro.params.slug ?? '';
@@ -50,7 +51,8 @@ const getArticleDateValue = (article) => {
 };
 
 const authorArticles = allArticles
-  .filter((article) => author && (article.data.authorSlug ?? article.data.author) === author.id)
+  // `author`/`authorSlug` are collection references ({ id, collection }), not strings.
+  .filter((article) => author && (article.data.authorSlug ?? article.data.author)?.id === author.id)
   .sort((a, b) => getArticleDateValue(b) - getArticleDateValue(a));
 
 const eyebrow = getDisplayEyebrow();
@@ -89,22 +91,21 @@ const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief'
             {authorArticles.length > 0 ? (
               <div class="feed-list">
                 {authorArticles.map((article) => {
-                  const thumbnailSrc =
-                    typeof article.data.thumbnail === 'string'
-                      ? article.data.thumbnail
-                      : (article.data.thumbnail?.src ?? '/images/placeholder.webp');
+                  const thumbnailSrc = getThumbnailSrc(article);
 
                   return (
                     <article
                       class:list={['feed-card', article.data.featured && 'feed-card-featured']}
                     >
-                      <img
-                        class="feed-card-image"
-                        src={thumbnailSrc}
-                        alt={article.data.title}
-                        loading="lazy"
-                        decoding="async"
-                      />
+                      {thumbnailSrc && (
+                        <img
+                          class="feed-card-image"
+                          src={thumbnailSrc}
+                          alt={article.data.title}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      )}
                       <div class="feed-card-body">
                         <p class="feed-card-eyebrow">
                           {article.data.eyebrow || article.data.pillar}
@@ -238,7 +239,7 @@ const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief'
 
   .feed-card-image {
     width: 100%;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
     display: block;
     border-radius: 0;

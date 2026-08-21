@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import aboutPlane from '../assets/images/about-brand-plane.webp';
 ---
 
 <Base title="About — Sokéfi">
@@ -7,7 +8,7 @@ import Base from '../layouts/Base.astro';
     <section class="pillar-header-card" aria-labelledby="about-title">
       <div class="pillar-header-media">
         <img
-          src="/images/about-brand-plane.webp"
+          src={aboutPlane.src}
           alt="Guests boarding a small propeller plane on a sunlit airstrip under a clear blue sky."
           loading="eager"
           decoding="async"

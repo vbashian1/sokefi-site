@@ -1,0 +1,123 @@
+---
+const { pick, images, alt = [] } = Astro.props;
+
+// The validated `gallery:` frontmatter is published by the article page, because MDX
+// only exposes RAW frontmatter to the body — `frontmatter.gallery` there is a list of
+// unresolved path strings, not the ImageMetadata that astro:content produces.
+const pool = Astro.locals?.articleGallery ?? [];
+const selected = images ?? (pick ?? pool.map((_, i) => i)).map((i) => pool[i]);
+
+const getImageMeta = (img) => {
+  if (!img) return null;
+  if (typeof img === 'string') return { src: img, width: 1600, height: 1000 };
+  return { src: img.src, width: img.width, height: img.height };
+};
+
+const items = selected
+  .map((img) => getImageMeta(img))
+  .filter(Boolean)
+  .map((meta, index, arr) => ({
+    ...meta,
+    landscape: meta.width >= meta.height,
+    isLastOdd: arr.length % 2 === 1 && index === arr.length - 1,
+    alt: alt[index] ?? `Photo ${index + 1}`,
+  }));
+---
+
+{
+  items.length === 1 && (
+    <div class="article-gallery article-gallery-single">
+      <img
+        class:list={[
+          'gallery-image',
+          items[0].landscape ? 'gallery-image-landscape' : 'gallery-image-portrait',
+        ]}
+        src={items[0].src}
+        width={items[0].width}
+        height={items[0].height}
+        alt={items[0].alt}
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+  )
+}
+
+{
+  items.length > 1 && (
+    <div class="article-gallery article-gallery-grid">
+      {items.map((img) => (
+        <img
+          class:list={['gallery-image', img.isLastOdd && 'gallery-image-full']}
+          src={img.src}
+          width={img.width}
+          height={img.height}
+          alt={img.alt}
+          loading="lazy"
+          decoding="async"
+        />
+      ))}
+    </div>
+  )
+}
+
+<style>
+  /* Sits inline in the body flow, so it needs symmetric vertical margins.
+     2.2rem matches the blockquote rhythm in the article body. */
+  .article-gallery {
+    margin: 2.2rem 0;
+  }
+
+  .gallery-image {
+    display: block;
+    border-radius: 0;
+  }
+
+  .gallery-image-landscape {
+    width: 100%;
+    height: auto;
+  }
+
+  .gallery-image-portrait {
+    width: 50%;
+    max-width: 340px;
+    height: auto;
+    margin: 0 auto;
+  }
+
+  .article-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .article-gallery-grid .gallery-image {
+    width: 100%;
+    height: auto;
+  }
+
+  .gallery-image-full {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 700px) {
+    .gallery-image-portrait {
+      width: 70%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .article-gallery-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .gallery-image-full {
+      grid-column: auto;
+    }
+
+    .gallery-image-portrait {
+      width: 100%;
+      max-width: 260px;
+    }
+  }
+</style>

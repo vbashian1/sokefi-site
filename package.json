@@ -12,7 +12,7 @@
     "prepare": "husky install"
   },
   "lint-staged": {
-    "*.{js,mjs,ts,astro,json,md}": [
+    "*.{js,mjs,ts,astro,json,md,mdx}": [
       "prettier --write"
     ],
     "*.{js,mjs,ts,astro}": [
@@ -35,7 +35,10 @@
     "typescript": "~5.3.3"
   },
   "dependencies": {
+    "@astrojs/mdx": "^7.0.5",
     "@astrojs/sitemap": "^3.7.3",
-    "@astrojs/vercel": "^11.0.3"
+    "@astrojs/vercel": "^11.0.3",
+    "marked": "^18.0.9",
+    "marked-smartypants": "^1.1.12"
   }
 }

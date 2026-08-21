@@ -44,7 +44,7 @@ const authors = defineCollection({
 });
 
 const articles = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/articles' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/articles' }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -66,6 +66,9 @@ const articles = defineCollection({
       byline: z.string().default(''),
       authorSlug: reference('authors').optional(),
       dek: z.string().default(''),
+      // GEO summary shown above the narrative, separated from it by a rule.
+      // Blank lines split it into paragraphs; omit the field for no summary and no rule.
+      summary: z.string().optional(),
       publishDate: z.coerce.date().optional(),
       updatedDate: z.coerce.date().optional(),
       thumbnail: image().optional(),

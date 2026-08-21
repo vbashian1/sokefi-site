@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import uncommonLanterns from '../assets/images/uncommon-lanterns.webp';
 ---
 
 <Base title="The Uncommon Traveller — Sokéfi">
@@ -7,7 +8,7 @@ import Base from '../layouts/Base.astro';
     <section class="pillar-header-card" aria-labelledby="traveller-title">
       <div class="pillar-header-media">
         <img
-          src="/images/uncommon-lanterns.webp"
+          src={uncommonLanterns.src}
           alt="Rows of hanging paper lanterns with Japanese text in a warm lit interior, with no person in frame."
           loading="eager"
           decoding="async"

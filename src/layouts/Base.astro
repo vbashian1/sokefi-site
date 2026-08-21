@@ -5,10 +5,11 @@ import Nav from '../components/Nav.astro';
 import CookieConsentBanner from '../components/CookieConsentBanner.astro';
 import { ROUTES } from '../config/routes';
 import { SOCIAL_LINKS } from '../config/social';
+import defaultShareImageAsset from '../assets/images/positano-new.avif';
 
 const defaultDescription =
   'Sokéfi is an editorial publication for curious travel, culture, and living well.';
-const defaultShareImage = '/images/positano-new.avif';
+const defaultShareImage = defaultShareImageAsset.src;
 
 const {
   title = 'Sokéfi',
