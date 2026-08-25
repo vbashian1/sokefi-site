@@ -7,7 +7,15 @@ const slug = Astro.params.slug ?? '';
 const affiliate = AFFILIATES[slug as keyof typeof AFFILIATES];
 
 if (affiliate) {
-  const referer = Astro.request.headers.get('referer') ?? 'direct';
+  const refererHeader = Astro.request.headers.get('referer');
+  let referer = 'direct';
+  if (refererHeader) {
+    try {
+      referer = new URL(refererHeader).origin;
+    } catch {
+      referer = 'unknown';
+    }
+  }
   const clickEvent = {
     slug,
     partner: affiliate.partner,
