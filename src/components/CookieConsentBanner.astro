@@ -25,7 +25,7 @@ const { cookieName = 'sokefi_cookie_consent' } = Astro.props;
     button.addEventListener('click', () => {
       const cookieName = banner.getAttribute('data-cookie-name') ?? 'sokefi_cookie_consent';
       const maxAge = 60 * 60 * 24 * 180;
-      document.cookie = `${cookieName}=accepted; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
+      document.cookie = `${cookieName}=accepted; Path=/; Max-Age=${maxAge}; SameSite=Lax; Secure`;
       banner.remove();
     });
   }

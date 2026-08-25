@@ -125,8 +125,8 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
         <div class="footer-links">
           <a href={SOCIAL_LINKS.instagram}>Instagram</a>
           <a href={SOCIAL_LINKS.facebook}>Facebook</a>
-          <a href={SOCIAL_LINKS.pinterest}>Pinterest</a>
-          <a href={SOCIAL_LINKS.substack}>Substack</a>
+          {SOCIAL_LINKS.pinterest && <a href={SOCIAL_LINKS.pinterest}>Pinterest</a>}
+          {SOCIAL_LINKS.substack && <a href={SOCIAL_LINKS.substack}>Substack</a>}
         </div>
       </div>
       <div class="footer-row footer-row-secondary">
@@ -166,7 +166,7 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
     margin: 0;
     background: #ffffff;
     color: var(--text);
-    font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+    font-family: 'Source Serif Pro', Georgia, serif;
     line-height: 1.7;
   }
 
@@ -505,7 +505,7 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
   .brand-note {
     margin: 0;
     min-height: 2.4rem;
-    font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+    font-family: 'Source Serif Pro', Georgia, serif;
     font-size: 0.82rem;
     line-height: 1.25;
     font-weight: 600;

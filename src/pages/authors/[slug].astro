@@ -26,7 +26,7 @@ const getDisplayEyebrow = () => {
     return author.data.column;
   }
 
-  return author?.data.pillars?.[0] ?? 'Sokefi';
+  return author?.data.pillars?.[0] ?? 'Sokéfi';
 };
 
 const getDisplayMonogram = () => {
@@ -62,7 +62,7 @@ const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief'
 ---
 
 <Base
-  title={author ? `${author.data.name} — Sokefi` : 'Author not found — Sokefi'}
+  title={author ? `${author.data.name} — Sokéfi` : 'Author not found — Sokéfi'}
   description={author?.data.shortBio ?? 'This author could not be found.'}
 >
   <main>
