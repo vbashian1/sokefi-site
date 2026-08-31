@@ -1,6 +1,19 @@
 import { defineCollection, reference, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
+// Article folders are named e.g. `2026-08-31-blues-highway/` for chronological browsing,
+// but URLs stay slug-only (/articles/blues-highway) — this strips the date prefix when
+// deriving the entry id, instead of Astro's default folder-name-as-id behavior.
+const DATE_FOLDER_PREFIX = /^\d{4}-\d{2}-\d{2}-/;
+
+const stripDatePrefixFromId = (entryPath: string) => {
+  const withoutExt = entryPath.replace(/\.(md|mdx)$/, '');
+  const withoutIndex = withoutExt.replace(/\/index$/, '');
+  const segments = withoutIndex.split('/');
+  segments[segments.length - 1] = segments[segments.length - 1].replace(DATE_FOLDER_PREFIX, '');
+  return segments.join('/');
+};
+
 const authors = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/authors' }),
   schema: ({ image }) =>
@@ -44,7 +57,11 @@ const authors = defineCollection({
 });
 
 const articles = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/articles' }),
+  loader: glob({
+    pattern: '**/*.{md,mdx}',
+    base: './src/content/articles',
+    generateId: ({ entry }) => stripDatePrefixFromId(entry),
+  }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
