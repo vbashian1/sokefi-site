@@ -1,0 +1,119 @@
+---
+// Renders "THE DETAILS" booking/affiliate callout boxes from article bodies.
+// `lines` is a flexible label/value list rather than fixed Price/Includes/Tip
+// props because the real exports don't always use those three labels (e.g. a
+// car-rental box uses "Pickup" instead of "Price") — this covers whatever
+// label set a given box actually needs. `links` is an array (not a single
+// CTA) because some boxes carry more than one booking link (e.g. separate
+// pickup-city links), each with its own label ("Book Here", "Buy Here", "Get
+// a Quote", ...).
+interface DetailLine {
+  label: string;
+  value: string;
+}
+
+interface DetailLink {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  title: string;
+  lines?: DetailLine[];
+  links: DetailLink[];
+}
+
+const { title, lines = [], links } = Astro.props;
+---
+
+<div class="article-details">
+  <p class="article-details-title">The Details — {title}</p>
+  {
+    lines.length > 0 && (
+      <div class="article-details-lines">
+        {lines.map((line) => (
+          <p class="article-details-line">
+            <strong>{line.label}:</strong> {line.value}
+          </p>
+        ))}
+      </div>
+    )
+  }
+  <div class="article-details-ctas">
+    {
+      links.map((link) => (
+        <a class="article-details-cta" href={link.href}>
+          {link.label} &rarr;
+        </a>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .article-details {
+    margin: 2rem 0;
+    padding: 1.35rem 1.5rem;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--container-corner-radius);
+    box-shadow: 0 20px 48px rgba(11, 77, 90, 0.06);
+  }
+
+  .article-details .article-details-title {
+    margin: 0 0 0.75rem;
+    font-family: 'Lato', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--amber);
+  }
+
+  .article-details-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0 0 1.1rem;
+  }
+
+  .article-details .article-details-line {
+    margin: 0;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--text);
+  }
+
+  .article-details-line strong {
+    color: var(--teal-deep);
+  }
+
+  .article-details-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .article-details .article-details-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.65rem 1.2rem;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #fffdf8;
+    background: var(--amber);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .article-details .article-details-cta:hover,
+  .article-details .article-details-cta:focus-visible {
+    background: var(--teal-deep);
+  }
+</style>
