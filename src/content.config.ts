@@ -86,7 +86,6 @@ const articles = defineCollection({
       // GEO summary shown above the narrative, separated from it by a rule.
       // Blank lines split it into paragraphs; omit the field for no summary and no rule.
       summary: z.string().optional(),
-      publishDate: z.coerce.date().optional(),
       updatedDate: z.coerce.date().optional(),
       thumbnail: image().optional(),
       heroImage: image().optional(),
@@ -114,7 +113,21 @@ const articles = defineCollection({
       crossPostToSubstack: z.boolean().default(false),
       cover: z.string().optional(),
       tags: z.array(z.string()).default([]),
-      region: z.enum(['Africa', 'Middle East', 'Europe', 'Americas', 'Asia Pacific']).optional(),
+      region: z
+        .array(
+          z.enum([
+            'Europe',
+            'North America',
+            'Central & South America',
+            'Caribbean',
+            'Africa',
+            'Middle East',
+            'Asia',
+            'Oceania',
+            'Polar',
+          ]),
+        )
+        .optional(),
       interest: z
         .array(
           z.enum([

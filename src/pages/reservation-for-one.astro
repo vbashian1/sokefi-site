@@ -13,7 +13,7 @@ const normalizePillar = (pillar) =>
   (pillar ?? '').toLowerCase().replace(/\s+/g, '-').replace(/-+/g, '-');
 
 const getArticleDateValue = (article) => {
-  const rawDate = article.data.publishDate ?? article.data.updatedDate ?? article.data.date;
+  const rawDate = article.data.updatedDate ?? article.data.date;
   const parsedDate = rawDate ? new Date(rawDate) : null;
   return parsedDate ? parsedDate.getTime() : 0;
 };

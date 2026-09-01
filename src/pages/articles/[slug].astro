@@ -3,6 +3,7 @@ import { getEntry, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import AffiliateDisclosure from '../../components/AffiliateDisclosure.astro';
 import ArticleGallery from '../../components/ArticleGallery.astro';
+import ArticleDetails from '../../components/ArticleDetails.astro';
 import defaultArticleImage from '../../assets/images/positano-new.avif';
 import { getAuthorRoute } from '../../config/routes';
 import { renderSummaryHtml, summaryToPlainText } from '../../utils/summary';
@@ -61,12 +62,13 @@ Astro.locals.articleGallery = galleryImages;
 const summaryHtml = await renderSummaryHtml(entry?.data.summary);
 const summaryText = summaryToPlainText(summaryHtml);
 
-const displayDate = entry ? (entry.data.publishDate ?? entry.data.date) : null;
+const displayDate = entry ? entry.data.date : null;
 const formattedDate = displayDate
   ? new Date(displayDate).toLocaleDateString('en-GB', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
+      timeZone: 'UTC',
     })
   : '';
 
@@ -177,7 +179,7 @@ const articleSchema = entry
             )}
 
             <div class="article-body">
-              <Content components={{ Gallery: ArticleGallery }} />
+              <Content components={{ Gallery: ArticleGallery, Details: ArticleDetails }} />
             </div>
 
             {entry.data.affiliateDisclosure && (
