@@ -136,6 +136,13 @@ const articles = defineCollection({
             'Long weekend',
             'Road trip',
             'Slow travel',
+            'History',
+            'Culture',
+            'Food & drink',
+            'Music',
+            'City breaks',
+            'Midlife',
+            'Ageing well',
           ]),
         )
         .optional(),
