@@ -16,7 +16,7 @@ if (!entry) {
 }
 
 const { Content } = entry ? await render(entry) : { Content: null };
-const authorRef = entry ? (entry.data.authorSlug ?? entry.data.author) : null;
+const authorRef = entry ? entry.data.author : null;
 const authorEntry = authorRef ? await getEntry(authorRef) : null;
 
 const getMonogram = (author) => {

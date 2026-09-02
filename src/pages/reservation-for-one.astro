@@ -64,9 +64,7 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
             {orderedArticles.map((article) => {
               const thumbnailSrc = getThumbnailSrc(article);
               const byline =
-                article.data.byline ||
-                authorNameMap[article.data.authorSlug ?? article.data.author] ||
-                'Sokéfi';
+                article.data.byline || authorNameMap[article.data.author.id] || 'Sokéfi';
 
               return (
                 <article class:list={['feed-card', article.data.featured && 'feed-card-featured']}>

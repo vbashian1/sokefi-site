@@ -81,7 +81,6 @@ const articles = defineCollection({
       ]),
       eyebrow: z.string().optional(),
       byline: z.string().default(''),
-      authorSlug: reference('authors').optional(),
       dek: z.string().default(''),
       // GEO summary shown above the narrative, separated from it by a rule.
       // Blank lines split it into paragraphs; omit the field for no summary and no rule.

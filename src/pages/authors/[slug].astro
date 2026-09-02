@@ -51,8 +51,8 @@ const getArticleDateValue = (article) => {
 };
 
 const authorArticles = allArticles
-  // `author`/`authorSlug` are collection references ({ id, collection }), not strings.
-  .filter((article) => author && (article.data.authorSlug ?? article.data.author)?.id === author.id)
+  // `author` is a collection reference ({ id, collection }), not a string.
+  .filter((article) => author && article.data.author.id === author.id)
   .sort((a, b) => getArticleDateValue(b) - getArticleDateValue(a));
 
 const eyebrow = getDisplayEyebrow();
