@@ -52,7 +52,7 @@ import { getAuthorRoute } from '../config/routes';
     margin: 1rem 0 0;
     padding-left: 0.85rem;
     position: relative;
-    color: rgba(26, 95, 110, 0.85);
+    color: color-mix(in srgb, var(--brand-teal) 85%, transparent);
     font-family: 'Playfair Display', Georgia, serif;
     font-style: normal;
     font-size: clamp(1rem, 1.65vw, 1.1rem);
@@ -74,7 +74,7 @@ import { getAuthorRoute } from '../config/routes';
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0;
-    background: #1a5f6e;
+    background: var(--brand-teal);
   }
 
   .awenvida-bio-lane {

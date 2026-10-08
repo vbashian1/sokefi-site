@@ -143,9 +143,11 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
 
 <style is:global>
   :root {
-    --teal: #0c7fa2;
-    --teal-deep: #0a6c8d;
-    --teal-soft: #0a6c8d;
+    /* Sokéfi brand teal — the one shared value for every teal on the site. */
+    --brand-teal: #1a5f6e;
+    --teal: var(--brand-teal);
+    --teal-deep: var(--brand-teal);
+    --teal-soft: var(--brand-teal);
     --ivory: #ffffff;
     --amber: #c9a227;
     --text: #17272b;
@@ -250,7 +252,7 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
     font-family: 'Playfair Display', Georgia, serif;
     font-size: clamp(2.1rem, 3vw, 2.25rem);
     line-height: 1.15;
-    color: #1a5f6e;
+    color: var(--brand-teal);
   }
 
   .pillar-tagline {
@@ -259,7 +261,7 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
     font-size: clamp(1.08rem, 1.65vw, 1.1875rem);
     font-style: normal;
     line-height: 1.35;
-    color: rgba(26, 95, 110, 0.85);
+    color: color-mix(in srgb, var(--brand-teal) 85%, transparent);
   }
 
   .hero-media {
@@ -510,7 +512,7 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
     line-height: 1.25;
     font-weight: 600;
     letter-spacing: 0;
-    color: rgba(26, 95, 110, 0.86);
+    color: color-mix(in srgb, var(--brand-teal) 86%, transparent);
     text-align: center;
     max-width: 20ch;
   }
@@ -566,7 +568,7 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
     letter-spacing: -0.02em;
     line-height: 1.42;
     text-transform: none;
-    color: #1a5f6e;
+    color: var(--brand-teal);
     text-align: center;
     font-weight: 600;
     padding-top: 0;

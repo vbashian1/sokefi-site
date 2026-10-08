@@ -64,7 +64,12 @@ const hasMeta = Astro.slots.has('meta');
   .team-byline-on-light .team-byline-accent {
     flex-shrink: 0;
     width: 8px;
-    background: linear-gradient(to right, #1a5f6e 0 4px, transparent 4px 6px, #c9a227 6px 8px);
+    background: linear-gradient(
+      to right,
+      var(--brand-teal) 0 4px,
+      transparent 4px 6px,
+      #c9a227 6px 8px
+    );
   }
 
   .team-byline-on-light .team-byline-copy {
