@@ -82,8 +82,8 @@ const articles = defineCollection({
       eyebrow: z.string().optional(),
       byline: z.string().default(''),
       dek: z.string().default(''),
-      // GEO summary shown above the narrative, separated from it by a rule.
-      // Blank lines split it into paragraphs; omit the field for no summary and no rule.
+      // GEO summary — metadata only, never rendered on the page. It feeds the
+      // article's structured data (description/abstract).
       summary: z.string().optional(),
       updatedDate: z.coerce.date().optional(),
       thumbnail: image().optional(),
@@ -133,13 +133,19 @@ const articles = defineCollection({
             'Solo travel',
             'Multigenerational travel',
             'Long weekend',
+            'Long-haul long weekend',
             'Road trip',
             'Slow travel',
+            'Historical sites',
+            'Museums',
+            'Bucket list',
+            'Natural wonders',
+            'Beaches',
+            'Coastal',
+            // Not on the confirmed list; kept only while the trial Blues and "60"
+            // copies still use them. Remove when those articles are replaced.
             'History',
-            'Culture',
-            'Food & drink',
             'Music',
-            'City breaks',
             'Midlife',
             'Ageing well',
           ]),

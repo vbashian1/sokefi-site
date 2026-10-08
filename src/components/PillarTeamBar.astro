@@ -1,0 +1,33 @@
+---
+// The teal team bar that closes Sokéfi Editorial Team articles, in place of the
+// author card and the "This piece was written by…" line. Matches the team bar on
+// the pillar pages: pillar name as the label, team name beneath.
+import EditorialByline from './EditorialByline.astro';
+
+interface Props {
+  pillar: string;
+  name: string;
+}
+
+const { pillar, name } = Astro.props;
+
+// The schema accepts each pillar as a slug or a display name; the bar shows the name.
+const PILLAR_NAMES: Record<string, string> = {
+  awenvida: 'Awenvida',
+  'beyond-the-guidebook': 'Beyond the Guidebook',
+  'the-uncommon-traveller': 'The Uncommon Traveller',
+  'reservation-for-one': 'Reservation for One',
+};
+const pillarName = PILLAR_NAMES[pillar.trim().toLowerCase().replace(/\s+/g, '-')] ?? pillar;
+---
+
+<section class="pillar-team-bar" aria-label="Written by">
+  <EditorialByline surface="teal" label={pillarName} name={name} />
+</section>
+
+<style>
+  .pillar-team-bar {
+    padding: 1.2rem 1.75rem;
+    background: #1a5f6e;
+  }
+</style>

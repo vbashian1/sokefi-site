@@ -4,6 +4,8 @@ import Base from '../../layouts/Base.astro';
 import AffiliateDisclosure from '../../components/AffiliateDisclosure.astro';
 import ArticleGallery from '../../components/ArticleGallery.astro';
 import ArticleDetails from '../../components/ArticleDetails.astro';
+import PillarTeamBar from '../../components/PillarTeamBar.astro';
+import EditorialByline from '../../components/EditorialByline.astro';
 import defaultArticleImage from '../../assets/images/positano-new.avif';
 import { getAuthorRoute } from '../../config/routes';
 import { renderSummaryHtml, summaryToPlainText } from '../../utils/summary';
@@ -56,9 +58,10 @@ const galleryImages = entry
 // Published for <Gallery pick={[...]} /> inside MDX bodies, which can only see raw frontmatter.
 Astro.locals.articleGallery = galleryImages;
 
-// Summaries accept basic markdown (bullets, bold, links). The rendered HTML drives
-// the visible block; the flattened text drives structured data, where a bulleted
-// list has to read as prose rather than as markup or run-together fragments.
+// The summary is metadata only — never rendered on the page. It accepts basic
+// markdown (bullets, bold, links), so it is rendered and then flattened to text for
+// structured data, where a bulleted list has to read as prose rather than as markup
+// or run-together fragments.
 const summaryHtml = await renderSummaryHtml(entry?.data.summary);
 const summaryText = summaryToPlainText(summaryHtml);
 
@@ -80,6 +83,8 @@ const tags = entry?.data.tags ?? [];
 const eyebrowText = entry ? entry.data.eyebrow || entry.data.pillar : '';
 const monogram = getMonogram(authorEntry);
 const authorHref = authorEntry ? getAuthorRoute(authorEntry.id) : null;
+// Team pieces close with the pillar team bar rather than a personal author card.
+const isEditorialTeam = authorEntry?.id === 'sokefi-editorial-team';
 
 const articleSchema = entry
   ? {
@@ -137,46 +142,58 @@ const articleSchema = entry
               </h1>
               {entry.data.dek && <p class="article-dek">{entry.data.dek}</p>}
 
-              <div class="article-byline">
-                <div class="byline-avatar" aria-hidden="true">
-                  {monogram}
+              {isEditorialTeam ? (
+                <div class="article-byline">
+                  <EditorialByline name={authorEntry.data.name} href={authorHref ?? undefined}>
+                    <Fragment slot="meta">
+                      {readTimeMinutes} min read
+                      {formattedDate && (
+                        <>
+                          {' '}
+                          &middot;{' '}
+                          <time datetime={new Date(displayDate).toISOString()}>
+                            {formattedDate}
+                          </time>
+                        </>
+                      )}
+                    </Fragment>
+                  </EditorialByline>
                 </div>
-                <div class="byline-meta">
-                  {authorEntry && authorHref ? (
-                    <a class="byline-author" href={authorHref}>
-                      {authorEntry.data.name}
-                    </a>
-                  ) : (
-                    <span class="byline-author">
-                      {entry.data.byline || 'Sokéfi Editorial Team'}
-                    </span>
-                  )}
-                  <span class="byline-sep" aria-hidden="true">
-                    &middot;
-                  </span>
-                  <span class="byline-readtime">{readTimeMinutes} min read</span>
-                  {formattedDate && (
-                    <>
-                      <span class="byline-sep" aria-hidden="true">
-                        &middot;
+              ) : (
+                <div class="article-byline">
+                  <div class="byline-avatar" aria-hidden="true">
+                    {monogram}
+                  </div>
+                  <div class="byline-meta">
+                    {authorEntry && authorHref ? (
+                      <a class="byline-author" href={authorHref}>
+                        {authorEntry.data.name}
+                      </a>
+                    ) : (
+                      <span class="byline-author">
+                        {entry.data.byline || 'Sokéfi Editorial Team'}
                       </span>
-                      <time class="byline-date" datetime={new Date(displayDate).toISOString()}>
-                        {formattedDate}
-                      </time>
-                    </>
-                  )}
+                    )}
+                    <span class="byline-sep" aria-hidden="true">
+                      &middot;
+                    </span>
+                    <span class="byline-readtime">{readTimeMinutes} min read</span>
+                    {formattedDate && (
+                      <>
+                        <span class="byline-sep" aria-hidden="true">
+                          &middot;
+                        </span>
+                        <time class="byline-date" datetime={new Date(displayDate).toISOString()}>
+                          {formattedDate}
+                        </time>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </header>
 
             <div class="article-rule" aria-hidden="true" />
-
-            {summaryHtml && (
-              <>
-                <div class="article-summary" set:html={summaryHtml} />
-                <div class="article-rule" aria-hidden="true" />
-              </>
-            )}
 
             <div class="article-body">
               <Content components={{ Gallery: ArticleGallery, Details: ArticleDetails }} />
@@ -200,7 +217,7 @@ const articleSchema = entry
               </section>
             )}
 
-            {authorEntry && (
+            {authorEntry && !isEditorialTeam && (
               <section class="article-author-card" aria-label="About the author">
                 <div class="author-card-avatar" aria-hidden="true">
                   {monogram}
@@ -217,7 +234,16 @@ const articleSchema = entry
                 </div>
               </section>
             )}
+          </div>
 
+          {/* Full width (same as the hero), like the team bar on the pillar pages. */}
+          {isEditorialTeam && (
+            <div class="article-team-bar">
+              <PillarTeamBar pillar={entry.data.pillar} name={authorEntry.data.name} />
+            </div>
+          )}
+
+          <div class="article-column">
             {tags.length > 0 && (
               <div class="article-tags" aria-label="Article tags">
                 {tags.map((tag) => (
@@ -325,53 +351,6 @@ const articleSchema = entry
     margin: 0 0 2rem;
   }
 
-  /* Sits between the two rules, so its bottom margin mirrors the byline's above the first. */
-  .article-summary {
-    margin: 0 0 1.6rem;
-  }
-
-  /* Lato, not the body serif: this block is informational, not narrative.
-     Slightly smaller than body copy because Lato's x-height runs larger.
-     These are :global because the markdown arrives via set:html and so carries
-     no scope attribute — the same reason .article-body styles its content that way. */
-  .article-summary :global(p),
-  .article-summary :global(ul),
-  .article-summary :global(ol) {
-    margin: 0 0 1.1rem;
-    font-family: 'Lato', Arial, sans-serif;
-    font-size: 1rem;
-    line-height: 1.7;
-    color: var(--text);
-  }
-
-  .article-summary :global(ul),
-  .article-summary :global(ol) {
-    padding-left: 1.35rem;
-  }
-
-  .article-summary :global(li) {
-    margin: 0 0 0.4rem;
-  }
-
-  .article-summary :global(li:last-child) {
-    margin-bottom: 0;
-  }
-
-  .article-summary :global(strong) {
-    font-weight: 700;
-  }
-
-  .article-summary :global(a) {
-    color: var(--teal-deep);
-    text-decoration: underline;
-  }
-
-  .article-summary :global(p:last-child),
-  .article-summary :global(ul:last-child),
-  .article-summary :global(ol:last-child) {
-    margin-bottom: 0;
-  }
-
   .article-body :global(p) {
     margin: 0 0 1.35rem;
     font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
@@ -467,6 +446,11 @@ const articleSchema = entry
     font-size: 1.02rem;
     line-height: 1.7;
     color: var(--text);
+  }
+
+  /* Same vertical spacing as the author card it stands in for. */
+  .article-team-bar {
+    margin: 0.5rem 0 1.85rem;
   }
 
   .article-author-card {
