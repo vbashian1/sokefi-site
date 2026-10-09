@@ -1,5 +1,5 @@
 ---
-import { getCollection, getEntry } from 'astro:content';
+import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import { getThumbnailSrc } from '../../utils/pillarFallback';
 import Base from '../../layouts/Base.astro';
 
@@ -12,7 +12,7 @@ if (!author || author.data.hasOwnPage === false) {
 
 const allArticles = await getCollection('articles');
 
-const columnLabelMap = {
+const columnLabelMap: Record<string, string> = {
   'Musings from the Corner Office': 'Corner Office',
   'Health/Vitality': 'Living Well',
 };
@@ -44,7 +44,7 @@ const getDisplayMonogram = () => {
   return initials || 'SO';
 };
 
-const getArticleDateValue = (article) => {
+const getArticleDateValue = (article: CollectionEntry<'articles'>) => {
   const rawDate = article.data.updatedDate ?? article.data.date;
   const parsedDate = rawDate ? new Date(rawDate) : null;
   return parsedDate ? parsedDate.getTime() : 0;

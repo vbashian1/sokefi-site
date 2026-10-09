@@ -48,7 +48,7 @@ const links = [
 
 <script>
   const toggle = document.querySelector('[data-menu-toggle]');
-  const menu = document.querySelector('[data-mobile-menu]');
+  const menu = document.querySelector<HTMLElement>('[data-mobile-menu]');
 
   if (toggle && menu) {
     toggle.addEventListener('click', () => {

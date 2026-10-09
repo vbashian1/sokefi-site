@@ -167,9 +167,8 @@ const brands = [
                     <span>{brand.noteLine2}</span>
                   </p>
                 ) : (
-                  <p class:list={['brand-note', !brand.note && 'brand-note-empty']}>
-                    {brand.note || String.fromCharCode(160)}
-                  </p>
+                  // Hidden spacer so every card's image lines up with Awenvida's two-line note.
+                  <p class="brand-note brand-note-empty">{String.fromCharCode(160)}</p>
                 )}
               </div>
               {brand.image && (

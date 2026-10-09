@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import reservationSelfieHat from '../assets/images/reservation-selfie-hat.webp';
-import { getCollection, getEntry } from 'astro:content';
+import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import { getThumbnailSrc } from '../utils/pillarFallback';
 import { getAuthorRoute } from '../config/routes';
 
@@ -9,10 +9,10 @@ const allArticles = await getCollection('articles');
 const allAuthors = await getCollection('authors');
 const authorEntry = await getEntry('authors', 'sophie-westbrooke');
 
-const normalizePillar = (pillar) =>
+const normalizePillar = (pillar: string | undefined) =>
   (pillar ?? '').toLowerCase().replace(/\s+/g, '-').replace(/-+/g, '-');
 
-const getArticleDateValue = (article) => {
+const getArticleDateValue = (article: CollectionEntry<'articles'>) => {
   const rawDate = article.data.updatedDate ?? article.data.date;
   const parsedDate = rawDate ? new Date(rawDate) : null;
   return parsedDate ? parsedDate.getTime() : 0;

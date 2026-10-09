@@ -1,5 +1,9 @@
 {
   "extends": "astro/tsconfigs/strict",
+  // Explicit because the inherited include uses ${configDir}, which needs
+  // TypeScript 5.5+; on the pinned 5.3 it matched no files at all.
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"],
   "compilerOptions": {
     "types": ["astro/client"]
   }

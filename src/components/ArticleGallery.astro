@@ -1,13 +1,26 @@
 ---
+import type { ImageMetadata } from 'astro';
+import type { ArticleGalleryImage } from '../types/gallery';
+
+type GallerySource = ImageMetadata | ArticleGalleryImage | string;
+type ImageMeta = { src: string; width: number; height: number };
+
+interface Props {
+  pick?: number[];
+  images?: GallerySource[];
+  alt?: string[];
+}
+
 const { pick, images, alt = [] } = Astro.props;
 
 // The validated `gallery:` frontmatter is published by the article page, because MDX
 // only exposes RAW frontmatter to the body — `frontmatter.gallery` there is a list of
 // unresolved path strings, not the ImageMetadata that astro:content produces.
 const pool = Astro.locals?.articleGallery ?? [];
-const selected = images ?? (pick ?? pool.map((_, i) => i)).map((i) => pool[i]);
+const selected: (GallerySource | undefined)[] =
+  images ?? (pick ?? pool.map((_, i) => i)).map((i) => pool[i]);
 
-const getImageMeta = (img) => {
+const getImageMeta = (img: GallerySource | undefined): ImageMeta | null => {
   if (!img) return null;
   if (typeof img === 'string') return { src: img, width: 1600, height: 1000 };
   return { src: img.src, width: img.width, height: img.height };
@@ -15,7 +28,7 @@ const getImageMeta = (img) => {
 
 const items = selected
   .map((img) => getImageMeta(img))
-  .filter(Boolean)
+  .filter((meta): meta is ImageMeta => meta !== null)
   .map((meta, index, arr) => ({
     ...meta,
     landscape: meta.width >= meta.height,

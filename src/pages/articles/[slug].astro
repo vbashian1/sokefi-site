@@ -1,5 +1,6 @@
 ---
-import { getEntry, render } from 'astro:content';
+import { getEntry, render, type CollectionEntry } from 'astro:content';
+import type { ImageMetadata } from 'astro';
 import Base from '../../layouts/Base.astro';
 import AffiliateDisclosure from '../../components/AffiliateDisclosure.astro';
 import ArticleGallery from '../../components/ArticleGallery.astro';
@@ -21,7 +22,7 @@ const { Content } = entry ? await render(entry) : { Content: null };
 const authorRef = entry ? entry.data.author : null;
 const authorEntry = authorRef ? await getEntry(authorRef) : null;
 
-const getMonogram = (author) => {
+const getMonogram = (author: CollectionEntry<'authors'> | null | undefined) => {
   if (author?.data.monogram && author.data.monogram.trim()) {
     return author.data.monogram.trim().toUpperCase();
   }
@@ -36,7 +37,9 @@ const getMonogram = (author) => {
   return initials || 'SO';
 };
 
-const getImageMeta = (img) => {
+type ImageMeta = { src: string; width: number; height: number };
+
+const getImageMeta = (img: ImageMetadata | string | undefined): ImageMeta | null => {
   if (!img) return null;
   if (typeof img === 'string') return { src: img, width: 1600, height: 1000 };
   return { src: img.src, width: img.width, height: img.height };
@@ -47,7 +50,7 @@ const heroMeta = entry ? getImageMeta(entry.data.heroImage) : null;
 const galleryImages = entry
   ? (entry.data.gallery ?? [])
       .map((img) => getImageMeta(img))
-      .filter(Boolean)
+      .filter((meta): meta is ImageMeta => meta !== null)
       .map((meta, index, arr) => ({
         ...meta,
         landscape: meta.width >= meta.height,
@@ -74,6 +77,8 @@ const formattedDate = displayDate
       timeZone: 'UTC',
     })
   : '';
+// For the <time datetime> attribute; only rendered when there is a date.
+const isoDate = displayDate ? new Date(displayDate).toISOString() : '';
 
 const wordCount = entry ? (entry.body ?? '').trim().split(/\s+/).filter(Boolean).length : 0;
 const readTimeMinutes = Math.max(1, Math.round(wordCount / 200));
@@ -150,10 +155,7 @@ const articleSchema = entry
                       {formattedDate && (
                         <>
                           {' '}
-                          &middot;{' '}
-                          <time datetime={new Date(displayDate).toISOString()}>
-                            {formattedDate}
-                          </time>
+                          &middot; <time datetime={isoDate}>{formattedDate}</time>
                         </>
                       )}
                     </Fragment>
@@ -183,7 +185,7 @@ const articleSchema = entry
                         <span class="byline-sep" aria-hidden="true">
                           &middot;
                         </span>
-                        <time class="byline-date" datetime={new Date(displayDate).toISOString()}>
+                        <time class="byline-date" datetime={isoDate}>
                           {formattedDate}
                         </time>
                       </>
@@ -196,7 +198,9 @@ const articleSchema = entry
             <div class="article-rule" aria-hidden="true" />
 
             <div class="article-body">
-              <Content components={{ Gallery: ArticleGallery, Details: ArticleDetails }} />
+              {Content && (
+                <Content components={{ Gallery: ArticleGallery, Details: ArticleDetails }} />
+              )}
             </div>
 
             {entry.data.affiliateDisclosure && (
