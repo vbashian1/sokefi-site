@@ -4,13 +4,14 @@
 // headline, an optional provider line, the detail lines, a button and a commission note.
 //
 // Articles write boxes in the Details Box Standard (Label / Headline / Provider / Price /
-// Includes / Tip / Button / Link); src/plugins/remark-details-boxes.mjs turns each one into
+// Includes / Tip / Button / Link); src/plugins/details-boxes.mjs turns each one into
 // this component with those fields as props. Headline, Provider, Price, Includes and Tip
-// can come in US and UK/EU variants (e.g. the insurance box), chosen per reader by location.
+// can come in US and UK variants (e.g. the insurance box): US readers see the US variant,
+// UK readers the UK variant, and the box is hidden from everyone else (src/utils/visitorRegion.ts).
 //
 // Older boxes written as <Details title lines links /> still work: `lines` is a free
 // label/value list and `links` can carry more than one button.
-import { getVisitorRegion } from '../utils/visitorRegion';
+import { getReaderMarket } from '../utils/visitorRegion';
 
 interface DetailLine {
   label: string;
@@ -28,20 +29,20 @@ interface Props {
   /** The place or product (the standard's "Headline"), e.g. "Saqqara and Giza Pyramids". */
   title?: string;
   titleUs?: string;
-  titleUkEu?: string;
+  titleUk?: string;
   /** Who sells or runs it, e.g. "GetYourGuide". */
   provider?: string;
   providerUs?: string;
-  providerUkEu?: string;
+  providerUk?: string;
   price?: string;
   priceUs?: string;
-  priceUkEu?: string;
+  priceUk?: string;
   includes?: string;
   includesUs?: string;
-  includesUkEu?: string;
+  includesUk?: string;
   tip?: string;
   tipUs?: string;
-  tipUkEu?: string;
+  tipUk?: string;
   /** "Book now", "Buy now" or "Get a quote". */
   button?: string;
   /** A /go/ link. */
@@ -53,11 +54,17 @@ interface Props {
 }
 
 const props = Astro.props;
-const region = getVisitorRegion(Astro.request);
+const market = getReaderMarket(Astro.request);
+
+// A region-split box (e.g. insurance) has a US and a UK variant and nothing for anyone else.
+const regionSplit = (['title', 'provider', 'price', 'includes', 'tip'] as const).some(
+  (field) => props[`${field}Us`] !== undefined,
+);
+const hidden = regionSplit && market === 'other';
 
 // The reader's regional variant if the box has one, otherwise the plain value.
 const pick = (field: 'title' | 'provider' | 'price' | 'includes' | 'tip') =>
-  (region === 'uk-eu' ? props[`${field}UkEu`] : props[`${field}Us`]) ?? props[field];
+  (market === 'uk' ? props[`${field}Uk`] : props[`${field}Us`]) ?? props[field];
 
 const label = props.label ?? 'The Details';
 const title = pick('title') ?? '';
@@ -97,39 +104,39 @@ const verb = firstButton.startsWith('buy')
     : 'book';
 ---
 
-<aside class="article-details">
-  <span class="article-details-edge" aria-hidden="true"></span>
-  <div class="article-details-body">
-    <p class="article-details-label">{label}</p>
-    <p class="article-details-title">{title}</p>
-    {provider && <p class="article-details-provider">{provider}</p>}
-    {
-      lines.length > 0 && (
-        <dl class="article-details-lines">
-          {lines.map((line) => (
-            <div class="article-details-line">
-              <dt>{line.label}</dt>
-              <dd>{capitalise(line.value)}</dd>
-            </div>
+{
+  !hidden && (
+    <aside class="article-details">
+      <span class="article-details-edge" aria-hidden="true" />
+      <div class="article-details-body">
+        <p class="article-details-label">{label}</p>
+        <p class="article-details-title">{title}</p>
+        {provider && <p class="article-details-provider">{provider}</p>}
+        {lines.length > 0 && (
+          <dl class="article-details-lines">
+            {lines.map((line) => (
+              <div class="article-details-line">
+                <dt>{line.label}</dt>
+                <dd>{capitalise(line.value)}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+        <div class="article-details-ctas">
+          {buttons.map((button) => (
+            <a class="article-details-cta" href={button.href}>
+              {button.text}
+            </a>
           ))}
-        </dl>
-      )
-    }
-    <div class="article-details-ctas">
-      {
-        buttons.map((button) => (
-          <a class="article-details-cta" href={button.href}>
-            {button.text}
-          </a>
-        ))
-      }
-    </div>
-    <p class="article-details-note">
-      Recommended by Sokéfi. We may earn a small commission if you {verb} through this link, at no extra
-      cost to you.
-    </p>
-  </div>
-</aside>
+        </div>
+        <p class="article-details-note">
+          Recommended by Sokéfi. We may earn a small commission if you {verb} through this link, at
+          no extra cost to you.
+        </p>
+      </div>
+    </aside>
+  )
+}
 
 <style>
   /* Selectors are two classes deep so the article body's own p/a styles can't override them. */

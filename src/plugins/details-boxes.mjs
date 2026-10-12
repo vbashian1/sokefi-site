@@ -13,7 +13,9 @@
 //   *Link: /go/gyg-cairo-pyramids*
 //
 // Headline, Provider, Price, Includes and Tip may instead be given per region as
-// "Headline (US): …" and "Headline (UK/EU): …"; the component picks one per reader.
+// "Headline (US): …" and "Headline (UK): …" ("(UK/EU)" is accepted as the older name for
+// "(UK)"). The component shows US readers the (US) variant, UK readers the (UK) variant,
+// and hides a region-split box from everyone else (e.g. the insurance box).
 // `_…_` italics (what Prettier writes) are accepted as well as `*…*`.
 //
 // Anything that breaks the standard stops the build with a message naming the file,
@@ -34,9 +36,9 @@ const FIELDS = {
   link: 'link',
 };
 const REGIONAL = new Set(['headline', 'provider', 'price', 'includes', 'tip']);
-const REGION_SUFFIX = { US: 'Us', 'UK/EU': 'UkEu' };
+const REGION_SUFFIX = { US: 'Us', UK: 'Uk' };
 const BUTTONS = new Set(['Book now', 'Buy now', 'Get a quote']);
-const LINE = /^([A-Za-z]+)\s*(?:\((US|UK\/EU)\))?\s*:\s*(.+)$/;
+const LINE = /^([A-Za-z]+)\s*(?:\((US|UK(?:\/EU)?)\))?\s*:\s*(.+)$/;
 
 const textOf = (node) =>
   node.type === 'text' || node.type === 'inlineCode'
@@ -57,7 +59,8 @@ export function parseDetailsBox(fieldLines) {
     const match = line.match(LINE);
     if (!match) throw new Error(`can't read the line "${line}" (expected "Field: value")`);
 
-    const [, rawKey, region, rawValue] = match;
+    const [, rawKey, rawRegion, rawValue] = match;
+    const region = rawRegion === 'UK/EU' ? 'UK' : rawRegion;
     const key = rawKey.toLowerCase();
     const value = rawValue.trim();
     if (!(key in FIELDS)) {
@@ -80,8 +83,8 @@ export function parseDetailsBox(fieldLines) {
   for (const key of REGIONAL) {
     const prop = FIELDS[key];
     const us = `${prop}Us` in props;
-    const ukEu = `${prop}UkEu` in props;
-    if (us !== ukEu) throw new Error(`"${key}" needs both a (US) and a (UK/EU) line`);
+    const uk = `${prop}Uk` in props;
+    if (us !== uk) throw new Error(`"${key}" needs both a (US) and a (UK) line`);
     if (us && prop in props) throw new Error(`"${key}" is given both plainly and per region`);
   }
   const has = (prop) => prop in props || `${prop}Us` in props;

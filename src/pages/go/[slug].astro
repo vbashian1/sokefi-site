@@ -1,12 +1,27 @@
 ---
 import { AFFILIATES } from '../../data/affiliates';
+import { getReaderMarket } from '../../utils/visitorRegion';
 
 export const prerender = false;
 
 const slug = Astro.params.slug ?? '';
-const affiliate = AFFILIATES[slug as keyof typeof AFFILIATES];
+// Own keys only, so a path like /go/constructor can't match a built-in object property.
+const affiliate = Object.hasOwn(AFFILIATES, slug) ? AFFILIATES[slug] : undefined;
 
-if (affiliate) {
+// Region-split links (e.g. travel-insurance) follow the same rule as the Details boxes:
+// US readers get `us`, UK readers `uk`, and anyone else gets "link unavailable".
+const market = getReaderMarket(Astro.request);
+const destination = !affiliate
+  ? undefined
+  : typeof affiliate.destination === 'string'
+    ? affiliate.destination
+    : market === 'us'
+      ? affiliate.destination.us
+      : market === 'uk'
+        ? affiliate.destination.uk
+        : undefined;
+
+if (affiliate && destination) {
   const refererHeader = Astro.request.headers.get('referer');
   let referer = 'direct';
   if (refererHeader) {
@@ -19,13 +34,14 @@ if (affiliate) {
   const clickEvent = {
     slug,
     partner: affiliate.partner,
+    market,
     timestamp: new Date().toISOString(),
     referer,
   };
 
   console.info('[affiliate-click]', JSON.stringify(clickEvent));
 
-  return Astro.redirect(affiliate.destination, 302);
+  return Astro.redirect(destination, 302);
 }
 
 Astro.response.status = 404;
