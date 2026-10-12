@@ -4,3 +4,5 @@ package-lock.json
 public/
 dist/
 .vercel/
+# Article content stays exactly as written (Details Box Standard, Veronica's wording).
+src/content/articles/

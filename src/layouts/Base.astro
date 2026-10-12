@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { geolocation } from '@vercel/functions';
+import { getVisitorRegion } from '../utils/visitorRegion';
 import Nav from '../components/Nav.astro';
 import CookieConsentBanner from '../components/CookieConsentBanner.astro';
 import { ROUTES } from '../config/routes';
@@ -48,44 +48,7 @@ const jsonLdGraph = {
 };
 
 const cookieConsentName = 'sokefi_cookie_consent';
-const euAndUkCountryCodes = new Set([
-  'AT',
-  'BE',
-  'BG',
-  'HR',
-  'CY',
-  'CZ',
-  'DK',
-  'EE',
-  'FI',
-  'FR',
-  'DE',
-  'GR',
-  'HU',
-  'IE',
-  'IT',
-  'LV',
-  'LT',
-  'LU',
-  'MT',
-  'NL',
-  'PL',
-  'PT',
-  'RO',
-  'SK',
-  'SI',
-  'ES',
-  'SE',
-  'GB',
-  'UK',
-]);
-
-const countryCode = (
-  geolocation(Astro.request).country ??
-  Astro.request.headers.get('x-vercel-ip-country') ??
-  ''
-).toUpperCase();
-const isEuOrUkVisitor = euAndUkCountryCodes.has(countryCode);
+const isEuOrUkVisitor = getVisitorRegion(Astro.request) === 'uk-eu';
 const hasCookieConsent = Astro.cookies.get(cookieConsentName)?.value === 'accepted';
 const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
 ---

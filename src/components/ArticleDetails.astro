@@ -1,12 +1,17 @@
 ---
-// Renders "THE DETAILS" booking/affiliate callout boxes from article bodies.
-// `lines` is a flexible label/value list rather than fixed Price/Includes/Tip
-// props because the real exports don't always use those three labels (e.g. a
-// car-rental box uses "Pickup" instead of "Price") — this covers whatever
-// label set a given box actually needs. `links` is an array (not a single
-// CTA) because some boxes carry more than one booking link (e.g. separate
-// pickup-city links), each with its own label ("Book Here", "Buy Here", "Get
-// a Quote", ...).
+// Renders the booking/affiliate "Details" boxes from article bodies as a magazine-style
+// info panel: a short label (e.g. "The tour"), the place or product as a Playfair
+// headline, an optional provider line, the detail lines, a button and a commission note.
+//
+// Articles write boxes in the Details Box Standard (Label / Headline / Provider / Price /
+// Includes / Tip / Button / Link); src/plugins/remark-details-boxes.mjs turns each one into
+// this component with those fields as props. Headline, Provider, Price, Includes and Tip
+// can come in US and UK/EU variants (e.g. the insurance box), chosen per reader by location.
+//
+// Older boxes written as <Details title lines links /> still work: `lines` is a free
+// label/value list and `links` can carry more than one button.
+import { getVisitorRegion } from '../utils/visitorRegion';
+
 interface DetailLine {
   label: string;
   value: string;
@@ -18,75 +23,192 @@ interface DetailLink {
 }
 
 interface Props {
-  title: string;
+  /** Short label above the headline, e.g. "The tour". Defaults to "The Details". */
+  label?: string;
+  /** The place or product (the standard's "Headline"), e.g. "Saqqara and Giza Pyramids". */
+  title?: string;
+  titleUs?: string;
+  titleUkEu?: string;
+  /** Who sells or runs it, e.g. "GetYourGuide". */
+  provider?: string;
+  providerUs?: string;
+  providerUkEu?: string;
+  price?: string;
+  priceUs?: string;
+  priceUkEu?: string;
+  includes?: string;
+  includesUs?: string;
+  includesUkEu?: string;
+  tip?: string;
+  tipUs?: string;
+  tipUkEu?: string;
+  /** "Book now", "Buy now" or "Get a quote". */
+  button?: string;
+  /** A /go/ link. */
+  link?: string;
+  /** Older format: free label/value lines. */
   lines?: DetailLine[];
-  links: DetailLink[];
+  /** Older format: one or more buttons. */
+  links?: DetailLink[];
 }
 
-const { title, lines = [], links } = Astro.props;
+const props = Astro.props;
+const region = getVisitorRegion(Astro.request);
+
+// The reader's regional variant if the box has one, otherwise the plain value.
+const pick = (field: 'title' | 'provider' | 'price' | 'includes' | 'tip') =>
+  (region === 'uk-eu' ? props[`${field}UkEu`] : props[`${field}Us`]) ?? props[field];
+
+const label = props.label ?? 'The Details';
+const title = pick('title') ?? '';
+const provider = pick('provider');
+
+const standardLines: { label: string; value: string | undefined }[] = [
+  { label: 'Price', value: pick('price') },
+  { label: 'Includes', value: pick('includes') },
+  { label: 'Tip', value: pick('tip') },
+];
+const lines: DetailLine[] =
+  props.lines ?? standardLines.filter((line): line is DetailLine => typeof line.value === 'string');
+
+// Each value starts with a capital ("Starting at $20"); the rest is left as written.
+const capitalise = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+
+// Older article exports use "Book Here" / "Buy Here" / "Get a Quote"; show the house
+// wording for those, and any other label as written.
+const BUTTON_WORDING: Record<string, string> = {
+  'book here': 'Book now',
+  'buy here': 'Buy now',
+  'get a quote': 'Get a quote',
+};
+const links: DetailLink[] =
+  props.links ?? (props.button && props.link ? [{ label: props.button, href: props.link }] : []);
+const buttons = links.map((link) => ({
+  href: link.href,
+  text: BUTTON_WORDING[link.label.trim().toLowerCase()] ?? link.label,
+}));
+
+// The commission note uses the first button's action: "if you book / buy / get a quote".
+const firstButton = buttons[0]?.text.toLowerCase() ?? '';
+const verb = firstButton.startsWith('buy')
+  ? 'buy'
+  : firstButton.includes('quote')
+    ? 'get a quote'
+    : 'book';
 ---
 
-<div class="article-details">
-  <p class="article-details-title">The Details — {title}</p>
-  {
-    lines.length > 0 && (
-      <div class="article-details-lines">
-        {lines.map((line) => (
-          <p class="article-details-line">
-            <strong>{line.label}:</strong> {line.value}
-          </p>
-        ))}
-      </div>
-    )
-  }
-  <div class="article-details-ctas">
+<aside class="article-details">
+  <span class="article-details-edge" aria-hidden="true"></span>
+  <div class="article-details-body">
+    <p class="article-details-label">{label}</p>
+    <p class="article-details-title">{title}</p>
+    {provider && <p class="article-details-provider">{provider}</p>}
     {
-      links.map((link) => (
-        <a class="article-details-cta" href={link.href}>
-          {link.label} &rarr;
-        </a>
-      ))
+      lines.length > 0 && (
+        <dl class="article-details-lines">
+          {lines.map((line) => (
+            <div class="article-details-line">
+              <dt>{line.label}</dt>
+              <dd>{capitalise(line.value)}</dd>
+            </div>
+          ))}
+        </dl>
+      )
     }
+    <div class="article-details-ctas">
+      {
+        buttons.map((button) => (
+          <a class="article-details-cta" href={button.href}>
+            {button.text}
+          </a>
+        ))
+      }
+    </div>
+    <p class="article-details-note">
+      Recommended by Sokéfi. We may earn a small commission if you {verb} through this link, at no extra
+      cost to you.
+    </p>
   </div>
-</div>
+</aside>
 
 <style>
+  /* Selectors are two classes deep so the article body's own p/a styles can't override them. */
   .article-details {
     margin: 2rem 0;
-    padding: 1.35rem 1.5rem;
-    background: #ffffff;
-    border: 1px solid var(--border);
-    border-radius: var(--container-corner-radius);
-    box-shadow: 0 20px 48px rgba(11, 77, 90, 0.06);
+    display: flex;
+    background: #fdfcfb;
+    border: 1px solid #d8d3c8;
+  }
+
+  /* The Editorial Team byline mark: teal 4px, gap 2px, amber 2px. */
+  .article-details-edge {
+    flex-shrink: 0;
+    width: 8px;
+    background: linear-gradient(
+      to right,
+      var(--brand-teal) 0 4px,
+      transparent 4px 6px,
+      #c9a227 6px 8px
+    );
+  }
+
+  .article-details-body {
+    flex: 1;
+    padding: 1.35rem 1.6rem 1.5rem 1.35rem;
+  }
+
+  .article-details .article-details-label {
+    margin: 0;
+    font-family: 'Lato', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--amber);
   }
 
   .article-details .article-details-title {
-    margin: 0 0 0.75rem;
+    margin: 0.45rem 0 0;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.32rem;
+    line-height: 1.3;
+    font-weight: 700;
+    color: var(--brand-teal);
+  }
+
+  .article-details .article-details-provider {
+    margin: 0.2rem 0 0;
+    font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+    font-style: italic;
+    font-size: 0.92rem;
+    line-height: 1.4;
+    color: rgba(23, 39, 43, 0.65);
+  }
+
+  .article-details-lines {
+    margin: 1rem 0 1.25rem;
+    padding-top: 0.95rem;
+    border-top: 1px solid rgba(201, 162, 39, 0.45);
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .article-details-line dt {
     font-family: 'Lato', Arial, sans-serif;
     text-transform: uppercase;
     letter-spacing: 0.16em;
-    font-size: 0.78rem;
+    font-size: 0.66rem;
     font-weight: 700;
     color: var(--amber);
   }
 
-  .article-details-lines {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    margin: 0 0 1.1rem;
-  }
-
-  .article-details .article-details-line {
-    margin: 0;
-    font-family: 'Lato', Arial, sans-serif;
-    font-size: 0.95rem;
-    line-height: 1.55;
+  .article-details-line dd {
+    margin: 0.15rem 0 0;
+    font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+    font-size: 0.98rem;
+    line-height: 1.5;
     color: var(--text);
-  }
-
-  .article-details-line strong {
-    color: var(--teal-deep);
   }
 
   .article-details-ctas {
@@ -95,25 +217,33 @@ const { title, lines = [], links } = Astro.props;
     gap: 0.75rem;
   }
 
+  /* Amber outline, teal text in the headline's Playfair. */
   .article-details .article-details-cta {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    padding: 0.6rem 1.6rem 0.7rem;
+    border: 1.5px solid var(--amber);
     border-radius: 999px;
-    padding: 0.65rem 1.2rem;
-    font-family: 'Lato', Arial, sans-serif;
-    font-size: 0.78rem;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.32rem;
     font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #fffdf8;
-    background: var(--amber);
+    line-height: 1.2;
+    color: var(--brand-teal);
+    background: transparent;
     text-decoration: none;
     white-space: nowrap;
   }
 
   .article-details .article-details-cta:hover,
   .article-details .article-details-cta:focus-visible {
-    background: var(--teal-deep);
+    color: var(--brand-teal);
+    background: color-mix(in srgb, var(--amber) 18%, transparent);
+  }
+
+  .article-details .article-details-note {
+    margin: 0.75rem 0 0;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: rgba(23, 39, 43, 0.62);
   }
 </style>
