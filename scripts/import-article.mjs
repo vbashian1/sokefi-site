@@ -7,6 +7,10 @@
 //   - maps the handoff fields onto the repo schema: authorSlug → author,
 //     publishDate → date (the handoff placeholder 2026-00-00 needs --date), FAQ q/a →
 //     question/answer
+//   - gives the article card its own hero photo: if there's a heroImage and no thumbnail,
+//     adds `thumbnail:` pointing at the same photo (framed separately with thumbnailFocus /
+//     thumbnailZoom in the framing preview), so pillar fallback images only appear for
+//     articles with no photo at all
 //   - writes .mdx (a READY_*.md file becomes .mdx so its <Gallery>/boxes work)
 //   - removes the retired Essentials lead-ins ("**Staying connected.** …" / "**Insurance.** …")
 //     directly above a Details box, per the Details Box Standard
@@ -46,8 +50,19 @@ frontmatter = frontmatter
   .replace(/^ {2}- q: /gm, '  - question: ')
   .replace(/^ {4}a: /gm, '    answer: ');
 
+// --- card image: default to the article's own hero photo ---
+let addedThumbnail = '';
+const heroLine = frontmatter.match(/^heroImage:\s*(["']?)([^"'#\n]+?)\1\s*(?:#.*)?$/m);
+if (heroLine && !/^thumbnail:/m.test(frontmatter)) {
+  addedThumbnail = heroLine[2].trim();
+  frontmatter = frontmatter.replace(
+    heroLine[0],
+    `${heroLine[0]}\nthumbnail: "${addedThumbnail}" # card uses the hero photo; frame it with thumbnailFocus / thumbnailZoom`,
+  );
+}
+
 const SCHEMA_FIELDS = new Set(
-  'title date description metaDescription author pillar eyebrow byline dek summary updatedDate thumbnail heroImage gallery column secondaryPillar series featured firsthand featuredPriority featuredDate crossPostToSubstack cover tags region interest faq affiliateDisclosure'.split(
+  'title date description metaDescription author pillar eyebrow byline dek summary updatedDate thumbnail heroImage heroFocus heroZoom thumbnailFocus thumbnailZoom gallery column secondaryPillar series featured firsthand featuredPriority featuredDate crossPostToSubstack cover tags region interest faq affiliateDisclosure'.split(
     ' ',
   ),
 );
@@ -104,4 +119,7 @@ console.log(`  Details boxes: ${boxes} (all match the standard)`);
 for (const removed of leadIns.removed) console.log(`  Removed Essentials lead-in: ${removed}`);
 if (unread.length)
   console.log(`  Frontmatter fields the schema doesn't read: ${unread.join(', ')}`);
-console.log('  Still to do by hand: images (placement map), interest tags, wording review.');
+if (addedThumbnail) console.log(`  Card image: added thumbnail = hero photo (${addedThumbnail})`);
+console.log(
+  '  Still to do by hand: images (placement map), framing (preview page), interest tags, wording review.',
+);
