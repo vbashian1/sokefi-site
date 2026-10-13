@@ -10,6 +10,7 @@ import EditorialByline from '../../components/EditorialByline.astro';
 import defaultArticleImage from '../../assets/images/positano-new.avif';
 import { getAuthorRoute } from '../../config/routes';
 import { renderSummaryHtml, summaryToPlainText } from '../../utils/summary';
+import { framingStyle } from '../../utils/framing';
 
 const slug = Astro.params.slug ?? '';
 const entry = await getEntry('articles', slug);
@@ -135,6 +136,7 @@ const articleSchema = entry
                 alt={entry.data.title}
                 loading="eager"
                 decoding="async"
+                style={framingStyle(entry.data.heroFocus, entry.data.heroZoom)}
               />
             </div>
           )}

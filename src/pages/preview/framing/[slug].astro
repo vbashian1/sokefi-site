@@ -1,0 +1,559 @@
+---
+// LOCAL PREVIEW ONLY (returns 404 on the live site): frame an article's photos by eye.
+// The real article and card pages load in frames at reader screen widths. Sliders set each
+// placement's focal point and zoom live in every frame; the page outlines on the original
+// exactly what each width shows, warns when a zoom asks for more detail than the photo has,
+// and prints the frontmatter values to send back. Nothing is saved from here.
+import { getEntry } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import { getAuthorRoute } from '../../../config/routes';
+
+export const prerender = false;
+
+const entry = import.meta.env.DEV ? await getEntry('articles', Astro.params.slug ?? '') : undefined;
+if (!entry) return new Response('Not found', { status: 404 });
+
+const articleUrl = `/articles/${entry.id}/`;
+const authorUrl = getAuthorRoute(entry.data.author.id);
+
+const parseFocus = (focus?: string) => {
+  const [x, y] = (focus ?? '50% 50%').split(' ').map((v) => parseInt(v, 10));
+  return { x, y };
+};
+
+const PLACEMENTS = [
+  entry.data.heroImage && {
+    id: 'hero',
+    title: 'Article banner (hero)',
+    image: entry.data.heroImage,
+    focusField: 'heroFocus',
+    zoomField: 'heroZoom',
+    focus: parseFocus(entry.data.heroFocus),
+    zoom: entry.data.heroZoom ?? 1,
+    saved: Boolean(entry.data.heroFocus),
+    url: articleUrl,
+    target: '.article-hero img',
+    views: [
+      { label: 'Desktop 1440px', width: 1440 },
+      { label: 'Laptop 1024px', width: 1024 },
+      { label: 'Tablet 768px', width: 768 },
+      { label: 'Phone 390px', width: 390 },
+    ],
+  },
+  entry.data.thumbnail && {
+    id: 'thumbnail',
+    title: 'Article card (thumbnail)',
+    image: entry.data.thumbnail,
+    focusField: 'thumbnailFocus',
+    zoomField: 'thumbnailZoom',
+    focus: parseFocus(entry.data.thumbnailFocus),
+    zoom: entry.data.thumbnailZoom ?? 1,
+    saved: Boolean(entry.data.thumbnailFocus),
+    url: authorUrl,
+    target: `.feed-card-image[alt="${entry.data.title.replace(/"/g, '\\"')}"]`,
+    views: [
+      { label: 'Desktop 1440px · author page card', width: 1440 },
+      { label: 'Phone 390px · author page card', width: 390 },
+    ],
+  },
+].filter((p): p is NonNullable<typeof p> => Boolean(p));
+
+// Gallery photos are shown whole for now; list how large each can be shown sharply, so
+// layout blocks that show them wide (or crop and zoom them) can be judged.
+const ARTICLE_COLUMN = 680;
+const FULL_WIDTH = 1152;
+const gallery = (entry.data.gallery ?? []).map((img, i) => ({
+  n: i + 1,
+  file: decodeURIComponent(img.src.split('?')[0].split('/').pop() ?? ''),
+  width: img.width,
+  height: img.height,
+  src: img.src,
+}));
+---
+
+<Base title={`Framing — ${entry.data.title}`}>
+  <main class="framing">
+    <p class="framing-eyebrow">Local preview · not on the live site</p>
+    <h1>Framing: {entry.data.title}</h1>
+    <p class="framing-intro">
+      Move the sliders to set each placement's focal point and zoom. Every frame below updates live;
+      the outlines show exactly what each screen width shows of your original. When it looks right,
+      copy the values and send them to me. Nothing here is saved.
+    </p>
+
+    {
+      PLACEMENTS.map((p) => (
+        <section
+          class="framing-section"
+          data-placement={p.id}
+          data-focus-field={p.focusField}
+          data-zoom-field={p.zoomField}
+        >
+          <h2>{p.title}</h2>
+          {!p.saved && (
+            <p class="framing-warning">
+              No {p.focusField} saved yet: on the site this placement is centre-cropped.
+            </p>
+          )}
+
+          <div class="framing-controls">
+            <label>
+              Focus across <output data-out="x">{p.focus.x}%</output>
+              <input type="range" min="0" max="100" step="1" value={p.focus.x} data-control="x" />
+            </label>
+            <label>
+              Focus down <output data-out="y">{p.focus.y}%</output>
+              <input type="range" min="0" max="100" step="1" value={p.focus.y} data-control="y" />
+            </label>
+            <label>
+              Zoom <output data-out="z">{p.zoom.toFixed(2)}×</output>
+              <input type="range" min="1" max="3" step="0.01" value={p.zoom} data-control="z" />
+            </label>
+            <button type="button" data-reset>
+              Back to saved values
+            </button>
+          </div>
+
+          <div class="framing-values">
+            <pre data-values />
+            <button type="button" data-copy>
+              Copy values
+            </button>
+          </div>
+
+          <div
+            class="framing-original"
+            data-saved-x={p.focus.x}
+            data-saved-y={p.focus.y}
+            data-saved-z={p.zoom}
+          >
+            <img src={p.image.src} width={p.image.width} height={p.image.height} alt="" />
+            <div class="framing-overlay" />
+          </div>
+          <p class="framing-meta">
+            Original: {p.image.width} × {p.image.height} pixels
+          </p>
+          <ul class="framing-legend" />
+
+          <div class="framing-views">
+            {p.views.map((view, i) => (
+              <figure class="framing-view">
+                <figcaption>{view.label}</figcaption>
+                <div class="framing-frame" style={`--w: ${view.width}`}>
+                  <iframe
+                    src={p.url}
+                    width={view.width}
+                    height="760"
+                    data-view={view.label}
+                    data-index={i}
+                    data-target={p.target}
+                    data-scroll-to={p.id === 'thumbnail' ? 'true' : undefined}
+                    title={view.label}
+                  />
+                </div>
+              </figure>
+            ))}
+          </div>
+        </section>
+      ))
+    }
+
+    {
+      gallery.length > 0 && (
+        <section class="framing-section">
+          <h2>Gallery photos (shown whole for now)</h2>
+          <p class="framing-intro">
+            How wide each photo can be shown and still look sharp. High-resolution screens (most
+            phones and laptops) need twice the pixels. The article text column is {ARTICLE_COLUMN}
+            px; a full-width layout is up to {FULL_WIDTH}px. Zooming into a photo divides these
+            widths by the zoom.
+          </p>
+          <table class="framing-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>File</th>
+                <th>Pixels</th>
+                <th>Sharp up to (high-res / standard)</th>
+                <th>Text column ({ARTICLE_COLUMN}px)</th>
+                <th>Full width ({FULL_WIDTH}px)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {gallery.map((g) => {
+                const verdict = (needed: number) =>
+                  g.width >= needed * 2
+                    ? ['ok', 'Sharp']
+                    : g.width >= needed
+                      ? ['soft', 'Softer on high-res screens']
+                      : ['bad', 'Soft on all screens'];
+                const [colClass, colText] = verdict(ARTICLE_COLUMN);
+                const [fullClass, fullText] = verdict(FULL_WIDTH);
+                return (
+                  <tr>
+                    <td>{g.n}</td>
+                    <td>
+                      <img src={g.src} alt="" class="framing-thumb" /> {g.file}
+                    </td>
+                    <td>
+                      {g.width} × {g.height}
+                    </td>
+                    <td>
+                      {Math.floor(g.width / 2)}px / {g.width}px
+                    </td>
+                    <td class={`v-${colClass}`}>{colText}</td>
+                    <td class={`v-${fullClass}`}>{fullText}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </section>
+      )
+    }
+  </main>
+</Base>
+
+<script>
+  const COLOURS = ['#1a5f6e', '#c9a227', '#b04a2f', '#5b4a9e'];
+  const pct = (n: number) => `${Math.round(n * 1000) / 10}%`;
+
+  interface Framing {
+    x: number;
+    y: number;
+    z: number;
+  }
+
+  /**
+   * Which part of the original an <img> shows, as fractions of the photo, plus how many
+   * photo pixels land on each screen pixel (for the sharpness check). Matches the site CSS:
+   * object-fit cover at the focal point, then scale(zoom) around that same point; phones
+   * use object-fit contain (the whole photo).
+   */
+  const visibleArea = (img: HTMLImageElement, f: Framing) => {
+    const style = getComputedStyle(img);
+    const boxW = img.offsetWidth;
+    const boxH = img.offsetHeight;
+    const nw = img.naturalWidth;
+    const nh = img.naturalHeight;
+    if (style.objectFit !== 'cover') {
+      const scale = Math.min(boxW / nw, boxH / nh);
+      return { left: 0, top: 0, width: 1, height: 1, density: 1 / scale, whole: true };
+    }
+    const zoom = style.transform === 'none' ? 1 : f.z;
+    const scale = Math.max(boxW / nw, boxH / nh);
+    const w = boxW / scale / nw;
+    const h = boxH / scale / nh;
+    const fx = f.x / 100;
+    const fy = f.y / 100;
+    const left = (1 - w) * fx;
+    const top = (1 - h) * fy;
+    return {
+      left: fx + (left - fx) / zoom,
+      top: fy + (top - fy) / zoom,
+      width: w / zoom,
+      height: h / zoom,
+      density: 1 / (scale * zoom),
+      whole: false,
+    };
+  };
+
+  const sharpness = (density: number) =>
+    density >= 2
+      ? { cls: 'ok', text: 'sharp on all screens' }
+      : density >= 1
+        ? { cls: 'soft', text: 'softer on high-resolution screens (not enough detail for 2×)' }
+        : { cls: 'bad', text: 'soft on all screens: the zoom goes beyond what the photo has' };
+
+  document.querySelectorAll<HTMLElement>('.framing-section[data-placement]').forEach((section) => {
+    const original = section.querySelector<HTMLElement>('.framing-original')!;
+    const overlay = section.querySelector<HTMLElement>('.framing-overlay')!;
+    const legend = section.querySelector<HTMLElement>('.framing-legend')!;
+    const valuesOut = section.querySelector<HTMLElement>('[data-values]')!;
+    const inputs = {
+      x: section.querySelector<HTMLInputElement>('[data-control="x"]')!,
+      y: section.querySelector<HTMLInputElement>('[data-control="y"]')!,
+      z: section.querySelector<HTMLInputElement>('[data-control="z"]')!,
+    };
+    const frames = [...section.querySelectorAll<HTMLIFrameElement>('iframe')];
+    const targets: Map<HTMLIFrameElement, HTMLImageElement> = new Map();
+
+    // Optional starting values from the address, e.g. ?hero=50,20,1.5 (across, down, zoom).
+    const fromUrl = new URLSearchParams(location.search).get(section.dataset.placement ?? '');
+    if (fromUrl) {
+      const [x, y, z] = fromUrl.split(',');
+      if (x) inputs.x.value = x;
+      if (y) inputs.y.value = y;
+      if (z) inputs.z.value = z;
+    }
+
+    const current = (): Framing => ({
+      x: Number(inputs.x.value),
+      y: Number(inputs.y.value),
+      z: Number(inputs.z.value),
+    });
+
+    const render = () => {
+      const f = current();
+      section.querySelector('[data-out="x"]')!.textContent = `${f.x}%`;
+      section.querySelector('[data-out="y"]')!.textContent = `${f.y}%`;
+      section.querySelector('[data-out="z"]')!.textContent = `${f.z.toFixed(2)}×`;
+
+      const lines = [`${section.dataset.focusField}: '${f.x}% ${f.y}%'`];
+      if (f.z > 1) lines.push(`${section.dataset.zoomField}: ${f.z.toFixed(2)}`);
+      valuesOut.textContent = lines.join('\n');
+
+      overlay.replaceChildren();
+      legend.replaceChildren();
+      const cross = document.createElement('div');
+      cross.className = 'framing-cross';
+      cross.style.left = `${f.x}%`;
+      cross.style.top = `${f.y}%`;
+      overlay.append(cross);
+
+      frames.forEach((frame, i) => {
+        const img = targets.get(frame);
+        if (!img) return;
+        img.style.setProperty('--focus', `${f.x}% ${f.y}%`);
+        img.style.setProperty('--zoom', String(f.z));
+        const area = visibleArea(img, f);
+        const colour = COLOURS[i % COLOURS.length];
+        const rect = document.createElement('div');
+        rect.className = 'framing-rect';
+        rect.style.cssText = `left:${pct(area.left)};top:${pct(area.top)};width:${pct(area.width)};height:${pct(area.height)};border-color:${colour}`;
+        overlay.append(rect);
+
+        const sharp = sharpness(area.density);
+        const item = document.createElement('li');
+        item.style.setProperty('--swatch', colour);
+        const where = area.whole
+          ? 'whole photo (framing not applied on phones)'
+          : `shows ${pct(area.left)}–${pct(area.left + area.width)} across, ${pct(area.top)}–${pct(area.top + area.height)} down`;
+        item.innerHTML = `<strong>${frame.dataset.view}</strong>: ${where} — <span class="v-${sharp.cls}">${sharp.text}</span>`;
+        legend.append(item);
+      });
+    };
+
+    frames.forEach((frame) => {
+      frame.addEventListener('load', () => {
+        const doc = frame.contentDocument;
+        const img = doc
+          ? (doc.querySelector(frame.dataset.target ?? '') as HTMLImageElement | null)
+          : null;
+        if (!img) return;
+        // Scroll only inside the frame (scrollIntoView would also scroll this page).
+        if (frame.dataset.scrollTo && frame.contentWindow) {
+          const top = img.getBoundingClientRect().top + frame.contentWindow.scrollY;
+          frame.contentWindow.scrollTo(0, Math.max(0, top - 200));
+        }
+        const ready = () => {
+          targets.set(frame, img);
+          render();
+        };
+        if (img.complete && img.naturalWidth) ready();
+        else img.addEventListener('load', ready, { once: true });
+      });
+    });
+
+    Object.values(inputs).forEach((input) => input.addEventListener('input', render));
+    section.querySelector('[data-reset]')!.addEventListener('click', () => {
+      inputs.x.value = original.dataset.savedX ?? '50';
+      inputs.y.value = original.dataset.savedY ?? '50';
+      inputs.z.value = original.dataset.savedZ ?? '1';
+      render();
+    });
+    section.querySelector('[data-copy]')!.addEventListener('click', async (event) => {
+      await navigator.clipboard.writeText(valuesOut.textContent ?? '');
+      (event.currentTarget as HTMLButtonElement).textContent = 'Copied';
+    });
+    render();
+  });
+</script>
+
+<style>
+  .framing {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .framing-eyebrow {
+    margin: 0;
+    font-family: 'Lato', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--amber);
+  }
+  .framing-intro,
+  .framing-meta {
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.95rem;
+  }
+  .framing-meta {
+    margin: 0.4rem 0 0;
+    color: rgba(23, 39, 43, 0.7);
+  }
+  .framing-warning,
+  .v-bad,
+  .framing-legend :global(.v-bad) {
+    color: #b04a2f;
+    font-weight: 700;
+  }
+  .v-soft,
+  .framing-legend :global(.v-soft) {
+    color: #9a6a00;
+    font-weight: 700;
+  }
+  .v-ok,
+  .framing-legend :global(.v-ok) {
+    color: #2e7d4f;
+  }
+  .framing-section {
+    margin: 2.5rem 0 3.5rem;
+  }
+  .framing-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: flex-end;
+    margin: 0.75rem 0 1rem;
+    font:
+      700 0.85rem 'Lato',
+      Arial,
+      sans-serif;
+  }
+  .framing-controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 220px;
+  }
+  .framing-controls output {
+    font-weight: 400;
+  }
+  .framing-controls button,
+  .framing-values button {
+    padding: 0.4rem 0.9rem;
+    border: 1px solid #d8d3c8;
+    background: #fff;
+    font:
+      700 0.8rem 'Lato',
+      Arial,
+      sans-serif;
+    cursor: pointer;
+  }
+  .framing-values {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin: 0 0 1rem;
+  }
+  .framing-values pre {
+    margin: 0;
+    padding: 0.6rem 0.9rem;
+    background: #f7f4ef;
+    border: 1px solid #d8d3c8;
+    font-size: 0.9rem;
+  }
+  .framing-original {
+    position: relative;
+    max-width: 900px;
+  }
+  .framing-original img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .framing-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .framing-overlay :global(.framing-rect) {
+    position: absolute;
+    border: 3px solid;
+    box-sizing: border-box;
+  }
+  .framing-overlay :global(.framing-cross) {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    margin: -14px 0 0 -14px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow:
+      0 0 0 2px #000,
+      inset 0 0 0 2px #000;
+  }
+  .framing-legend {
+    margin: 0.6rem 0 0;
+    padding: 0;
+    list-style: none;
+    font:
+      0.85rem/1.7 'Lato',
+      Arial,
+      sans-serif;
+  }
+  .framing-legend :global(li)::before {
+    content: '';
+    display: inline-block;
+    width: 0.8rem;
+    height: 0.8rem;
+    margin-right: 0.45rem;
+    vertical-align: -0.1rem;
+    background: var(--swatch);
+  }
+  .framing-views {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+    align-items: flex-start;
+  }
+  .framing-view {
+    margin: 0;
+  }
+  .framing-view figcaption {
+    font:
+      700 0.8rem 'Lato',
+      Arial,
+      sans-serif;
+    margin-bottom: 0.35rem;
+  }
+  /* Frames render at the real width, scaled down to fit. */
+  .framing-frame {
+    --scale: 0.32;
+    width: calc(var(--w) * 1px * var(--scale));
+    height: calc(760px * var(--scale));
+    overflow: hidden;
+    border: 1px solid #d8d3c8;
+  }
+  .framing-frame iframe {
+    border: 0;
+    transform: scale(var(--scale));
+    transform-origin: 0 0;
+  }
+  .framing-table {
+    border-collapse: collapse;
+    width: 100%;
+    font:
+      0.88rem/1.4 'Lato',
+      Arial,
+      sans-serif;
+  }
+  .framing-table th,
+  .framing-table td {
+    border-bottom: 1px solid #e5e0d6;
+    padding: 0.45rem 0.6rem;
+    text-align: left;
+    vertical-align: middle;
+  }
+  .framing-thumb {
+    width: 48px;
+    height: 36px;
+    object-fit: cover;
+    vertical-align: middle;
+    margin-right: 0.4rem;
+  }
+</style>

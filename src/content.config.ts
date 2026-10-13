@@ -6,6 +6,17 @@ import { glob } from 'astro/loaders';
 // deriving the entry id, instead of Astro's default folder-name-as-id behavior.
 const DATE_FOLDER_PREFIX = /^\d{4}-\d{2}-\d{2}-/;
 
+/** A focal point "across% down%", each 0–100%, e.g. "50% 20%". Used as CSS object-position. */
+const focusPoint = z
+  .string()
+  .regex(
+    /^(100|[1-9]?\d)% (100|[1-9]?\d)%$/,
+    'Focus must be "across% down%", each 0–100%, e.g. "50% 20%"',
+  );
+
+/** Zoom around the focal point: 1 = the photo as cropped to fit, up to 4. */
+const zoomLevel = z.number().min(1).max(4);
+
 const stripDatePrefixFromId = (entryPath: string) => {
   const withoutExt = entryPath.replace(/\.(md|mdx)$/, '');
   const withoutIndex = withoutExt.replace(/\/index$/, '');
@@ -88,6 +99,14 @@ const articles = defineCollection({
       updatedDate: z.coerce.date().optional(),
       thumbnail: image().optional(),
       heroImage: image().optional(),
+      // Framing: the point of the photo to keep in view when a placement crops it, as
+      // "across% down%" (e.g. "50% 20%"). Hero (article banner) and thumbnail (article
+      // cards) are framed independently; without a value the browser centre-crops.
+      // Zoom enlarges the photo around the focal point (1 = none), still from the original.
+      heroFocus: focusPoint.optional(),
+      heroZoom: zoomLevel.optional(),
+      thumbnailFocus: focusPoint.optional(),
+      thumbnailZoom: zoomLevel.optional(),
       gallery: z.array(image()).optional(),
       column: z
         .enum(['Musings from the Corner Office', 'Health/Vitality', "Jake's Take"])

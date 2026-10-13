@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import reservationSelfieHat from '../assets/images/reservation-selfie-hat.webp';
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import { getThumbnailSrc } from '../utils/pillarFallback';
+import { framingStyle } from '../utils/framing';
 import { getAuthorRoute } from '../config/routes';
 
 const allArticles = await getCollection('articles');
@@ -69,13 +70,20 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
               return (
                 <article class:list={['feed-card', article.data.featured && 'feed-card-featured']}>
                   {thumbnailSrc && (
-                    <img
-                      class="feed-card-image"
-                      src={thumbnailSrc}
-                      alt={article.data.title}
-                      loading="lazy"
-                      decoding="async"
-                    />
+                    <span class="feed-card-frame">
+                      <img
+                        class="feed-card-image"
+                        src={thumbnailSrc}
+                        alt={article.data.title}
+                        loading="lazy"
+                        decoding="async"
+                        style={
+                          article.data.thumbnail
+                            ? framingStyle(article.data.thumbnailFocus, article.data.thumbnailZoom)
+                            : undefined
+                        }
+                      />
+                    </span>
                   )}
                   <div class="feed-card-body">
                     <p class="feed-card-eyebrow">{article.data.eyebrow || 'Reservation for One'}</p>
@@ -154,13 +162,25 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
     transform: translateY(-1px);
   }
 
-  .feed-card-image {
+  /* The frame sets the card image size and clips it, so the article's framing (focus and
+     zoom, from thumbnailFocus / thumbnailZoom) can scale the photo inside it. */
+  .feed-card-frame {
+    display: block;
     width: 100%;
     aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border: 1px solid rgba(14, 143, 184, 0.16);
+  }
+
+  .feed-card-image {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
+    object-position: var(--focus, center center);
+    transform: scale(var(--zoom, 1));
+    transform-origin: var(--focus, center center);
     display: block;
     border-radius: 0;
-    border: 1px solid rgba(14, 143, 184, 0.16);
   }
 
   .feed-card-body {
@@ -267,7 +287,7 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
       grid-template-columns: 1fr;
     }
 
-    .feed-card-image {
+    .feed-card-frame {
       max-width: 220px;
     }
   }

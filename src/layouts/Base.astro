@@ -235,11 +235,16 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
     box-shadow: 0 20px 48px rgba(11, 77, 90, 0.08);
   }
 
+  /* Framing: --focus is the article's focal point ("across% down%") and --zoom its zoom
+     (1 = none). With object-position at the focal point, scaling from the same point keeps
+     it fixed in the frame. Set per article (heroFocus / heroZoom). */
   .hero-media img {
     width: 100%;
     height: clamp(260px, 42vw, 460px);
     object-fit: cover;
-    object-position: center center;
+    object-position: var(--focus, center center);
+    transform: scale(var(--zoom, 1));
+    transform-origin: var(--focus, center center);
     display: block;
   }
 
@@ -619,10 +624,12 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
       gap: 0.65rem;
     }
 
+    /* Phones show the whole photo, so framing (focus/zoom) doesn't apply. */
     .hero-media img {
       height: auto;
       max-height: none;
       object-fit: contain;
+      transform: none;
     }
 
     .section-heading {
