@@ -1,0 +1,245 @@
+---
+// LOCAL PREVIEW ONLY (404 on the live site): every layout building block, shown with this
+// article's real paragraphs, callouts and photos (using the crops saved on its <Gallery>
+// markers), in the real article column and body styles. Nothing here changes the article.
+import { getEntry } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import FullBleed from '../../../components/blocks/FullBleed.astro';
+import WideImage from '../../../components/blocks/WideImage.astro';
+import ImagePair from '../../../components/blocks/ImagePair.astro';
+import Inset from '../../../components/blocks/Inset.astro';
+import PullQuote from '../../../components/blocks/PullQuote.astro';
+import { parseGalleryMarkers } from '../../../utils/framing';
+import { renderSummaryHtml } from '../../../utils/summary';
+import '../../../styles/article-body.css';
+
+export const prerender = false;
+
+const entry = import.meta.env.DEV ? await getEntry('articles', Astro.params.slug ?? '') : undefined;
+if (!entry) return new Response('Not found', { status: 404 });
+
+// The blocks look photos up by `pick`, as in an article.
+const gallery = entry.data.gallery ?? [];
+Astro.locals.articleGallery = gallery.map((img, i, arr) => ({
+  src: img.src,
+  width: img.width,
+  height: img.height,
+  landscape: img.width >= img.height,
+  isLastOdd: arr.length % 2 === 1 && i === arr.length - 1,
+}));
+
+// Saved crop for each photo (from its marker in the article); first marker wins.
+const saved = parseGalleryMarkers(entry.body ?? '');
+const crop = (pick: number) => {
+  const s = saved.find((m) => m.pick === pick);
+  return { pick, shape: s?.shape, focus: s?.focus, zoom: s?.zoom };
+};
+
+// The article's own prose paragraphs, in order (no headings, boxes, markers or lists).
+const prose = (entry.body ?? '')
+  .split(/\n{2,}/)
+  .map((p) => p.trim())
+  .filter((p) => p.length > 120 && !/^(#|<|\*\*\[|---|\{|>|\*|-|\|)/.test(p));
+const html = await Promise.all(prose.map((p) => renderSummaryHtml(p)));
+const para = (i: number) => html[i % html.length];
+
+const callouts = entry.data.callouts ?? [];
+const quote = (i: number) => callouts[i % Math.max(callouts.length, 1)] ?? '';
+// A draft crop for the wide blocks: the wide shape, starting from the photo's saved focus.
+const wide = (pick: number, shape: '16:9' | '2:1') => ({ pick, shape, focus: crop(pick).focus });
+const describe = (pick: number) => {
+  const c = crop(pick);
+  const file = decodeURIComponent(gallery[pick]?.src.split('?')[0].split('/').pop() ?? '');
+  return `${file} — saved crop: ${c.shape ?? 'original'}${c.focus ? `, focus ${c.focus}` : ''}${c.zoom ? `, zoom ${c.zoom}` : ''}`;
+};
+---
+
+<Base title={`Layout blocks — ${entry.data.title}`}>
+  <main class="lb">
+    <div class="article-column">
+      <p class="lb-eyebrow">Local preview · not on the live site</p>
+      <h1 class="lb-title">Layout blocks: {entry.data.title}</h1>
+      <p class="lb-intro">
+        Each block below uses this article's real paragraphs, callouts and photos, with your saved
+        crops, in the real article column. Narrow the window (or open this on a phone) to see each
+        block collapse to a single column. The article itself is unchanged.
+      </p>
+    </div>
+
+    <section class="lb-section">
+      <div class="article-column">
+        <p class="lb-label">
+          1 · Drop cap <span>Optional per article (dropCap: true) — first paragraph only</span>
+        </p>
+        <div class="article-body has-drop-cap">
+          <Fragment set:html={para(0)} />
+          <Fragment set:html={para(1)} />
+        </div>
+      </div>
+    </section>
+
+    <section class="lb-section">
+      <div class="article-column">
+        <p class="lb-label">
+          2 · Inset, left
+          <span
+            >Within a run of text (after a paragraph), one at a time, at least 3 paragraphs from any
+            other inset · {describe(0)}</span
+          >
+        </p>
+        <div class="article-body">
+          <Fragment set:html={para(2)} />
+          <Inset side="left" {...crop(0)} />
+          <Fragment set:html={para(3)} />
+          <Fragment set:html={para(4)} />
+        </div>
+      </div>
+    </section>
+
+    <section class="lb-section">
+      <div class="article-column">
+        <p class="lb-label">
+          3 · Inset, right <span>Same rules · {describe(2)}</span>
+        </p>
+        <div class="article-body">
+          <Fragment set:html={para(5)} />
+          <Inset side="right" {...crop(2)} />
+          <Fragment set:html={para(6)} />
+          <Fragment set:html={para(7)} />
+        </div>
+      </div>
+    </section>
+
+    <section class="lb-section">
+      <div class="article-column">
+        <p class="lb-label">
+          4 · Pull quote, amber bar <span>The existing style · callout 1</span>
+        </p>
+        <div class="article-body">
+          <Fragment set:html={para(9)} />
+          <PullQuote>{quote(0)}</PullQuote>
+          <Fragment set:html={para(10)} />
+        </div>
+      </div>
+    </section>
+
+    <section class="lb-section">
+      <div class="article-column">
+        <p class="lb-label">
+          5 · Pull quote, side-set <span>In the margin on wide screens (1180px+) · callout 2</span>
+        </p>
+        <div class="article-body">
+          <PullQuote variant="side" side="right">{quote(1)}</PullQuote>
+          <Fragment set:html={para(11)} />
+          <Fragment set:html={para(12)} />
+          <Fragment set:html={para(13)} />
+        </div>
+      </div>
+    </section>
+
+    <section class="lb-section">
+      <div class="article-column">
+        <p class="lb-label">
+          6 · Pull quote, large and centred <span>Breaks out wider than the column · callout 3</span
+          >
+        </p>
+        <div class="article-body">
+          <Fragment set:html={para(14)} />
+          <PullQuote variant="display">{quote(2)}</PullQuote>
+          <Fragment set:html={para(15)} />
+        </div>
+      </div>
+    </section>
+
+    <section class="lb-section">
+      <div class="article-column">
+        <p class="lb-label">
+          7 · Image pair
+          <span
+            >Two photos of the same shape and similar weight — here the two Saqqara reliefs, both
+            4:3 · {describe(0)} + {describe(2)}</span
+          >
+        </p>
+        <div class="article-body">
+          <Fragment set:html={para(16)} />
+          <ImagePair first={crop(0)} second={crop(2)} />
+          <Fragment set:html={para(17)} />
+        </div>
+      </div>
+    </section>
+
+    <section class="lb-section">
+      <div class="article-column">
+        <p class="lb-label">
+          8 · Wide image
+          <span
+            >As wide as the banner, 16:9 or 2:1, never taller than the banner, at most one wide or
+            full-width block per article · hieroglyphics in 16:9 (draft crop from its saved focus)</span
+          >
+        </p>
+        <div class="article-body">
+          <Fragment set:html={para(18)} />
+          <WideImage {...wide(0, '16:9')} />
+          <Fragment set:html={para(19)} />
+        </div>
+      </div>
+    </section>
+
+    <section class="lb-section">
+      <div class="article-column">
+        <p class="lb-label">
+          9 · Full-width image
+          <span
+            >Edge to edge, 16:9 or 2:1, never taller than the banner · shopfront in 2:1 (draft crop
+            from its saved focus). A real article would use this or the wide image, not both.</span
+          >
+        </p>
+        <div class="article-body">
+          <Fragment set:html={para(20)} />
+          <FullBleed {...wide(3, '2:1')} />
+          <Fragment set:html={para(21)} />
+        </div>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .lb-eyebrow {
+    margin: 0;
+    font:
+      700 0.75rem 'Lato',
+      Arial,
+      sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--amber);
+  }
+  .lb-title {
+    margin: 0.4rem 0 0.6rem;
+  }
+  .lb-intro {
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.95rem;
+  }
+  .lb-section {
+    margin: 2.5rem 0 3rem;
+    padding-top: 1.25rem;
+    border-top: 2px dashed #d8d3c8;
+  }
+  .lb-label {
+    margin: 0 0 1.4rem;
+    padding: 0.5rem 0.8rem;
+    background: #f7f4ef;
+    font:
+      700 0.85rem/1.5 'Lato',
+      Arial,
+      sans-serif;
+    color: var(--brand-teal);
+  }
+  .lb-label span {
+    display: block;
+    font-weight: 400;
+    color: rgba(23, 39, 43, 0.7);
+  }
+</style>

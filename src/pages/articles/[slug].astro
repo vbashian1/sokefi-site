@@ -11,6 +11,23 @@ import defaultArticleImage from '../../assets/images/positano-new.avif';
 import { getAuthorRoute } from '../../config/routes';
 import { renderSummaryHtml, summaryToPlainText } from '../../utils/summary';
 import { framingStyle } from '../../utils/framing';
+import '../../styles/article-body.css';
+import FullBleed from '../../components/blocks/FullBleed.astro';
+import WideImage from '../../components/blocks/WideImage.astro';
+import ImagePair from '../../components/blocks/ImagePair.astro';
+import Inset from '../../components/blocks/Inset.astro';
+import PullQuote from '../../components/blocks/PullQuote.astro';
+
+// Components an article body can use (photos, layout blocks, Details boxes).
+const MDX_COMPONENTS = {
+  Gallery: ArticleGallery,
+  Details: ArticleDetails,
+  FullBleed,
+  WideImage,
+  ImagePair,
+  Inset,
+  PullQuote,
+};
 
 const slug = Astro.params.slug ?? '';
 const entry = await getEntry('articles', slug);
@@ -199,10 +216,8 @@ const articleSchema = entry
 
             <div class="article-rule" aria-hidden="true" />
 
-            <div class="article-body">
-              {Content && (
-                <Content components={{ Gallery: ArticleGallery, Details: ArticleDetails }} />
-              )}
+            <div class:list={['article-body', entry.data.dropCap && 'has-drop-cap']}>
+              {Content && <Content components={MDX_COMPONENTS} />}
             </div>
 
             {entry.data.affiliateDisclosure && (
@@ -270,10 +285,7 @@ const articleSchema = entry
 </Base>
 
 <style>
-  .article-column {
-    max-width: 680px;
-    margin: 0 auto;
-  }
+  /* Column and article-body styles live in src/styles/article-body.css (shared). */
 
   .article-header {
     margin: 1.85rem 0 0;
@@ -355,68 +367,6 @@ const articleSchema = entry
     height: 1.5px;
     background: var(--teal);
     margin: 0 0 2rem;
-  }
-
-  .article-body :global(p) {
-    margin: 0 0 1.35rem;
-    font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
-    font-size: 1.08rem;
-    line-height: 1.75;
-    color: var(--text);
-  }
-
-  .article-body :global(h2) {
-    margin: 2.2rem 0 1rem;
-    font-size: clamp(1.4rem, 2.2vw, 1.75rem);
-    color: var(--teal-deep);
-  }
-
-  .article-body :global(h3) {
-    margin: 1.75rem 0 0.85rem;
-    font-size: clamp(1.2rem, 1.9vw, 1.4rem);
-    color: var(--teal-deep);
-  }
-
-  .article-body :global(ul),
-  .article-body :global(ol) {
-    margin: 0 0 1.35rem;
-    padding-left: 1.4rem;
-    font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
-    font-size: 1.08rem;
-    line-height: 1.75;
-    color: var(--text);
-  }
-
-  .article-body :global(a) {
-    color: var(--teal-deep);
-    text-decoration: underline;
-  }
-
-  .article-body :global(blockquote) {
-    margin: 2.2rem 0;
-    padding-left: 1.35rem;
-    position: relative;
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: clamp(1.3rem, 2vw, 1.55rem);
-    font-weight: 600;
-    color: var(--amber);
-    line-height: 1.5;
-  }
-
-  .article-body :global(blockquote::before) {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0.2rem;
-    width: 2px;
-    height: calc(100% - 0.4rem);
-    background: var(--amber);
-  }
-
-  .article-body :global(blockquote p) {
-    margin: 0;
-    font: inherit;
-    color: inherit;
   }
 
   .article-disclosure {

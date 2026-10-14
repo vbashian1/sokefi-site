@@ -68,6 +68,8 @@ const SHAPE_CHOICES = [
   { value: '4:3', label: 'Landscape 4:3' },
   { value: '1:1', label: 'Square' },
   { value: '4:5', label: 'Portrait 4:5' },
+  { value: '16:9', label: 'Wide 16:9' },
+  { value: '2:1', label: 'Wide 2:1' },
 ] as const;
 const attr = (attrs: string, re: RegExp) => attrs.match(re)?.[1];
 const galleryImages = entry.data.gallery ?? [];
@@ -438,6 +440,8 @@ const placements = [...(entry.body ?? '').matchAll(/<Gallery\b([^>]*?)\/>/g)]
     '4:3': 4 / 3,
     '1:1': 1,
     '4:5': 4 / 5,
+    '16:9': 16 / 9,
+    '2:1': 2,
   };
   // Phone (390px screen): the article column is 342px; frames follow the gallery's phone
   // widths (landscape and square across the column, portrait up to 260px).

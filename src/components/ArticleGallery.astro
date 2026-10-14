@@ -1,19 +1,11 @@
 ---
 import type { ImageMetadata } from 'astro';
 import type { ArticleGalleryImage } from '../types/gallery';
+import FramedImage from './blocks/FramedImage.astro';
+import { isShape, type Shape } from '../utils/framing';
 
 type GallerySource = ImageMetadata | ArticleGalleryImage | string;
 type ImageMeta = { src: string; width: number; height: number };
-
-/** Frame shapes for a single photo: its own shape, or a crop to a set ratio. */
-const SHAPES = {
-  original: null,
-  '3:2': 3 / 2,
-  '4:3': 4 / 3,
-  '1:1': 1,
-  '4:5': 4 / 5,
-} as const;
-type Shape = keyof typeof SHAPES;
 
 interface Props {
   pick?: number[];
@@ -30,8 +22,8 @@ interface Props {
 }
 
 const { pick, images, alt = [], shape, focus, zoom } = Astro.props;
-if (shape !== undefined && !(shape in SHAPES)) {
-  throw new Error(`Gallery shape "${shape}" must be one of: ${Object.keys(SHAPES).join(', ')}`);
+if (shape !== undefined && !isShape(shape)) {
+  throw new Error(`Gallery shape "${shape}" must be one of: original, 3:2, 4:3, 1:1, 4:5`);
 }
 
 // The validated `gallery:` frontmatter is published by the article page, because MDX
@@ -57,31 +49,15 @@ const items = selected
     alt: alt[index] ?? `Photo ${index + 1}`,
   }));
 
-// A single photo with any framing set is shown in a frame of the chosen shape; the photo
-// fills it (object-fit cover) at the focal point and zoom. Frame width follows its shape:
-// landscape across the column, portrait at the usual portrait size, square in between.
+// A single photo with any framing set is shown in a frame of the chosen shape (see
+// FramedImage): the photo fills it at the focal point and zoom, from the original file.
 const framed = items.length === 1 && Boolean(shape || focus || zoom) ? items[0] : null;
-const frameRatio = framed ? (SHAPES[shape ?? 'original'] ?? framed.width / framed.height) : 1;
-const frameKind = frameRatio > 1.01 ? 'landscape' : frameRatio < 0.99 ? 'portrait' : 'square';
 ---
 
 {
   framed && (
     <div class="article-gallery article-gallery-single">
-      <div
-        class:list={['gallery-frame', `gallery-frame-${frameKind}`]}
-        style={`aspect-ratio: ${frameRatio}; --focus: ${focus ?? '50% 50%'}; --zoom: ${zoom ?? 1}`}
-      >
-        <img
-          class="gallery-frame-image"
-          src={framed.src}
-          width={framed.width}
-          height={framed.height}
-          alt={framed.alt}
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
+      <FramedImage image={framed} shape={shape} focus={focus} zoom={zoom} alt={framed.alt} />
     </div>
   )
 }
@@ -128,6 +104,7 @@ const frameKind = frameRatio > 1.01 ? 'landscape' : frameRatio < 0.99 ? 'portrai
      2.2rem matches the blockquote rhythm in the article body. */
   .article-gallery {
     margin: 2.2rem 0;
+    clear: both;
   }
 
   .gallery-image {
@@ -160,57 +137,6 @@ const frameKind = frameRatio > 1.01 ? 'landscape' : frameRatio < 0.99 ? 'portrai
 
   .gallery-image-full {
     grid-column: 1 / -1;
-  }
-
-  /* Framed single photo (shape / focus / zoom): the frame clips, the photo fills it. */
-  .gallery-frame {
-    margin: 0 auto;
-    overflow: hidden;
-  }
-
-  .gallery-frame-landscape {
-    width: 100%;
-  }
-
-  .gallery-frame-square {
-    width: 70%;
-    max-width: 476px;
-  }
-
-  .gallery-frame-portrait {
-    width: 50%;
-    max-width: 340px;
-  }
-
-  .gallery-frame-image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: var(--focus, center center);
-    transform: scale(var(--zoom, 1));
-    transform-origin: var(--focus, center center);
-  }
-
-  @media (max-width: 700px) {
-    .gallery-frame-square {
-      width: 85%;
-    }
-
-    .gallery-frame-portrait {
-      width: 70%;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .gallery-frame-square {
-      width: 100%;
-    }
-
-    .gallery-frame-portrait {
-      width: 100%;
-      max-width: 260px;
-    }
   }
 
   @media (max-width: 700px) {

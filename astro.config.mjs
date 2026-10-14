@@ -4,6 +4,7 @@ import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 import { satteri } from '@astrojs/markdown-satteri';
 import { detailsBoxes } from './src/plugins/details-boxes.mjs';
+import { layoutRules } from './src/plugins/layout-rules.mjs';
 
 export default defineConfig({
   site: 'https://sokefi.com',
@@ -11,8 +12,9 @@ export default defineConfig({
   output: 'server',
   adapter: vercel(),
   integrations: [sitemap(), mdx()],
-  // Details boxes written to the Details Box Standard become <Details> components.
+  // Details boxes written to the Details Box Standard become <Details> components, and
+  // article layouts are checked against the layout rules (src/plugins/layout-rules.mjs).
   markdown: {
-    processor: satteri({ mdastPlugins: [detailsBoxes] }),
+    processor: satteri({ mdastPlugins: [detailsBoxes, layoutRules] }),
   },
 });

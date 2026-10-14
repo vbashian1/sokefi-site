@@ -107,6 +107,10 @@ const articles = defineCollection({
       heroZoom: zoomLevel.optional(),
       thumbnailFocus: focusPoint.optional(),
       thumbnailZoom: zoomLevel.optional(),
+      // Layout: a drop cap on the first paragraph of the piece (off unless set).
+      dropCap: z.boolean().default(false),
+      // Pull-quote lines from the article file; each also appears in the body text.
+      callouts: z.array(z.string()).optional(),
       gallery: z.array(image()).optional(),
       column: z
         .enum(['Musings from the Corner Office', 'Health/Vitality', "Jake's Take"])
