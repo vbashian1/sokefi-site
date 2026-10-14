@@ -7,6 +7,7 @@
 import { getEntry } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 import { getAuthorRoute } from '../../../config/routes';
+import ArticleGallery from '../../../components/ArticleGallery.astro';
 
 export const prerender = false;
 
@@ -58,17 +59,36 @@ const PLACEMENTS = [
   },
 ].filter((p): p is NonNullable<typeof p> => Boolean(p));
 
-// Gallery photos are shown whole for now; list how large each can be shown sharply, so
-// layout blocks that show them wide (or crop and zoom them) can be judged.
+// In-article photos: one section per <Gallery pick={[n]} … /> marker in the article body,
+// in reading order, with whatever framing that placement already has.
 const ARTICLE_COLUMN = 680;
-const FULL_WIDTH = 1152;
-const gallery = (entry.data.gallery ?? []).map((img, i) => ({
-  n: i + 1,
-  file: decodeURIComponent(img.src.split('?')[0].split('/').pop() ?? ''),
-  width: img.width,
-  height: img.height,
-  src: img.src,
-}));
+const SHAPE_CHOICES = [
+  { value: 'original', label: 'Original' },
+  { value: '3:2', label: 'Landscape 3:2' },
+  { value: '4:3', label: 'Landscape 4:3' },
+  { value: '1:1', label: 'Square' },
+  { value: '4:5', label: 'Portrait 4:5' },
+] as const;
+const attr = (attrs: string, re: RegExp) => attrs.match(re)?.[1];
+const galleryImages = entry.data.gallery ?? [];
+const placements = [...(entry.body ?? '').matchAll(/<Gallery\b([^>]*?)\/>/g)]
+  .map((m, i) => {
+    const attrs = m[1];
+    const pick = Number(attr(attrs, /pick=\{\[\s*(\d+)\s*\]\}/));
+    const image = galleryImages[pick];
+    if (!image) return null;
+    return {
+      n: i + 1,
+      pick,
+      image,
+      file: decodeURIComponent(image.src.split('?')[0].split('/').pop() ?? ''),
+      shape: (attr(attrs, /shape="([^"]+)"/) ??
+        'original') as (typeof SHAPE_CHOICES)[number]['value'],
+      focus: parseFocus(attr(attrs, /focus="([^"]+)"/)),
+      zoom: Number(attr(attrs, /zoom=\{([\d.]+)\}/) ?? 1),
+    };
+  })
+  .filter((p): p is NonNullable<typeof p> => Boolean(p));
 ---
 
 <Base title={`Framing — ${entry.data.title}`}>
@@ -159,57 +179,98 @@ const gallery = (entry.data.gallery ?? []).map((img, i) => ({
     }
 
     {
-      gallery.length > 0 && (
-        <section class="framing-section">
-          <h2>Gallery photos (shown whole for now)</h2>
+      placements.length > 0 && (
+        <>
+          <h2 class="framing-part">In-article photos</h2>
           <p class="framing-intro">
-            How wide each photo can be shown and still look sharp. High-resolution screens (most
-            phones and laptops) need twice the pixels. The article text column is {ARTICLE_COLUMN}
-            px; a full-width layout is up to {FULL_WIDTH}px. Zooming into a photo divides these
-            widths by the zoom.
+            One section per photo placement, in reading order. Choose a shape, then set the focal
+            point and zoom. The photo below each set of controls is drawn by the site's own gallery
+            component at the article column width ({ARTICLE_COLUMN}px). Copy the marker line and
+            send it to me; it replaces that placement's marker in the article.
           </p>
-          <table class="framing-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>File</th>
-                <th>Pixels</th>
-                <th>Sharp up to (high-res / standard)</th>
-                <th>Text column ({ARTICLE_COLUMN}px)</th>
-                <th>Full width ({FULL_WIDTH}px)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {gallery.map((g) => {
-                const verdict = (needed: number) =>
-                  g.width >= needed * 2
-                    ? ['ok', 'Sharp']
-                    : g.width >= needed
-                      ? ['soft', 'Softer on high-res screens']
-                      : ['bad', 'Soft on all screens'];
-                const [colClass, colText] = verdict(ARTICLE_COLUMN);
-                const [fullClass, fullText] = verdict(FULL_WIDTH);
-                return (
-                  <tr>
-                    <td>{g.n}</td>
-                    <td>
-                      <img src={g.src} alt="" class="framing-thumb" /> {g.file}
-                    </td>
-                    <td>
-                      {g.width} × {g.height}
-                    </td>
-                    <td>
-                      {Math.floor(g.width / 2)}px / {g.width}px
-                    </td>
-                    <td class={`v-${colClass}`}>{colText}</td>
-                    <td class={`v-${fullClass}`}>{fullText}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </section>
+        </>
       )
+    }
+    {
+      placements.map((g) => (
+        <section
+          class="framing-section framing-gallery"
+          data-pick={g.pick}
+          data-saved-shape={g.shape}
+        >
+          <h2>
+            Photo {g.n}: {g.file}
+          </h2>
+
+          <fieldset class="framing-shapes">
+            <legend>Shape</legend>
+            {SHAPE_CHOICES.map((s) => (
+              <label>
+                <input
+                  type="radio"
+                  name={`shape-${g.n}`}
+                  value={s.value}
+                  checked={s.value === g.shape}
+                  data-shape
+                />
+                {s.label}
+              </label>
+            ))}
+          </fieldset>
+
+          <div class="framing-controls">
+            <label>
+              Focus across <output data-out="x">{g.focus.x}%</output>
+              <input type="range" min="0" max="100" step="1" value={g.focus.x} data-control="x" />
+            </label>
+            <label>
+              Focus down <output data-out="y">{g.focus.y}%</output>
+              <input type="range" min="0" max="100" step="1" value={g.focus.y} data-control="y" />
+            </label>
+            <label>
+              Zoom <output data-out="z">{g.zoom.toFixed(2)}×</output>
+              <input type="range" min="1" max="3" step="0.01" value={g.zoom} data-control="z" />
+            </label>
+            <button type="button" data-reset>
+              Back to saved values
+            </button>
+          </div>
+
+          <div class="framing-values">
+            <pre data-values />
+            <button type="button" data-copy>
+              Copy marker
+            </button>
+          </div>
+
+          <div class="framing-gallery-layout">
+            <div>
+              <div
+                class="framing-original framing-original-small"
+                data-saved-x={g.focus.x}
+                data-saved-y={g.focus.y}
+                data-saved-z={g.zoom}
+              >
+                <img src={g.image.src} width={g.image.width} height={g.image.height} alt="" />
+                <div class="framing-overlay" />
+              </div>
+              <p class="framing-meta">
+                Original: {g.image.width} × {g.image.height} pixels
+              </p>
+              <ul class="framing-legend" />
+            </div>
+            <div class="framing-column">
+              <p class="framing-column-label">In the article column ({ARTICLE_COLUMN}px)</p>
+              <ArticleGallery
+                images={[g.image]}
+                shape={g.shape}
+                focus={`${g.focus.x}% ${g.focus.y}%`}
+                zoom={g.zoom}
+              />
+            </div>
+          </div>
+        </section>
+      ))
     }
   </main>
 </Base>
@@ -234,8 +295,9 @@ const gallery = (entry.data.gallery ?? []).map((img, i) => ({
     const style = getComputedStyle(img);
     const boxW = img.offsetWidth;
     const boxH = img.offsetHeight;
-    const nw = img.naturalWidth;
-    const nh = img.naturalHeight;
+    // Fall back to the size attributes: lazy-loaded photos may not have loaded yet.
+    const nw = img.naturalWidth || Number(img.getAttribute('width'));
+    const nh = img.naturalHeight || Number(img.getAttribute('height'));
     if (style.objectFit !== 'cover') {
       const scale = Math.min(boxW / nw, boxH / nh);
       return { left: 0, top: 0, width: 1, height: 1, density: 1 / scale, whole: true };
@@ -367,6 +429,129 @@ const gallery = (entry.data.gallery ?? []).map((img, i) => ({
       (event.currentTarget as HTMLButtonElement).textContent = 'Copied';
     });
     render();
+  });
+
+  // ---- In-article photos: shape + focus + zoom on the site's own gallery frame ----
+  const RATIOS: Record<string, number | null> = {
+    original: null,
+    '3:2': 3 / 2,
+    '4:3': 4 / 3,
+    '1:1': 1,
+    '4:5': 4 / 5,
+  };
+  // Phone (390px screen): the article column is 342px; frames follow the gallery's phone
+  // widths (landscape and square across the column, portrait up to 260px).
+  const PHONE_COLUMN = 342;
+  const PHONE_PORTRAIT = 260;
+
+  document.querySelectorAll<HTMLElement>('.framing-gallery').forEach((section) => {
+    const frame = section.querySelector<HTMLElement>('.gallery-frame');
+    const img = section.querySelector<HTMLImageElement>('.gallery-frame-image');
+    if (!frame || !img) return;
+    const original = section.querySelector<HTMLElement>('.framing-original')!;
+    const overlay = section.querySelector<HTMLElement>('.framing-overlay')!;
+    const legend = section.querySelector<HTMLElement>('.framing-legend')!;
+    const valuesOut = section.querySelector<HTMLElement>('[data-values]')!;
+    const pick = section.dataset.pick;
+    const inputs = {
+      x: section.querySelector<HTMLInputElement>('[data-control="x"]')!,
+      y: section.querySelector<HTMLInputElement>('[data-control="y"]')!,
+      z: section.querySelector<HTMLInputElement>('[data-control="z"]')!,
+    };
+    const shapes = [...section.querySelectorAll<HTMLInputElement>('[data-shape]')];
+    const shapeValue = () => shapes.find((s) => s.checked)?.value ?? 'original';
+
+    // Optional starting values from the address, e.g. ?photo2=40,30,1.2,4:5
+    const index = [...document.querySelectorAll('.framing-gallery')].indexOf(section) + 1;
+    const fromUrl = new URLSearchParams(location.search).get(`photo${index}`);
+    if (fromUrl) {
+      const [x, y, z, shape] = fromUrl.split(',');
+      if (x) inputs.x.value = x;
+      if (y) inputs.y.value = y;
+      if (z) inputs.z.value = z;
+      const match = shapes.find((s) => s.value === shape);
+      if (match) match.checked = true;
+    }
+
+    const render = () => {
+      const f: Framing = {
+        x: Number(inputs.x.value),
+        y: Number(inputs.y.value),
+        z: Number(inputs.z.value),
+      };
+      const shape = shapeValue();
+      const nw = img.naturalWidth || Number(img.getAttribute('width'));
+      const nh = img.naturalHeight || Number(img.getAttribute('height'));
+      const ratio = RATIOS[shape] ?? nw / nh;
+      const kind = ratio > 1.01 ? 'landscape' : ratio < 0.99 ? 'portrait' : 'square';
+
+      frame.style.aspectRatio = String(ratio);
+      frame.style.setProperty('--focus', `${f.x}% ${f.y}%`);
+      frame.style.setProperty('--zoom', String(f.z));
+      frame.classList.remove(
+        'gallery-frame-landscape',
+        'gallery-frame-portrait',
+        'gallery-frame-square',
+      );
+      frame.classList.add(`gallery-frame-${kind}`);
+
+      section.querySelector('[data-out="x"]')!.textContent = `${f.x}%`;
+      section.querySelector('[data-out="y"]')!.textContent = `${f.y}%`;
+      section.querySelector('[data-out="z"]')!.textContent = `${f.z.toFixed(2)}×`;
+
+      const untouched = shape === 'original' && f.x === 50 && f.y === 50 && f.z === 1;
+      valuesOut.textContent = untouched
+        ? `<Gallery pick={[${pick}]} />`
+        : `<Gallery pick={[${pick}]}${shape === 'original' ? '' : ` shape="${shape}"`} focus="${f.x}% ${f.y}%"${f.z > 1 ? ` zoom={${f.z.toFixed(2)}}` : ''} />`;
+
+      const area = visibleArea(img, f);
+      overlay.replaceChildren();
+      const cross = document.createElement('div');
+      cross.className = 'framing-cross';
+      cross.style.left = `${f.x}%`;
+      cross.style.top = `${f.y}%`;
+      const rect = document.createElement('div');
+      rect.className = 'framing-rect';
+      rect.style.cssText = `left:${pct(area.left)};top:${pct(area.top)};width:${pct(area.width)};height:${pct(area.height)};border-color:${COLOURS[0]}`;
+      overlay.append(rect, cross);
+
+      const lines = [
+        { label: `Desktop: ${img.offsetWidth}px wide`, density: area.density },
+        {
+          label: `Phone: ${kind === 'portrait' ? PHONE_PORTRAIT : PHONE_COLUMN}px wide`,
+          density: (area.width * nw) / (kind === 'portrait' ? PHONE_PORTRAIT : PHONE_COLUMN),
+        },
+      ];
+      legend.replaceChildren();
+      const where = document.createElement('li');
+      where.style.setProperty('--swatch', COLOURS[0]);
+      where.textContent = `Shows ${pct(area.left)}–${pct(area.left + area.width)} across, ${pct(area.top)}–${pct(area.top + area.height)} down`;
+      legend.append(where);
+      lines.forEach((line) => {
+        const sharp = sharpness(line.density);
+        const item = document.createElement('li');
+        item.classList.add('framing-legend-plain');
+        item.innerHTML = `<strong>${line.label}</strong> — <span class="v-${sharp.cls}">${sharp.text}</span>`;
+        legend.append(item);
+      });
+    };
+
+    [...Object.values(inputs), ...shapes].forEach((el) => el.addEventListener('input', render));
+    section.querySelector('[data-reset]')!.addEventListener('click', () => {
+      inputs.x.value = original.dataset.savedX ?? '50';
+      inputs.y.value = original.dataset.savedY ?? '50';
+      inputs.z.value = original.dataset.savedZ ?? '1';
+      const saved = shapes.find((s) => s.value === section.dataset.savedShape);
+      if (saved) saved.checked = true;
+      render();
+    });
+    section.querySelector('[data-copy]')!.addEventListener('click', async (event) => {
+      await navigator.clipboard.writeText(valuesOut.textContent ?? '');
+      (event.currentTarget as HTMLButtonElement).textContent = 'Copied';
+    });
+    // Measure once the column has laid out the frame (and again if the photo loads late).
+    requestAnimationFrame(render);
+    img.addEventListener('load', render);
   });
 </script>
 
@@ -534,26 +719,68 @@ const gallery = (entry.data.gallery ?? []).map((img, i) => ({
     transform: scale(var(--scale));
     transform-origin: 0 0;
   }
-  .framing-table {
-    border-collapse: collapse;
-    width: 100%;
+  .framing-part {
+    margin: 3.5rem 0 0.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #d8d3c8;
+  }
+  .framing-shapes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.2rem;
+    margin: 0.75rem 0 0;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid #d8d3c8;
     font:
-      0.88rem/1.4 'Lato',
+      0.88rem 'Lato',
       Arial,
       sans-serif;
   }
-  .framing-table th,
-  .framing-table td {
-    border-bottom: 1px solid #e5e0d6;
-    padding: 0.45rem 0.6rem;
-    text-align: left;
-    vertical-align: middle;
+  .framing-shapes legend {
+    padding: 0 0.3rem;
+    font-weight: 700;
   }
-  .framing-thumb {
-    width: 48px;
-    height: 36px;
-    object-fit: cover;
-    vertical-align: middle;
-    margin-right: 0.4rem;
+  .framing-shapes label {
+    display: inline-flex;
+    gap: 0.35rem;
+    align-items: center;
+    cursor: pointer;
+  }
+  .framing-gallery-layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    align-items: flex-start;
+  }
+  /* Fits tall originals on screen: the box shrinks to the photo so the outline stays exact. */
+  .framing-original-small {
+    width: fit-content;
+    max-width: 100%;
+  }
+  .framing-original-small img {
+    width: auto;
+    max-width: 420px;
+    max-height: 520px;
+  }
+  /* The article column at the site's real width (680px), so the gallery component sizes
+     its frame exactly as in the article. */
+  .framing-column {
+    width: 680px;
+    max-width: 100%;
+    padding: 0 0 0.5rem;
+    border-left: 1px dashed #d8d3c8;
+    border-right: 1px dashed #d8d3c8;
+  }
+  .framing-column-label {
+    margin: 0;
+    font:
+      700 0.8rem 'Lato',
+      Arial,
+      sans-serif;
+    text-align: center;
+    color: rgba(23, 39, 43, 0.6);
+  }
+  .framing-legend :global(li.framing-legend-plain)::before {
+    visibility: hidden;
   }
 </style>
