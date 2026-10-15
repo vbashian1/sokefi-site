@@ -9,7 +9,7 @@ import PillarTeamBar from '../../components/PillarTeamBar.astro';
 import EditorialByline from '../../components/EditorialByline.astro';
 import defaultArticleImage from '../../assets/images/positano-new.avif';
 import { getAuthorRoute } from '../../config/routes';
-import { renderSummaryHtml, summaryToPlainText } from '../../utils/summary';
+import { renderInlineHtml, renderSummaryHtml, summaryToPlainText } from '../../utils/summary';
 import { framingStyle } from '../../utils/framing';
 import '../../styles/article-body.css';
 import FullBleed from '../../components/blocks/FullBleed.astro';
@@ -124,7 +124,13 @@ const isoDate = displayDate ? new Date(displayDate).toISOString() : '';
 const wordCount = entry ? (entry.body ?? '').trim().split(/\s+/).filter(Boolean).length : 0;
 const readTimeMinutes = Math.max(1, Math.round(wordCount / 200));
 
-const faqItems = entry?.data.faq ?? [];
+// FAQ text can carry links and needs the same quotes and dashes as the body copy.
+const faqItems = await Promise.all(
+  (entry?.data.faq ?? []).map(async (item) => ({
+    question: await renderInlineHtml(item.question),
+    answer: await renderInlineHtml(item.answer),
+  })),
+);
 const tags = entry?.data.tags ?? [];
 const eyebrowText = entry ? entry.data.eyebrow || entry.data.pillar : '';
 const monogram = getMonogram(authorEntry);
@@ -259,8 +265,8 @@ const articleSchema = entry
                 <h2 id="article-faq-heading">Frequently asked questions</h2>
                 {faqItems.map((item) => (
                   <div class="faq-item">
-                    <h3>{item.question}</h3>
-                    <p>{item.answer}</p>
+                    <h3 set:html={item.question} />
+                    <p set:html={item.answer} />
                   </div>
                 ))}
               </section>

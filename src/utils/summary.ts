@@ -22,6 +22,14 @@ export const renderSummaryHtml = async (source?: string): Promise<string> => {
   return (await markdown.parse(trimmed)).trim();
 };
 
+/**
+ * Renders one line of basic markdown (links, bold, italics) to inline HTML, with the same
+ * typographic quotes and dashes as body copy. Used for FAQ questions and answers, which can
+ * carry links (e.g. Blues Highway's festival links) and would otherwise show raw markdown.
+ */
+export const renderInlineHtml = async (source?: string): Promise<string> =>
+  (await markdown.parseInline((source ?? '').trim())).trim();
+
 const NAMED_ENTITIES: Record<string, string> = {
   '&nbsp;': ' ',
   '&lt;': '<',
