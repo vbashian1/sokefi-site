@@ -122,6 +122,15 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
     --container-corner-radius: 0px;
     /* Height of the article/page banner; wide and full-width article photos are capped at it. */
     --banner-height: clamp(260px, 42vw, 460px);
+    /* Text size on the gold buttons (Subscribe, Read our story, Get the Sokéfi Edit, Tell
+       us): larger on phones so the white text holds up on the gold (Veronica, 2026-10-15). */
+    --gold-button-size: 0.9rem;
+  }
+
+  @media (max-width: 699px) {
+    :root {
+      --gold-button-size: 1rem;
+    }
   }
 
   * {
@@ -386,6 +395,7 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
   }
 
   .button-secondary {
+    font-size: var(--gold-button-size);
     background: var(--amber);
     color: #fffdf8;
     box-shadow: 0 10px 22px rgba(201, 162, 39, 0.18);
