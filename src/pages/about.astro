@@ -1,0 +1,222 @@
+---
+import Base from '../layouts/Base.astro';
+import aboutPlane from '../assets/images/about-brand-plane.webp';
+---
+
+<Base title="About — Sokéfi">
+  <main>
+    <section class="pillar-header-card" aria-labelledby="about-title">
+      <div class="pillar-header-media">
+        <img
+          src={aboutPlane.src}
+          alt="Guests boarding a small propeller plane on a sunlit airstrip under a clear blue sky."
+          loading="eager"
+          decoding="async"
+        />
+      </div>
+      <div class="pillar-header-text">
+        <p class="pillar-eyebrow">Sokéfi</p>
+        <h1 class="pillar-title" id="about-title">About Sokéfi</h1>
+        <p class="pillar-tagline">It's a state of mind.</p>
+      </div>
+    </section>
+
+    <section class="section pillar-intro" aria-label="About introduction">
+      <div class="about-intro-grid">
+        <div class="about-intro-rule" aria-hidden="true"></div>
+        <div class="about-main-copy">
+          <p class="pillar-intro-text intro-p1">Welcome to Sokéfi. We're so glad you found us.</p>
+          <p class="pillar-intro-text intro-p2">
+            What is Sokéfi? Well, kefi is a Greek word describing that feeling of being completely
+            alive. And being so kefi is what we're all about. Sokéfi is a lifestyle destination for
+            people in midlife and beyond who are living life fully — and loving it.
+          </p>
+          <p class="pillar-intro-text intro-p3">
+            We started Sokéfi because we looked around and didn't see ourselves. Not in the travel
+            sites, not in the lifestyle magazines, not in the content that kept telling us what
+            midlife was supposed to look like. We were living it!
+          </p>
+          <p class="pillar-intro-text intro-p4">
+            This is for people who are finding — or rediscovering — their groove. The ones who know
+            that being cool isn't about age or milestones.
+          </p>
+          <p class="pillar-intro-text intro-p5">
+            It's for parents who are redefining themselves as empty nesters. It's for the couple
+            rediscovering the joy of being together. It's for those embracing life on their own
+            terms, maybe individually or perhaps as a couple. It's for the midlifer who is excited
+            about what comes next.
+          </p>
+          <p class="pillar-intro-text intro-p6">
+            Here you'll find travel — destination guides that go beyond the usual travel lists –
+            designed for people who've been around enough to know what they're looking for. Honest
+            conversation about the lifestyle and healthy living that go with this stage of life. And
+            insights from people who are living it with you.
+          </p>
+        </div>
+        <p class="about-pullquote">It's that feeling of being completely alive.</p>
+        <p class="pillar-intro-text intro-p7 about-closing-line">
+          This is midlife. Make it so kefi.
+        </p>
+      </div>
+    </section>
+
+    <section class="about-kefi-band" aria-label="Sokefi visual sign-off">
+      <div class="about-kefi-copy">
+        <p class="about-kefi-title">SOKÉFI</p>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .pillar-intro {
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: clamp(0.4rem, 1vw, 0.8rem);
+    padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  .about-intro-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 700px) minmax(220px, 260px);
+    column-gap: clamp(1.25rem, 3.2vw, 2.75rem);
+    align-items: start;
+    justify-content: start;
+  }
+
+  .about-intro-rule {
+    grid-column: 1 / -1;
+    height: 1.5px;
+    background: var(--brand-teal);
+    margin: 0.35rem 0 1.3rem;
+  }
+
+  .about-main-copy {
+    grid-column: 1;
+  }
+
+  .about-pullquote {
+    grid-column: 2;
+    margin: 9.5rem 0 0;
+    width: 100%;
+    max-width: 260px;
+    padding-left: 1rem;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.35rem, 2.1vw, 1.62rem);
+    font-style: normal;
+    font-weight: 600;
+    color: #c9a227;
+    line-height: 1.6;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
+    position: relative;
+  }
+
+  .about-pullquote::before {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0.2rem;
+    width: 2px;
+    height: calc(100% - 0.4rem);
+    background: #c9a227;
+  }
+
+  .pillar-intro-text {
+    font-family: 'Source Serif Pro', serif;
+    line-height: 1.75;
+    color: #17272b;
+  }
+
+  .pillar-intro-text {
+    margin: 0 0 1rem;
+    font-size: clamp(1.05rem, 1.45vw, 1.15rem);
+    font-weight: 500;
+  }
+
+  .about-closing-line {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    width: 100%;
+    max-width: none;
+    margin: 1.35rem 0 0;
+    padding-top: 0.5rem;
+    border-top: 1.5px solid var(--brand-teal);
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.1875rem;
+    font-weight: 600;
+    color: #17272b;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .about-kefi-band {
+    margin: 0 0 1.5rem;
+    padding: 0.9rem 1.75rem;
+    background: var(--brand-teal);
+    border-radius: 0;
+  }
+
+  .about-kefi-copy {
+    position: relative;
+    width: fit-content;
+    padding-left: 1.35rem;
+  }
+
+  .about-kefi-copy::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.15rem;
+    width: 2px;
+    height: calc(100% - 0.3rem);
+    background: #c9a227;
+  }
+
+  .about-kefi-title {
+    margin: 0;
+    color: #e0b739;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.02rem, 1.35vw, 1.18rem);
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  @media (max-width: 1100px) {
+    .about-intro-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .about-main-copy {
+      grid-column: 1;
+    }
+
+    .about-intro-rule {
+      grid-column: 1;
+    }
+
+    .about-pullquote {
+      grid-column: 1;
+      width: min(100%, 520px);
+      max-width: 520px;
+      margin: 2rem auto;
+      text-align: center;
+      padding-left: 0;
+      padding-top: 1rem;
+    }
+
+    .about-pullquote::before {
+      left: 50%;
+      top: 0;
+      width: 44px;
+      height: 2px;
+      transform: translateX(-50%);
+    }
+  }
+</style>

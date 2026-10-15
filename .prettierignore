@@ -2,4 +2,7 @@
 node_modules/
 package-lock.json
 public/
-.dist/
+dist/
+.vercel/
+# Article content stays exactly as written (Details Box Standard, Veronica's wording).
+src/content/articles/

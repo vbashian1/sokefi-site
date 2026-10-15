@@ -1,0 +1,129 @@
+---
+// The Sokéfi Editorial Team byline: a teal bar (#1a5f6e, 4px) with a thin amber
+// line (#c9a227, 2px) beside it, next to stacked lines — no initials circle. One
+// piece for every place the team byline appears: under the article title, in the
+// end-of-article team bar, and (later) on article cards.
+//
+// `surface` sets colours for the background it sits on. On 'teal' (the dark team
+// bar) the teal bar would be invisible, so only the amber line shows, drawn exactly
+// as on the pillar-page team bar. The optional `meta` slot is the "read time · date"
+// line.
+interface Props {
+  name: string;
+  surface?: 'light' | 'teal';
+  label?: string;
+  href?: string;
+}
+
+const { name, surface = 'light', label, href } = Astro.props;
+const hasMeta = Astro.slots.has('meta');
+---
+
+<div class:list={['team-byline', `team-byline-on-${surface}`]}>
+  <span class="team-byline-accent" aria-hidden="true"></span>
+  <div class="team-byline-copy">
+    {label && <p class="team-byline-label">{label}</p>}
+    {
+      href ? (
+        <a class="team-byline-name" href={href}>
+          {name}
+        </a>
+      ) : (
+        <p class="team-byline-name">{name}</p>
+      )
+    }
+    {
+      hasMeta && (
+        <p class="team-byline-meta">
+          <slot name="meta" />
+        </p>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .team-byline p {
+    margin: 0;
+  }
+
+  .team-byline-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  /* --- On a light background (under the article title) --- */
+  .team-byline-on-light {
+    display: flex;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  /* Teal bar, a 2px gap, then the amber line. */
+  .team-byline-on-light .team-byline-accent {
+    flex-shrink: 0;
+    width: 8px;
+    background: linear-gradient(
+      to right,
+      var(--brand-teal) 0 4px,
+      transparent 4px 6px,
+      #c9a227 6px 8px
+    );
+  }
+
+  .team-byline-on-light .team-byline-copy {
+    padding: 0.1rem 0;
+  }
+
+  .team-byline-on-light .team-byline-name {
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--teal-deep);
+  }
+
+  .team-byline-on-light a.team-byline-name:hover {
+    text-decoration: underline;
+  }
+
+  .team-byline-on-light .team-byline-meta {
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.85rem;
+    color: rgba(23, 39, 43, 0.75);
+  }
+
+  /* --- On the teal team bar: identical to the pillar-page team bar --- */
+  .team-byline-on-teal .team-byline-accent {
+    display: none;
+  }
+
+  .team-byline-on-teal .team-byline-copy {
+    position: relative;
+    padding-left: 0.55rem;
+  }
+
+  .team-byline-on-teal .team-byline-copy::before {
+    content: '';
+    position: absolute;
+    top: 0.1rem;
+    left: 0;
+    width: 2px;
+    height: calc(100% - 0.2rem);
+    background: #c9a227;
+  }
+
+  .team-byline-on-teal .team-byline-label {
+    margin: 0 0 0.2rem;
+    color: #c9a227;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+
+  .team-byline-on-teal .team-byline-name {
+    color: #f7f4ef;
+    font-weight: 700;
+  }
+</style>

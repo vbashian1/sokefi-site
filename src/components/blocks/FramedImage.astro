@@ -1,0 +1,116 @@
+---
+// One photo in a frame of a chosen shape, filled from the ORIGINAL file at the saved focal
+// point and zoom (object-fit cover; nothing is pre-cropped). Used by <Gallery> and every
+// layout block, so a placement's saved crop looks the same wherever it is used.
+//
+// fit="gallery": the frame's width follows its shape (landscape across the column,
+//   portrait at the usual portrait size, square in between), with phone sizes.
+// fit="fill": the frame fills whatever its block gives it (full-width, wide, pair, inset).
+import type { ImageMetadata } from 'astro';
+import type { ArticleGalleryImage } from '../../types/gallery';
+import { frameKind, frameRatio, isShape, type Shape } from '../../utils/framing';
+
+type Source = ImageMetadata | ArticleGalleryImage | { src: string; width: number; height: number };
+
+interface Props {
+  /** The photo itself, or `pick` to use the article's gallery photo by index. */
+  image?: Source;
+  pick?: number;
+  shape?: Shape;
+  focus?: string;
+  zoom?: number;
+  alt?: string;
+  fit?: 'gallery' | 'fill';
+  loading?: 'lazy' | 'eager';
+}
+
+const {
+  image,
+  pick,
+  shape,
+  focus,
+  zoom,
+  alt = '',
+  fit = 'gallery',
+  loading = 'lazy',
+} = Astro.props;
+if (shape !== undefined && !isShape(shape)) {
+  throw new Error(`Photo shape "${shape}" must be one of: original, 3:2, 4:3, 1:1, 4:5`);
+}
+
+const photo = image ?? (pick !== undefined ? Astro.locals?.articleGallery?.[pick] : undefined);
+if (!photo) {
+  throw new Error(`No photo for pick ${pick}: the article's gallery has no image at that index`);
+}
+
+const ratio = frameRatio(shape, photo.width, photo.height);
+const sizeClass = fit === 'fill' ? 'gallery-frame-fill' : `gallery-frame-${frameKind(ratio)}`;
+---
+
+<div
+  class:list={['gallery-frame', sizeClass]}
+  style={`aspect-ratio: ${ratio}; --focus: ${focus ?? '50% 50%'}; --zoom: ${zoom ?? 1}`}
+>
+  <img
+    class="gallery-frame-image"
+    src={photo.src}
+    width={photo.width}
+    height={photo.height}
+    alt={alt}
+    loading={loading}
+    decoding="async"
+  />
+</div>
+
+<style>
+  .gallery-frame {
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  .gallery-frame-fill,
+  .gallery-frame-landscape {
+    width: 100%;
+  }
+
+  .gallery-frame-square {
+    width: 70%;
+    max-width: 476px;
+  }
+
+  .gallery-frame-portrait {
+    width: 50%;
+    max-width: 340px;
+  }
+
+  .gallery-frame-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--focus, center center);
+    transform: scale(var(--zoom, 1));
+    transform-origin: var(--focus, center center);
+  }
+
+  @media (max-width: 700px) {
+    .gallery-frame-square {
+      width: 85%;
+    }
+
+    .gallery-frame-portrait {
+      width: 70%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .gallery-frame-square {
+      width: 100%;
+    }
+
+    .gallery-frame-portrait {
+      width: 100%;
+      max-width: 260px;
+    }
+  }
+</style>

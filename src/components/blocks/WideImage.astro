@@ -1,0 +1,48 @@
+---
+// Wide photo: wider than the text column but not edge to edge — the width of the article
+// banner (up to 1152px), centred on the column. Uses the placement's saved crop. Below
+// 900px screens it is simply the column width.
+//   <WideImage pick={0} shape="16:9" focus="60% 59%" />  (16:9 or 2:1; at most one per article)
+import FramedImage from './FramedImage.astro';
+import { WIDE_SHAPES, type Shape } from '../../utils/framing';
+
+interface Props {
+  pick?: number;
+  image?: { src: string; width: number; height: number };
+  shape?: Shape;
+  focus?: string;
+  zoom?: number;
+  alt?: string;
+}
+
+const props = Astro.props;
+// Wide shapes only, and never taller than the banner (see layout rules).
+if (!(WIDE_SHAPES as readonly string[]).includes(props.shape ?? '')) {
+  throw new Error('<WideImage> needs shape="16:9" or shape="2:1"');
+}
+---
+
+<figure class="block-wide">
+  <FramedImage {...props} fit="fill" />
+</figure>
+
+<style>
+  /* Never taller than the article banner: the frame keeps its width and is cut to the
+     banner height around the focal point. */
+  .block-wide :global(.gallery-frame) {
+    max-height: var(--banner-height);
+  }
+
+  .block-wide {
+    clear: both;
+    margin: 2.6rem 0;
+  }
+
+  /* Same width as the article banner: the page content width, centred on the column. */
+  @media (min-width: 901px) {
+    .block-wide {
+      width: min(1152px, calc(100vw - 3rem));
+      margin-left: calc(50% - min(576px, 50vw - 1.5rem));
+    }
+  }
+</style>

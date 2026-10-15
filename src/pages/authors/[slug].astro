@@ -1,0 +1,325 @@
+---
+import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
+import { getThumbnailSrc } from '../../utils/pillarFallback';
+import { framingStyle } from '../../utils/framing';
+import Base from '../../layouts/Base.astro';
+
+const slug = Astro.params.slug ?? '';
+const author = await getEntry('authors', slug);
+
+if (!author || author.data.hasOwnPage === false) {
+  Astro.response.status = 404;
+}
+
+const allArticles = await getCollection('articles');
+
+const columnLabelMap: Record<string, string> = {
+  'Musings from the Corner Office': 'Corner Office',
+  'Health/Vitality': 'Living Well',
+};
+
+const getDisplayEyebrow = () => {
+  if (author?.data.column && columnLabelMap[author.data.column]) {
+    return columnLabelMap[author.data.column];
+  }
+
+  if (author?.data.column) {
+    return author.data.column;
+  }
+
+  return author?.data.pillars?.[0] ?? 'Sokéfi';
+};
+
+const getDisplayMonogram = () => {
+  if (author?.data.monogram && author.data.monogram.trim()) {
+    return author.data.monogram.trim().toUpperCase();
+  }
+
+  const initials = (author?.data.name ?? '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('')
+    .slice(0, 2);
+
+  return initials || 'SO';
+};
+
+const getArticleDateValue = (article: CollectionEntry<'articles'>) => {
+  const rawDate = article.data.updatedDate ?? article.data.date;
+  const parsedDate = rawDate ? new Date(rawDate) : null;
+  return parsedDate ? parsedDate.getTime() : 0;
+};
+
+const authorArticles = allArticles
+  // `author` is a collection reference ({ id, collection }), not a string.
+  .filter((article) => author && article.data.author.id === author.id)
+  .sort((a, b) => getArticleDateValue(b) - getArticleDateValue(a));
+
+const eyebrow = getDisplayEyebrow();
+const monogram = getDisplayMonogram();
+const bioText = author?.data.shortBio ?? '';
+const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief' : '';
+---
+
+<Base
+  title={author ? `${author.data.name} — Sokéfi` : 'Author not found — Sokéfi'}
+  description={author?.data.shortBio ?? 'This author could not be found.'}
+>
+  <main>
+    {
+      author ? (
+        <>
+          <section class="section author-intro" aria-labelledby="author-name">
+            <div class="author-monogram" aria-hidden="true">
+              {monogram}
+            </div>
+            <div class="author-copy">
+              <p class="author-eyebrow">{eyebrow}</p>
+              <h1 class="author-name" id="author-name">
+                {author.data.name}
+              </h1>
+              {authorRole && <p class="author-role">{authorRole}</p>}
+              <p class="author-bio">{bioText}</p>
+            </div>
+          </section>
+
+          <div class="author-divider" aria-hidden="true" />
+
+          <section class="author-feed" aria-labelledby="author-feed-title">
+            <h2 id="author-feed-title">Bylined articles</h2>
+
+            {authorArticles.length > 0 ? (
+              <div class="feed-list">
+                {authorArticles.map((article) => {
+                  const thumbnailSrc = getThumbnailSrc(article);
+
+                  return (
+                    <article
+                      class:list={['feed-card', article.data.featured && 'feed-card-featured']}
+                    >
+                      {thumbnailSrc && (
+                        <span class="feed-card-frame">
+                          <img
+                            class="feed-card-image"
+                            src={thumbnailSrc}
+                            alt={article.data.title}
+                            loading="lazy"
+                            decoding="async"
+                            style={
+                              article.data.thumbnail
+                                ? framingStyle(
+                                    article.data.thumbnailFocus,
+                                    article.data.thumbnailZoom,
+                                  )
+                                : undefined
+                            }
+                          />
+                        </span>
+                      )}
+                      <div class="feed-card-body">
+                        <p class="feed-card-eyebrow">
+                          {article.data.eyebrow || article.data.pillar}
+                        </p>
+                        <p class="feed-card-byline">{article.data.byline || author.data.name}</p>
+                        <h3 class="feed-card-title">{article.data.title}</h3>
+                        <p class="feed-card-dek">
+                          {article.data.dek ||
+                            article.data.description ||
+                            article.data.metaDescription}
+                        </p>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              <p class="feed-empty-state">
+                No bylined articles are currently assigned to this author.
+              </p>
+            )}
+          </section>
+        </>
+      ) : (
+        <section class="section" aria-labelledby="author-missing-title">
+          <h1 id="author-missing-title">Author not found</h1>
+          <p>This author profile could not be found.</p>
+        </section>
+      )
+    }
+  </main>
+</Base>
+
+<style>
+  .author-intro {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: clamp(1rem, 2.6vw, 1.75rem);
+  }
+
+  .author-monogram {
+    width: clamp(5rem, 10vw, 6.5rem);
+    height: clamp(5rem, 10vw, 6.5rem);
+    border-radius: 50%;
+    background: var(--brand-teal);
+    color: #f7f4ef;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: clamp(1.45rem, 2.5vw, 1.95rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+  }
+
+  .author-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .author-eyebrow {
+    margin: 0;
+    color: #c9a227;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.85rem;
+    font-weight: 800;
+  }
+
+  .author-name {
+    margin: 0;
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--brand-teal);
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    line-height: 1.1;
+  }
+
+  .author-bio {
+    margin: 0;
+    color: #2a3c41;
+    font-size: 1.08rem;
+    line-height: 1.5;
+  }
+
+  .author-role {
+    margin: 0;
+    color: var(--brand-teal);
+    font-size: 0.98rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: none;
+  }
+
+  .author-divider {
+    height: 1.5px;
+    margin: 0.35rem 0 1.5rem;
+    background: #c9a227;
+  }
+
+  .author-feed h2 {
+    margin: 0 0 1rem;
+    color: var(--brand-teal);
+    font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  }
+
+  .feed-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .feed-card {
+    display: grid;
+    grid-template-columns: minmax(180px, 240px) 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid rgba(14, 143, 184, 0.16);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .feed-card-featured {
+    border-color: rgba(201, 162, 39, 0.45);
+    background: #fdf8eb;
+    transform: translateY(-1px);
+  }
+
+  /* The frame sets the card image size and clips it, so the article's framing (focus and
+     zoom, from thumbnailFocus / thumbnailZoom) can scale the photo inside it. */
+  .feed-card-frame {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border: 1px solid rgba(14, 143, 184, 0.16);
+  }
+
+  .feed-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--focus, center center);
+    transform: scale(var(--zoom, 1));
+    transform-origin: var(--focus, center center);
+    display: block;
+    border-radius: 0;
+  }
+
+  .feed-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .feed-card-eyebrow,
+  .feed-card-byline,
+  .feed-card-dek {
+    margin: 0;
+    color: #46565b;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .feed-card-eyebrow {
+    color: var(--brand-teal);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.74rem;
+    font-weight: 700;
+  }
+
+  .feed-card-title {
+    margin: 0;
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    line-height: 1.2;
+    color: #17272b;
+  }
+
+  .feed-empty-state {
+    margin: 0;
+    color: #46565b;
+    font-style: italic;
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 700px) {
+    .author-intro {
+      grid-template-columns: 1fr;
+      align-items: start;
+    }
+
+    .feed-card {
+      grid-template-columns: 1fr;
+    }
+
+    .feed-card-frame {
+      max-width: 220px;
+    }
+  }
+</style>

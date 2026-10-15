@@ -1,0 +1,257 @@
+---
+// Renders the booking/affiliate "Details" boxes from article bodies as a magazine-style
+// info panel: a short label (e.g. "The tour"), the place or product as a Playfair
+// headline, an optional provider line, the detail lines, a button and a commission note.
+//
+// Articles write boxes in the Details Box Standard (Label / Headline / Provider / Price /
+// Includes / Tip / Button / Link); src/plugins/details-boxes.mjs turns each one into
+// this component with those fields as props. Headline, Provider, Price, Includes and Tip
+// can come in US and UK variants (e.g. the insurance box): US readers see the US variant,
+// UK readers the UK variant, and the box is hidden from everyone else (src/utils/visitorRegion.ts).
+//
+// Older boxes written as <Details title lines links /> still work: `lines` is a free
+// label/value list and `links` can carry more than one button.
+import { getReaderMarket } from '../utils/visitorRegion';
+
+interface DetailLine {
+  label: string;
+  value: string;
+}
+
+interface DetailLink {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  /** Short label above the headline, e.g. "The tour". Defaults to "The Details". */
+  label?: string;
+  /** The place or product (the standard's "Headline"), e.g. "Saqqara and Giza Pyramids". */
+  title?: string;
+  titleUs?: string;
+  titleUk?: string;
+  /** Who sells or runs it, e.g. "GetYourGuide". */
+  provider?: string;
+  providerUs?: string;
+  providerUk?: string;
+  price?: string;
+  priceUs?: string;
+  priceUk?: string;
+  includes?: string;
+  includesUs?: string;
+  includesUk?: string;
+  tip?: string;
+  tipUs?: string;
+  tipUk?: string;
+  /** "Book now", "Buy now" or "Get a quote". */
+  button?: string;
+  /** A /go/ link. */
+  link?: string;
+  /** Older format: free label/value lines. */
+  lines?: DetailLine[];
+  /** Older format: one or more buttons. */
+  links?: DetailLink[];
+}
+
+const props = Astro.props;
+const market = getReaderMarket(Astro.request);
+
+// A region-split box (e.g. insurance) has a US and a UK variant and nothing for anyone else.
+const regionSplit = (['title', 'provider', 'price', 'includes', 'tip'] as const).some(
+  (field) => props[`${field}Us`] !== undefined,
+);
+const hidden = regionSplit && market === 'other';
+
+// The reader's regional variant if the box has one, otherwise the plain value.
+const pick = (field: 'title' | 'provider' | 'price' | 'includes' | 'tip') =>
+  (market === 'uk' ? props[`${field}Uk`] : props[`${field}Us`]) ?? props[field];
+
+const label = props.label ?? 'The Details';
+const title = pick('title') ?? '';
+const provider = pick('provider');
+
+const standardLines: { label: string; value: string | undefined }[] = [
+  { label: 'Price', value: pick('price') },
+  { label: 'Includes', value: pick('includes') },
+  { label: 'Tip', value: pick('tip') },
+];
+const lines: DetailLine[] =
+  props.lines ?? standardLines.filter((line): line is DetailLine => typeof line.value === 'string');
+
+// Each value starts with a capital ("Starting at $20"); the rest is left as written.
+const capitalise = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+
+// Older article exports use "Book Here" / "Buy Here" / "Get a Quote"; show the house
+// wording for those, and any other label as written.
+const BUTTON_WORDING: Record<string, string> = {
+  'book here': 'Book now',
+  'buy here': 'Buy now',
+  'get a quote': 'Get a quote',
+};
+const links: DetailLink[] =
+  props.links ?? (props.button && props.link ? [{ label: props.button, href: props.link }] : []);
+const buttons = links.map((link) => ({
+  href: link.href,
+  text: BUTTON_WORDING[link.label.trim().toLowerCase()] ?? link.label,
+}));
+
+// The commission note uses the first button's action: "if you book / buy / get a quote".
+const firstButton = buttons[0]?.text.toLowerCase() ?? '';
+const verb = firstButton.startsWith('buy')
+  ? 'buy'
+  : firstButton.includes('quote')
+    ? 'get a quote'
+    : 'book';
+---
+
+{
+  !hidden && (
+    <aside class="article-details">
+      <span class="article-details-edge" aria-hidden="true" />
+      <div class="article-details-body">
+        <p class="article-details-label">{label}</p>
+        <p class="article-details-title">{title}</p>
+        {provider && <p class="article-details-provider">{provider}</p>}
+        {lines.length > 0 && (
+          <dl class="article-details-lines">
+            {lines.map((line) => (
+              <div class="article-details-line">
+                <dt>{line.label}</dt>
+                <dd>{capitalise(line.value)}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+        <div class="article-details-ctas">
+          {buttons.map((button) => (
+            <a class="article-details-cta" href={button.href}>
+              {button.text}
+            </a>
+          ))}
+        </div>
+        <p class="article-details-note">
+          Recommended by Sokéfi. We may earn a small commission if you {verb} through this link, at
+          no extra cost to you.
+        </p>
+      </div>
+    </aside>
+  )
+}
+
+<style>
+  /* Selectors are two classes deep so the article body's own p/a styles can't override them. */
+  .article-details {
+    clear: both;
+    margin: 2rem 0;
+    display: flex;
+    background: #fdfcfb;
+    border: 1px solid #d8d3c8;
+  }
+
+  /* The Editorial Team byline mark: teal 4px, gap 2px, amber 2px. */
+  .article-details-edge {
+    flex-shrink: 0;
+    width: 8px;
+    background: linear-gradient(
+      to right,
+      var(--brand-teal) 0 4px,
+      transparent 4px 6px,
+      #c9a227 6px 8px
+    );
+  }
+
+  .article-details-body {
+    flex: 1;
+    padding: 1.35rem 1.6rem 1.5rem 1.35rem;
+  }
+
+  .article-details .article-details-label {
+    margin: 0;
+    font-family: 'Lato', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--amber);
+  }
+
+  .article-details .article-details-title {
+    margin: 0.45rem 0 0;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.32rem;
+    line-height: 1.3;
+    font-weight: 700;
+    color: var(--brand-teal);
+  }
+
+  .article-details .article-details-provider {
+    margin: 0.2rem 0 0;
+    font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+    font-style: italic;
+    font-size: 0.92rem;
+    line-height: 1.4;
+    color: rgba(23, 39, 43, 0.65);
+  }
+
+  .article-details-lines {
+    margin: 1rem 0 1.25rem;
+    padding-top: 0.95rem;
+    border-top: 1px solid rgba(201, 162, 39, 0.45);
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .article-details-line dt {
+    font-family: 'Lato', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: var(--amber);
+  }
+
+  .article-details-line dd {
+    margin: 0.15rem 0 0;
+    font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+    font-size: 0.98rem;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  .article-details-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  /* Amber outline, teal text in the headline's Playfair. */
+  .article-details .article-details-cta {
+    display: inline-flex;
+    padding: 0.6rem 1.6rem 0.7rem;
+    border: 1.5px solid var(--amber);
+    border-radius: 999px;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.32rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--brand-teal);
+    background: transparent;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .article-details .article-details-cta:hover,
+  .article-details .article-details-cta:focus-visible {
+    color: var(--brand-teal);
+    background: color-mix(in srgb, var(--amber) 18%, transparent);
+  }
+
+  .article-details .article-details-note {
+    margin: 0.75rem 0 0;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: rgba(23, 39, 43, 0.62);
+  }
+</style>

@@ -1,0 +1,78 @@
+---
+// Two photos side by side, of the SAME shape and similar visual weight (never a portrait
+// with a landscape — the layout rules check the shapes match). Each uses its saved crop.
+// `wide` makes the pair as wide as the article banner. On phones the two stack.
+//   <ImagePair first={{ pick: 0, shape: '4:3', focus: '60% 59%', zoom: 1.13 }}
+//              second={{ pick: 2, shape: '4:3', focus: '60% 75%' }} />
+import FramedImage from './FramedImage.astro';
+import { frameRatio, type Shape } from '../../utils/framing';
+
+interface PairPhoto {
+  pick?: number;
+  image?: { src: string; width: number; height: number };
+  shape?: Shape;
+  focus?: string;
+  zoom?: number;
+  alt?: string;
+}
+
+interface Props {
+  first: PairPhoto;
+  second: PairPhoto;
+  wide?: boolean;
+}
+
+const { first, second, wide = false } = Astro.props;
+const pool = Astro.locals?.articleGallery ?? [];
+const ratioOf = (p: PairPhoto) => {
+  const photo = p.image ?? (p.pick !== undefined ? pool[p.pick] : undefined);
+  if (!photo) throw new Error(`ImagePair: no photo for pick ${p.pick}`);
+  return frameRatio(p.shape, photo.width, photo.height);
+};
+const items = [first, second].map((p) => ({ props: p, ratio: ratioOf(p) }));
+if (Math.abs(items[0].ratio - items[1].ratio) > 0.01) {
+  throw new Error('<ImagePair> needs two photos of the same shape');
+}
+---
+
+<figure class:list={['block-pair', wide && 'block-pair-wide']}>
+  {
+    items.map((item) => (
+      <div class="block-pair-item" style={`--grow: ${item.ratio}`}>
+        <FramedImage {...item.props} fit="fill" />
+      </div>
+    ))
+  }
+</figure>
+
+<style>
+  .block-pair {
+    clear: both;
+    display: flex;
+    gap: 1rem;
+    margin: 2.4rem 0;
+  }
+
+  /* Each photo's share of the row is its width ÷ height, so both end up the same height. */
+  .block-pair-item {
+    flex: var(--grow) 1 0;
+    min-width: 0;
+  }
+
+  @media (min-width: 901px) {
+    .block-pair-wide {
+      width: min(1152px, calc(100vw - 3rem));
+      margin-left: calc(50% - min(576px, 50vw - 1.5rem));
+    }
+  }
+
+  @media (max-width: 700px) {
+    .block-pair {
+      flex-direction: column;
+    }
+
+    .block-pair-item {
+      flex: none;
+    }
+  }
+</style>

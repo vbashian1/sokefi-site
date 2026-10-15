@@ -1,0 +1,73 @@
+---
+import Base from '../layouts/Base.astro';
+import beyondCamels from '../assets/images/beyond-camels-stable.webp';
+---
+
+<Base title="Beyond the Guidebook — Sokéfi">
+  <main>
+    <section class="pillar-header-card" aria-labelledby="guidebook-title">
+      <div class="pillar-header-media">
+        <img
+          src={beyondCamels.src}
+          alt="A camel caravan led by a walking guide in the desert with strong sun flare and long shadows on the sand."
+          loading="eager"
+          decoding="async"
+        />
+      </div>
+      <div class="pillar-header-text">
+        <p class="pillar-eyebrow">Sokéfi</p>
+        <h1 class="pillar-title" id="guidebook-title">Beyond the Guidebook</h1>
+        <p class="pillar-tagline">The world. Seen differently.</p>
+      </div>
+    </section>
+
+    <section class="pillar-team-bar" aria-label="Pillar team">
+      <div class="pillar-team-copy">
+        <p class="pillar-team-eyebrow">BEYOND THE GUIDEBOOK</p>
+        <p class="pillar-team-name">Sokéfi Editorial Team</p>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .pillar-team-bar {
+    margin: 0 0 clamp(1.5rem, 3vw, 2.25rem);
+    padding: 1.2rem 1.75rem;
+    background: var(--brand-teal);
+  }
+
+  .pillar-team-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    position: relative;
+    padding-left: 0.55rem;
+  }
+
+  .pillar-team-copy::before {
+    content: '';
+    position: absolute;
+    top: 0.1rem;
+    left: 0;
+    width: 2px;
+    height: calc(100% - 0.2rem);
+    background: #c9a227;
+  }
+
+  .pillar-team-eyebrow {
+    margin: 0 0 0.2rem;
+    color: #c9a227;
+    opacity: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+
+  .pillar-team-name {
+    margin: 0;
+    color: #f7f4ef;
+    font-weight: 700;
+  }
+</style>

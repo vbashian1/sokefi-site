@@ -1,0 +1,63 @@
+---
+// Inset photo: a smaller photo beside the text, with the text flowing around it, on the
+// left or right — placed only where chosen. Uses the placement's saved crop.
+// Rules (checked at build, src/plugins/layout-rules.mjs): an inset sits within a run of text
+// (straight after a paragraph, never at the start of a section) and is at least 3
+// paragraphs from any other inset. As a safeguard it also starts below any earlier float,
+// and headings and wide blocks start below it.
+// On phones it is a centred photo in the column, with no wrap.
+//   <Inset pick={0} side="left" shape="4:3" focus="60% 59%" zoom={1.13} />
+import FramedImage from './FramedImage.astro';
+import type { Shape } from '../../utils/framing';
+
+interface Props {
+  side?: 'left' | 'right';
+  pick?: number;
+  image?: { src: string; width: number; height: number };
+  shape?: Shape;
+  focus?: string;
+  zoom?: number;
+  alt?: string;
+}
+
+const { side = 'left', ...photo } = Astro.props;
+if (side !== 'left' && side !== 'right') {
+  throw new Error(`Inset side "${side}" must be "left" or "right"`);
+}
+---
+
+<figure class:list={['block-inset', `block-inset-${side}`]}>
+  <FramedImage {...photo} fit="fill" />
+</figure>
+
+<style>
+  .block-inset {
+    clear: both;
+    width: 42%;
+    max-width: 300px;
+    /* Top edge level with the top of the first line of text beside it (measured). */
+    margin-top: 0.475rem;
+    margin-bottom: 1rem;
+  }
+
+  .block-inset-left {
+    float: left;
+    margin-left: 0;
+    margin-right: 1.5rem;
+  }
+
+  .block-inset-right {
+    float: right;
+    margin-left: 1.5rem;
+    margin-right: 0;
+  }
+
+  @media (max-width: 700px) {
+    .block-inset {
+      float: none;
+      width: 70%;
+      max-width: 340px;
+      margin: 2rem auto;
+    }
+  }
+</style>

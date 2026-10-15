@@ -1,0 +1,60 @@
+---
+import { AFFILIATES } from '../../data/affiliates';
+import { getReaderMarket } from '../../utils/visitorRegion';
+
+export const prerender = false;
+
+const slug = Astro.params.slug ?? '';
+// Own keys only, so a path like /go/constructor can't match a built-in object property.
+const affiliate = Object.hasOwn(AFFILIATES, slug) ? AFFILIATES[slug] : undefined;
+
+// Region-split links (e.g. travel-insurance) follow the same rule as the Details boxes:
+// US readers get `us`, UK readers `uk`, and anyone else gets "link unavailable".
+const market = getReaderMarket(Astro.request);
+const destination = !affiliate
+  ? undefined
+  : typeof affiliate.destination === 'string'
+    ? affiliate.destination
+    : market === 'us'
+      ? affiliate.destination.us
+      : market === 'uk'
+        ? affiliate.destination.uk
+        : undefined;
+
+if (affiliate && destination) {
+  const refererHeader = Astro.request.headers.get('referer');
+  let referer = 'direct';
+  if (refererHeader) {
+    try {
+      referer = new URL(refererHeader).origin;
+    } catch {
+      referer = 'unknown';
+    }
+  }
+  const clickEvent = {
+    slug,
+    partner: affiliate.partner,
+    market,
+    timestamp: new Date().toISOString(),
+    referer,
+  };
+
+  console.info('[affiliate-click]', JSON.stringify(clickEvent));
+
+  return Astro.redirect(destination, 302);
+}
+
+Astro.response.status = 404;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Link not found — Sokéfi</title>
+  </head>
+  <body>
+    <p>Sorry, this link is unavailable.</p>
+  </body>
+</html>

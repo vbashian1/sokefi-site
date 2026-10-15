@@ -1,6 +1,8 @@
 node_modules/
 .DS_Store
-.dist/
+dist/
+.vercel/
+.astro/
 .env
 .env.*
 .vscode/

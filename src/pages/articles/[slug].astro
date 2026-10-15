@@ -1,0 +1,547 @@
+---
+import { getEntry, render, type CollectionEntry } from 'astro:content';
+import type { ImageMetadata } from 'astro';
+import Base from '../../layouts/Base.astro';
+import AffiliateDisclosure from '../../components/AffiliateDisclosure.astro';
+import ArticleGallery from '../../components/ArticleGallery.astro';
+import ArticleDetails from '../../components/ArticleDetails.astro';
+import PillarTeamBar from '../../components/PillarTeamBar.astro';
+import EditorialByline from '../../components/EditorialByline.astro';
+import defaultArticleImage from '../../assets/images/positano-new.avif';
+import { getAuthorRoute } from '../../config/routes';
+import { renderSummaryHtml, summaryToPlainText } from '../../utils/summary';
+import { framingStyle } from '../../utils/framing';
+import '../../styles/article-body.css';
+import FullBleed from '../../components/blocks/FullBleed.astro';
+import WideImage from '../../components/blocks/WideImage.astro';
+import ImagePair from '../../components/blocks/ImagePair.astro';
+import Inset from '../../components/blocks/Inset.astro';
+import PullQuote from '../../components/blocks/PullQuote.astro';
+import ReaderInvitation from '../../components/blocks/ReaderInvitation.astro';
+
+// Components an article body can use (photos, layout blocks, Details boxes).
+const MDX_COMPONENTS = {
+  Gallery: ArticleGallery,
+  Details: ArticleDetails,
+  FullBleed,
+  WideImage,
+  ImagePair,
+  Inset,
+  PullQuote,
+  ReaderInvitation,
+};
+
+const slug = Astro.params.slug ?? '';
+const entry = await getEntry('articles', slug);
+
+if (!entry) {
+  Astro.response.status = 404;
+}
+
+const rendered = entry ? await render(entry) : null;
+
+// LOCAL PREVIEW ONLY: with ?proposal=1, a proposed layout in src/proposals/<article>.mdx
+// replaces the body (same text, layout blocks added or moved) so it can be judged on the
+// real page before anything is saved into the article. ?proposal=<name> loads an
+// alternative, src/proposals/<article>.<name>.mdx. Never active on the live site.
+const proposals = import.meta.env.DEV ? import.meta.glob('../../proposals/*.mdx') : {};
+const proposalName = Astro.url.searchParams.get('proposal');
+const proposalLoader =
+  import.meta.env.DEV && entry && Astro.url.searchParams.has('proposal')
+    ? proposals[
+        `../../proposals/${entry.id}${proposalName && proposalName !== '1' ? `.${proposalName}` : ''}.mdx`
+      ]
+    : undefined;
+const proposal = proposalLoader
+  ? ((await proposalLoader()) as {
+      default: typeof import('*.mdx').default;
+      layout?: { dropCap?: boolean };
+    })
+  : undefined;
+const Content = proposal?.default ?? rendered?.Content ?? null;
+const dropCap = proposal?.layout?.dropCap ?? entry?.data.dropCap ?? false;
+const authorRef = entry ? entry.data.author : null;
+const authorEntry = authorRef ? await getEntry(authorRef) : null;
+
+const getMonogram = (author: CollectionEntry<'authors'> | null | undefined) => {
+  if (author?.data.monogram && author.data.monogram.trim()) {
+    return author.data.monogram.trim().toUpperCase();
+  }
+
+  const initials = (author?.data.name ?? '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('')
+    .slice(0, 2);
+
+  return initials || 'SO';
+};
+
+type ImageMeta = { src: string; width: number; height: number };
+
+const getImageMeta = (img: ImageMetadata | string | undefined): ImageMeta | null => {
+  if (!img) return null;
+  if (typeof img === 'string') return { src: img, width: 1600, height: 1000 };
+  return { src: img.src, width: img.width, height: img.height };
+};
+
+const heroMeta = entry ? getImageMeta(entry.data.heroImage) : null;
+
+const galleryImages = entry
+  ? (entry.data.gallery ?? [])
+      .map((img) => getImageMeta(img))
+      .filter((meta): meta is ImageMeta => meta !== null)
+      .map((meta, index, arr) => ({
+        ...meta,
+        landscape: meta.width >= meta.height,
+        isLastOdd: arr.length % 2 === 1 && index === arr.length - 1,
+      }))
+  : [];
+
+// Published for <Gallery pick={[...]} /> inside MDX bodies, which can only see raw frontmatter.
+Astro.locals.articleGallery = galleryImages;
+
+// The summary is metadata only — never rendered on the page. It accepts basic
+// markdown (bullets, bold, links), so it is rendered and then flattened to text for
+// structured data, where a bulleted list has to read as prose rather than as markup
+// or run-together fragments.
+const summaryHtml = await renderSummaryHtml(entry?.data.summary);
+const summaryText = summaryToPlainText(summaryHtml);
+
+const displayDate = entry ? entry.data.date : null;
+const formattedDate = displayDate
+  ? new Date(displayDate).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    })
+  : '';
+// For the <time datetime> attribute; only rendered when there is a date.
+const isoDate = displayDate ? new Date(displayDate).toISOString() : '';
+
+const wordCount = entry ? (entry.body ?? '').trim().split(/\s+/).filter(Boolean).length : 0;
+const readTimeMinutes = Math.max(1, Math.round(wordCount / 200));
+
+const faqItems = entry?.data.faq ?? [];
+const tags = entry?.data.tags ?? [];
+const eyebrowText = entry ? entry.data.eyebrow || entry.data.pillar : '';
+const monogram = getMonogram(authorEntry);
+const authorHref = authorEntry ? getAuthorRoute(authorEntry.id) : null;
+// Team pieces close with the pillar team bar rather than a personal author card.
+const isEditorialTeam = authorEntry?.id === 'sokefi-editorial-team';
+
+const articleSchema = entry
+  ? {
+      '@type': 'Article',
+      headline: entry.data.title,
+      description: summaryText || entry.data.metaDescription,
+      ...(summaryText ? { abstract: summaryText } : {}),
+      datePublished: entry.data.date.toISOString(),
+      image: [
+        new URL(
+          heroMeta?.src ?? entry.data.cover ?? defaultArticleImage.src,
+          Astro.site ?? new URL('https://sokefi.com'),
+        ).toString(),
+      ],
+      ...(authorEntry
+        ? {
+            author: {
+              '@type': 'Person',
+              name: authorEntry.data.name,
+            },
+          }
+        : {}),
+    }
+  : undefined;
+---
+
+<Base
+  title={entry ? `${entry.data.title} — Sokéfi` : 'Article not found — Sokéfi'}
+  description={entry ? entry.data.metaDescription : 'This article could not be found.'}
+  image={heroMeta?.src ?? entry?.data.cover ?? defaultArticleImage.src}
+  structuredData={articleSchema}
+>
+  <main>
+    {
+      entry ? (
+        <article class="article" aria-labelledby="article-title">
+          {heroMeta && (
+            <div class="hero-media article-hero">
+              <img
+                src={heroMeta.src}
+                width={heroMeta.width}
+                height={heroMeta.height}
+                alt={entry.data.title}
+                loading="eager"
+                decoding="async"
+                style={framingStyle(entry.data.heroFocus, entry.data.heroZoom)}
+              />
+            </div>
+          )}
+
+          <div class="article-column">
+            <header class="article-header">
+              {eyebrowText && <p class="article-eyebrow">{eyebrowText}</p>}
+              <h1 class="article-title" id="article-title">
+                {entry.data.title}
+              </h1>
+              {entry.data.dek && <p class="article-dek">{entry.data.dek}</p>}
+
+              {isEditorialTeam ? (
+                <div class="article-byline">
+                  <EditorialByline name={authorEntry.data.name} href={authorHref ?? undefined}>
+                    <Fragment slot="meta">
+                      {readTimeMinutes} min read
+                      {formattedDate && (
+                        <>
+                          {' '}
+                          &middot; <time datetime={isoDate}>{formattedDate}</time>
+                        </>
+                      )}
+                    </Fragment>
+                  </EditorialByline>
+                </div>
+              ) : (
+                <div class="article-byline">
+                  <div class="byline-avatar" aria-hidden="true">
+                    {monogram}
+                  </div>
+                  <div class="byline-meta">
+                    {authorEntry && authorHref ? (
+                      <a class="byline-author" href={authorHref}>
+                        {authorEntry.data.name}
+                      </a>
+                    ) : (
+                      <span class="byline-author">
+                        {entry.data.byline || 'Sokéfi Editorial Team'}
+                      </span>
+                    )}
+                    <span class="byline-sep" aria-hidden="true">
+                      &middot;
+                    </span>
+                    <span class="byline-readtime">{readTimeMinutes} min read</span>
+                    {formattedDate && (
+                      <>
+                        <span class="byline-sep" aria-hidden="true">
+                          &middot;
+                        </span>
+                        <time class="byline-date" datetime={isoDate}>
+                          {formattedDate}
+                        </time>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </header>
+
+            <div class="article-rule" aria-hidden="true" />
+
+            {proposal && (
+              <p class="article-proposal-flag">
+                Local preview: proposed layout (not saved in the article)
+              </p>
+            )}
+            <div class:list={['article-body', dropCap && 'has-drop-cap']}>
+              {Content && <Content components={MDX_COMPONENTS} />}
+            </div>
+
+            {entry.data.affiliateDisclosure && (
+              <div class="article-disclosure">
+                <AffiliateDisclosure />
+              </div>
+            )}
+
+            {faqItems.length > 0 && (
+              <section class="article-faq" aria-labelledby="article-faq-heading">
+                <h2 id="article-faq-heading">Frequently asked questions</h2>
+                {faqItems.map((item) => (
+                  <div class="faq-item">
+                    <h3>{item.question}</h3>
+                    <p>{item.answer}</p>
+                  </div>
+                ))}
+              </section>
+            )}
+
+            {authorEntry && !isEditorialTeam && (
+              <section class="article-author-card" aria-label="About the author">
+                <div class="author-card-avatar" aria-hidden="true">
+                  {monogram}
+                </div>
+                <div class="author-card-copy">
+                  {eyebrowText && <p class="author-card-eyebrow">{eyebrowText}</p>}
+                  <p class="author-card-name">{authorEntry.data.name}</p>
+                  <p class="author-card-bio">{authorEntry.data.shortBio}</p>
+                  {authorHref && (
+                    <a class="author-card-link inline-link" href={authorHref}>
+                      View profile &rarr;
+                    </a>
+                  )}
+                </div>
+              </section>
+            )}
+          </div>
+
+          {/* Full width (same as the hero), like the team bar on the pillar pages. */}
+          {isEditorialTeam && (
+            <div class="article-team-bar">
+              <PillarTeamBar pillar={entry.data.pillar} name={authorEntry.data.name} />
+            </div>
+          )}
+
+          <div class="article-column">
+            {tags.length > 0 && (
+              <div class="article-tags" aria-label="Article tags">
+                {tags.map((tag) => (
+                  <span class="article-tag">{tag}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        </article>
+      ) : (
+        <section class="section" aria-labelledby="article-missing-title">
+          <h1 id="article-missing-title">Article not found</h1>
+          <p>This article could not be found.</p>
+        </section>
+      )
+    }
+  </main>
+</Base>
+
+<style>
+  /* Column and article-body styles live in src/styles/article-body.css (shared). */
+
+  .article-header {
+    margin: 1.85rem 0 0;
+  }
+
+  .article-eyebrow {
+    margin: 0 0 0.85rem;
+    font-family: 'Lato', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--amber);
+  }
+
+  .article-title {
+    margin: 0 0 0.85rem;
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--teal-deep);
+    font-size: clamp(2.1rem, 4vw, 3rem);
+    line-height: 1.15;
+  }
+
+  .article-dek {
+    margin: 0 0 1.5rem;
+    font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+    font-size: clamp(1.1rem, 1.7vw, 1.25rem);
+    line-height: 1.55;
+    color: rgba(23, 39, 43, 0.72);
+  }
+
+  .article-byline {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .byline-avatar {
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    background: var(--brand-teal);
+    color: #f7f4ef;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    flex-shrink: 0;
+  }
+
+  .byline-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.85rem;
+    color: rgba(23, 39, 43, 0.75);
+  }
+
+  .byline-author {
+    color: var(--teal-deep);
+    font-weight: 700;
+  }
+
+  .byline-author:hover {
+    text-decoration: underline;
+  }
+
+  .byline-sep {
+    opacity: 0.5;
+  }
+
+  .article-rule {
+    height: 1.5px;
+    background: var(--teal);
+    margin: 0 0 2rem;
+  }
+
+  /* Shown only in the local proposal preview (?proposal=1). */
+  .article-proposal-flag {
+    margin: 0 0 1.5rem;
+    padding: 0.5rem 0.8rem;
+    background: #fff4d6;
+    border-left: 3px solid var(--amber);
+    font:
+      700 0.85rem 'Lato',
+      Arial,
+      sans-serif;
+    color: var(--text);
+  }
+
+  .article-disclosure {
+    margin: 0 0 1.85rem;
+  }
+
+  .article-faq {
+    margin: 0 0 1.85rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .article-faq h2 {
+    margin: 0 0 1.1rem;
+    font-size: clamp(1.3rem, 2vw, 1.6rem);
+    color: var(--teal-deep);
+  }
+
+  .faq-item {
+    margin: 0 0 1.15rem;
+  }
+
+  /* Questions are written in sentence case (Veronica, 2026-10-14). */
+  .faq-item h3 {
+    margin: 0 0 0.35rem;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--teal-deep);
+  }
+
+  .faq-item p {
+    margin: 0;
+    font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+    font-size: 1.02rem;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  /* Same vertical spacing as the author card it stands in for. */
+  .article-team-bar {
+    margin: 0.5rem 0 1.85rem;
+  }
+
+  .article-author-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.1rem;
+    align-items: start;
+    margin: 0.5rem 0 1.85rem;
+    padding: 1.5rem;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--container-corner-radius);
+    box-shadow: 0 20px 48px rgba(11, 77, 90, 0.06);
+  }
+
+  .author-card-avatar {
+    width: 3.6rem;
+    height: 3.6rem;
+    border-radius: 50%;
+    background: var(--brand-teal);
+    color: #f7f4ef;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    flex-shrink: 0;
+  }
+
+  .author-card-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .author-card-eyebrow {
+    margin: 0;
+    font-family: 'Lato', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--amber);
+  }
+
+  .author-card-name {
+    margin: 0;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.2rem;
+    color: var(--teal-deep);
+  }
+
+  .author-card-bio {
+    margin: 0.15rem 0 0.3rem;
+    font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+    font-size: 0.98rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .author-card-link {
+    align-self: flex-start;
+  }
+
+  .article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 0 0 0.5rem;
+  }
+
+  .article-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.42rem 0.9rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--brand-teal) 8%, transparent);
+    color: var(--teal-deep);
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  @media (max-width: 700px) {
+    .article-author-card {
+      grid-template-columns: 1fr;
+      justify-items: start;
+    }
+  }
+</style>
