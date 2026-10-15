@@ -20,7 +20,7 @@
     ]
   },
   "devDependencies": {
-    "astro": "^7.0.6",
+    "astro": "^7.3.8",
     "prettier": "^2.8.8",
     "prettier-plugin-astro": "^0.14.0",
     "eslint": "^8.50.0",
