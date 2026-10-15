@@ -71,6 +71,7 @@ const quote = (await Astro.slots.render('default')).replace(/<\/?p>/g, '').trim(
     font-weight: 600;
     line-height: 1.3;
     color: var(--brand-teal);
+    text-wrap: balance;
   }
 
   @media (min-width: 901px) {

@@ -155,6 +155,17 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
     margin: 0 0 0.6rem;
   }
 
+  /* Balanced line wrapping (Veronica, 2026-10-15): a heading that wraps comes out in roughly
+     even lines rather than leaving one word alone. Lines that fit are unaffected. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-wrap: balance;
+  }
+
   p {
     margin: 0 0 1rem;
   }
@@ -363,6 +374,15 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
   .inline-link:hover {
     transform: translateY(-1px);
     filter: brightness(1.02);
+  }
+
+  /* Buttons whose label can wrap on a phone (e.g. "Get the Sokéfi Edit in your inbox") split
+     into even, centred lines. Buttons set never to wrap stay on one line. */
+  .button,
+  .subscribe-link,
+  .mobile-subscribe {
+    text-align: center;
+    text-wrap: balance;
   }
 
   .button-secondary {
