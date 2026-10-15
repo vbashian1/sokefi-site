@@ -12,6 +12,9 @@ export default defineConfig({
   output: 'server',
   adapter: vercel(),
   integrations: [sitemap(), mdx()],
+  // No developer toolbar on local previews: it sat over the article text and read as part
+  // of the page. (It never appears on the live site.)
+  devToolbar: { enabled: false },
   // Details boxes written to the Details Box Standard become <Details> components, and
   // article layouts are checked against the layout rules (src/plugins/layout-rules.mjs).
   markdown: {

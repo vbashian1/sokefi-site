@@ -1,0 +1,32 @@
+---
+// Reader prompt: sets a closing invitation to readers apart from the article text, e.g.
+// "Leave your comments below — …". Display only; the wording stays as written.
+//   <ReaderPrompt>Leave your comments below — what does it mean for you…</ReaderPrompt>
+// NOTE: the site has no comment feature yet, so a "comments below" prompt points at
+// nothing. Flagged to Veronica (2026-10-15); the feature itself is a separate decision/build.
+---
+
+<div class="reader-prompt">
+  <slot />
+</div>
+
+<style>
+  .reader-prompt {
+    clear: both;
+    margin: 2.6rem 0 0.5rem;
+    padding: 1.5rem 1.6rem;
+    border-top: 2px solid var(--amber);
+    background: color-mix(in srgb, var(--brand-teal) 5%, #ffffff);
+    text-align: center;
+  }
+
+  /* Two-class selectors so these beat the article's body-text paragraph style. */
+  :global(.article-body) .reader-prompt :global(p) {
+    margin: 0;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.15rem, 1.8vw, 1.3rem);
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--brand-teal);
+  }
+</style>

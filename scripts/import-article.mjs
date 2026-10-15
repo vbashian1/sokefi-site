@@ -9,6 +9,8 @@
 //     question/answer
 //   - writes FAQ questions in sentence case, keeping proper nouns ("IS CAIRO SAFE…?" →
 //     "Is Cairo safe…?"), and prints every question for the review (scripts/faq-sentence-case.mjs)
+//   - turns an empty `region:` line (not a place piece) into a comment, as the schema
+//     takes a list of regions or nothing
 //   - gives the article card its own hero photo: if there's a heroImage and no thumbnail,
 //     adds `thumbnail:` pointing at the same photo (framed separately with thumbnailFocus /
 //     thumbnailZoom in the framing preview), so pillar fallback images only appear for
@@ -53,6 +55,13 @@ frontmatter = frontmatter
   .replace(/^ {2}- q: /gm, '  - question: ')
   .replace(/^ {4}a: /gm, '    answer: ');
 
+// --- an empty `region:` (not a place piece) would fail the schema: keep it as a comment ---
+let regionEmptied = false;
+frontmatter = frontmatter.replace(/^region:[ \t]*(#\s*(.*))?$/m, (_line, _comment, note) => {
+  regionEmptied = true;
+  return `# region: none${note ? ` — ${note}` : ''}`;
+});
+
 // --- card image: default to the article's own hero photo ---
 let addedThumbnail = '';
 const heroLine = frontmatter.match(/^heroImage:\s*(["']?)([^"'#\n]+?)\1\s*(?:#.*)?$/m);
@@ -65,7 +74,7 @@ if (heroLine && !/^thumbnail:/m.test(frontmatter)) {
 }
 
 const SCHEMA_FIELDS = new Set(
-  'title date description metaDescription author pillar eyebrow byline dek summary updatedDate thumbnail heroImage heroFocus heroZoom thumbnailFocus thumbnailZoom gallery column secondaryPillar series featured firsthand featuredPriority featuredDate crossPostToSubstack cover tags region interest faq affiliateDisclosure'.split(
+  'title date description metaDescription author pillar eyebrow byline dek summary updatedDate thumbnail heroImage heroFocus heroZoom thumbnailFocus thumbnailZoom gallery column secondaryPillar series featured firsthand featuredPriority featuredDate crossPostToSubstack cover tags region interest faq affiliateDisclosure callouts dropCap'.split(
     ' ',
   ),
 );
@@ -126,6 +135,7 @@ console.log(`  Details boxes: ${boxes} (all match the standard)`);
 for (const removed of leadIns.removed) console.log(`  Removed Essentials lead-in: ${removed}`);
 if (unread.length)
   console.log(`  Frontmatter fields the schema doesn't read: ${unread.join(', ')}`);
+if (regionEmptied) console.log('  Region: empty in the handoff — kept as a comment (no region)');
 if (addedThumbnail) console.log(`  Card image: added thumbnail = hero photo (${addedThumbnail})`);
 if (faq.changes.length) {
   console.log('  FAQ questions in sentence case — check the proper nouns:');
