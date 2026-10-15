@@ -113,6 +113,9 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
     --teal-soft: var(--brand-teal);
     --ivory: #ffffff;
     --amber: #c9a227;
+    /* Deeper amber for amber-bar quote text only: #c9a227 is 2.42:1 on white, this is
+       3.23:1, passing the 3:1 standard for large text. Everything else stays --amber. */
+    --amber-text: #ad8b22;
     --text: #17272b;
     --border: rgba(14, 143, 184, 0.16);
     --panel: #ffffff;

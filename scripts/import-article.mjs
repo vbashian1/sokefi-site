@@ -7,6 +7,8 @@
 //   - maps the handoff fields onto the repo schema: authorSlug → author,
 //     publishDate → date (the handoff placeholder 2026-00-00 needs --date), FAQ q/a →
 //     question/answer
+//   - writes FAQ questions in sentence case, keeping proper nouns ("IS CAIRO SAFE…?" →
+//     "Is Cairo safe…?"), and prints every question for the review (scripts/faq-sentence-case.mjs)
 //   - gives the article card its own hero photo: if there's a heroImage and no thumbnail,
 //     adds `thumbnail:` pointing at the same photo (framed separately with thumbnailFocus /
 //     thumbnailZoom in the framing preview), so pillar fallback images only appear for
@@ -22,6 +24,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseDetailsBox } from '../src/plugins/details-boxes.mjs';
 import { removeEssentialsLeadIns } from './essentials-lead-ins.mjs';
+import { sentenceCaseFaq } from './faq-sentence-case.mjs';
 
 const [source, ...args] = process.argv.slice(2);
 if (!source) {
@@ -74,6 +77,10 @@ const unread = [...frontmatter.matchAll(/^([A-Za-z]+):/gm)]
 const leadIns = removeEssentialsLeadIns(body);
 body = leadIns.body;
 
+// --- FAQ questions in sentence case ---
+const faq = sentenceCaseFaq(frontmatter, body);
+frontmatter = faq.frontmatter;
+
 // --- Details boxes ---
 const lines = body.split('\n');
 let boxes = 0;
@@ -120,6 +127,10 @@ for (const removed of leadIns.removed) console.log(`  Removed Essentials lead-in
 if (unread.length)
   console.log(`  Frontmatter fields the schema doesn't read: ${unread.join(', ')}`);
 if (addedThumbnail) console.log(`  Card image: added thumbnail = hero photo (${addedThumbnail})`);
+if (faq.changes.length) {
+  console.log('  FAQ questions in sentence case — check the proper nouns:');
+  for (const [, after] of faq.changes) console.log(`    ${after}`);
+}
 console.log(
-  '  Still to do by hand: images (placement map), framing (preview page), interest tags, wording review.',
+  '  Still to do by hand: images (placement map), framing (preview page), interest tags, wording review, FAQ proper nouns.',
 );

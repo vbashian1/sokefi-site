@@ -16,32 +16,30 @@ const { variant = 'bar', side = 'right' } = Astro.props;
 if (!['bar', 'display', 'side'].includes(variant)) {
   throw new Error(`PullQuote variant "${variant}" must be "bar", "display" or "side"`);
 }
+
+// A quote written over several lines in the article arrives wrapped in its own paragraph,
+// which would nest inside the quote's paragraph and lose the quote style — so unwrap it.
+const quote = (await Astro.slots.render('default')).replace(/<\/?p>/g, '').trim();
 ---
 
 {
   variant === 'bar' && (
     <blockquote class="pullquote-bar" aria-hidden="true">
-      <p>
-        <slot />
-      </p>
+      <p set:html={quote} />
     </blockquote>
   )
 }
 {
   variant === 'display' && (
     <aside class="pullquote-display" aria-hidden="true">
-      <p>
-        <slot />
-      </p>
+      <p set:html={quote} />
     </aside>
   )
 }
 {
   variant === 'side' && (
     <aside class:list={['pullquote-side', `pullquote-side-${side}`]} aria-hidden="true">
-      <p>
-        <slot />
-      </p>
+      <p set:html={quote} />
     </aside>
   )
 }
@@ -95,14 +93,14 @@ if (!['bar', 'display', 'side'].includes(variant)) {
     font-size: clamp(1.3rem, 2vw, 1.55rem);
     font-weight: 600;
     line-height: 1.5;
-    color: var(--amber);
+    color: var(--amber-text);
   }
 
   /* Wide screens: lifted into the margin beside the column (the column is 680px inside a
      1152px page, leaving ~236px either side), so the text runs at full width beside it. */
   @media (min-width: 1180px) {
     .pullquote-side {
-      width: 200px;
+      width: 210px;
       margin-top: 0.3rem;
       margin-bottom: 1rem;
       padding: 0.9rem 0 0;
@@ -122,9 +120,11 @@ if (!['bar', 'display', 'side'].includes(variant)) {
       margin-right: 0;
     }
 
+    /* Teal Playfair, set large enough to hold its own beside the column. */
     .pullquote-side p {
-      font-size: 1.15rem;
-      line-height: 1.45;
+      font-size: 1.45rem;
+      line-height: 1.35;
+      color: var(--brand-teal);
     }
   }
 </style>

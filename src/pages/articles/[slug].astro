@@ -36,7 +36,28 @@ if (!entry) {
   Astro.response.status = 404;
 }
 
-const { Content } = entry ? await render(entry) : { Content: null };
+const rendered = entry ? await render(entry) : null;
+
+// LOCAL PREVIEW ONLY: with ?proposal=1, a proposed layout in src/proposals/<article>.mdx
+// replaces the body (same text, layout blocks added or moved) so it can be judged on the
+// real page before anything is saved into the article. ?proposal=<name> loads an
+// alternative, src/proposals/<article>.<name>.mdx. Never active on the live site.
+const proposals = import.meta.env.DEV ? import.meta.glob('../../proposals/*.mdx') : {};
+const proposalName = Astro.url.searchParams.get('proposal');
+const proposalLoader =
+  import.meta.env.DEV && entry && Astro.url.searchParams.has('proposal')
+    ? proposals[
+        `../../proposals/${entry.id}${proposalName && proposalName !== '1' ? `.${proposalName}` : ''}.mdx`
+      ]
+    : undefined;
+const proposal = proposalLoader
+  ? ((await proposalLoader()) as {
+      default: typeof import('*.mdx').default;
+      layout?: { dropCap?: boolean };
+    })
+  : undefined;
+const Content = proposal?.default ?? rendered?.Content ?? null;
+const dropCap = proposal?.layout?.dropCap ?? entry?.data.dropCap ?? false;
 const authorRef = entry ? entry.data.author : null;
 const authorEntry = authorRef ? await getEntry(authorRef) : null;
 
@@ -216,7 +237,12 @@ const articleSchema = entry
 
             <div class="article-rule" aria-hidden="true" />
 
-            <div class:list={['article-body', entry.data.dropCap && 'has-drop-cap']}>
+            {proposal && (
+              <p class="article-proposal-flag">
+                Local preview: proposed layout (not saved in the article)
+              </p>
+            )}
+            <div class:list={['article-body', dropCap && 'has-drop-cap']}>
               {Content && <Content components={MDX_COMPONENTS} />}
             </div>
 
@@ -369,6 +395,19 @@ const articleSchema = entry
     margin: 0 0 2rem;
   }
 
+  /* Shown only in the local proposal preview (?proposal=1). */
+  .article-proposal-flag {
+    margin: 0 0 1.5rem;
+    padding: 0.5rem 0.8rem;
+    background: #fff4d6;
+    border-left: 3px solid var(--amber);
+    font:
+      700 0.85rem 'Lato',
+      Arial,
+      sans-serif;
+    color: var(--text);
+  }
+
   .article-disclosure {
     margin: 0 0 1.85rem;
   }
@@ -389,10 +428,13 @@ const articleSchema = entry
     margin: 0 0 1.15rem;
   }
 
+  /* Questions are written in sentence case (Veronica, 2026-10-14). */
   .faq-item h3 {
     margin: 0 0 0.35rem;
     font-family: 'Playfair Display', Georgia, serif;
-    font-size: 1.05rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.35;
     color: var(--teal-deep);
   }
 
