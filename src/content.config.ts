@@ -165,10 +165,6 @@ const articles = defineCollection({
             'Natural wonders',
             'Beaches',
             'Coastal',
-            // Not on the confirmed list; kept only while the trial Blues copy still uses
-            // them. Remove when that article is replaced.
-            'History',
-            'Music',
           ]),
         )
         .optional(),
