@@ -21,12 +21,15 @@
 //   - checks every Details box against the Details Box Standard (same rules as the site
 //     build, src/plugins/details-boxes.mjs) and stops on any old-format box
 //   - reports frontmatter fields the schema doesn't read
+//   - reports headings and bold labels that differ from Cairo's house style
+//     (scripts/house-headings.mjs), for approval — it doesn't change them
 // Images, interest tags and box wording are decisions for Veronica and are not touched.
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseDetailsBox } from '../src/plugins/details-boxes.mjs';
 import { removeEssentialsLeadIns } from './essentials-lead-ins.mjs';
 import { sentenceCaseFaq } from './faq-sentence-case.mjs';
+import { checkHouseHeadings } from './house-headings.mjs';
 
 const [source, ...args] = process.argv.slice(2);
 if (!source) {
@@ -90,6 +93,9 @@ body = leadIns.body;
 const faq = sentenceCaseFaq(frontmatter, body);
 frontmatter = faq.frontmatter;
 
+// --- headings and bold labels against the house style (Cairo); reported, not changed ---
+const headingMismatches = checkHouseHeadings(body);
+
 // --- Details boxes ---
 const lines = body.split('\n');
 let boxes = 0;
@@ -137,6 +143,10 @@ if (unread.length)
   console.log(`  Frontmatter fields the schema doesn't read: ${unread.join(', ')}`);
 if (regionEmptied) console.log('  Region: empty in the handoff — kept as a comment (no region)');
 if (addedThumbnail) console.log(`  Card image: added thumbnail = hero photo (${addedThumbnail})`);
+if (headingMismatches.length) {
+  console.log('  Headings and labels that differ from Cairo — for approval:');
+  for (const m of headingMismatches) console.log(`    ${m}`);
+}
 if (faq.changes.length) {
   console.log('  FAQ questions in sentence case — check the proper nouns:');
   for (const [, after] of faq.changes) console.log(`    ${after}`);

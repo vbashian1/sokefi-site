@@ -37,7 +37,11 @@ const pairShape = (node, side) =>
 
 /** A prose paragraph (not a Details box written as a paragraph). */
 const isProse = (node, ctx) =>
-  node.type === 'paragraph' && !/^\s*\[THE DETAILS/i.test(ctx.textContent(node));
+  (node.type === 'paragraph' && !/^\s*\[THE DETAILS/i.test(ctx.textContent(node))) ||
+  // A paragraph with its bold label above it (src/plugins/label-paragraphs.mjs).
+  (node.type === 'mdxJsxFlowElement' &&
+    node.name === 'div' &&
+    (node.attributes ?? []).some((a) => a.name === 'class' && a.value === 'article-labelled'));
 
 /** Checks one body (the list of top-level nodes). Returns a list of problems. */
 export function checkLayout(children, ctx) {
