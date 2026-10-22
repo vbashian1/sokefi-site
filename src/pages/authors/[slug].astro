@@ -3,6 +3,8 @@ import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import { getThumbnailSrc } from '../../utils/pillarFallback';
 import { framingStyle } from '../../utils/framing';
 import Base from '../../layouts/Base.astro';
+import { renderInlineHtml } from '../../utils/summary';
+import { getArticleRoute } from '../../config/routes';
 
 const slug = Astro.params.slug ?? '';
 const author = await getEntry('authors', slug);
@@ -58,7 +60,8 @@ const authorArticles = allArticles
 
 const eyebrow = getDisplayEyebrow();
 const monogram = getDisplayMonogram();
-const bioText = author?.data.shortBio ?? '';
+// Bio with the same curly quotes and dashes as body copy.
+const bioHtml = await renderInlineHtml(author?.data.shortBio ?? '');
 const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief' : '';
 ---
 
@@ -80,65 +83,68 @@ const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief'
                 {author.data.name}
               </h1>
               {authorRole && <p class="author-role">{authorRole}</p>}
-              <p class="author-bio">{bioText}</p>
+              <p class="author-bio" set:html={bioHtml} />
             </div>
           </section>
 
-          <div class="author-divider" aria-hidden="true" />
+          {/* An author with no articles yet shows no article section at all. */}
+          {authorArticles.length > 0 && (
+            <>
+              <div class="author-divider" aria-hidden="true" />
 
-          <section class="author-feed" aria-labelledby="author-feed-title">
-            <h2 id="author-feed-title">Bylined articles</h2>
+              <section class="author-feed" aria-labelledby="author-feed-title">
+                <h2 id="author-feed-title">Bylined articles</h2>
 
-            {authorArticles.length > 0 ? (
-              <div class="feed-list">
-                {authorArticles.map((article) => {
-                  const thumbnailSrc = getThumbnailSrc(article);
+                <div class="feed-list">
+                  {authorArticles.map((article) => {
+                    const thumbnailSrc = getThumbnailSrc(article);
 
-                  return (
-                    <article
-                      class:list={['feed-card', article.data.featured && 'feed-card-featured']}
-                    >
-                      {thumbnailSrc && (
-                        <span class="feed-card-frame">
-                          <img
-                            class="feed-card-image"
-                            src={thumbnailSrc}
-                            alt={article.data.title}
-                            loading="lazy"
-                            decoding="async"
-                            style={
-                              article.data.thumbnail
-                                ? framingStyle(
-                                    article.data.thumbnailFocus,
-                                    article.data.thumbnailZoom,
-                                  )
-                                : undefined
-                            }
-                          />
-                        </span>
-                      )}
-                      <div class="feed-card-body">
-                        <p class="feed-card-eyebrow">
-                          {article.data.eyebrow || article.data.pillar}
-                        </p>
-                        <p class="feed-card-byline">{article.data.byline || author.data.name}</p>
-                        <h3 class="feed-card-title">{article.data.title}</h3>
-                        <p class="feed-card-dek">
-                          {article.data.dek ||
-                            article.data.description ||
-                            article.data.metaDescription}
-                        </p>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            ) : (
-              <p class="feed-empty-state">
-                No bylined articles are currently assigned to this author.
-              </p>
-            )}
-          </section>
+                    return (
+                      <article
+                        class:list={['feed-card', article.data.featured && 'feed-card-featured']}
+                      >
+                        {thumbnailSrc && (
+                          <span class="feed-card-frame">
+                            <img
+                              class="feed-card-image"
+                              src={thumbnailSrc}
+                              alt={article.data.title}
+                              loading="lazy"
+                              decoding="async"
+                              style={
+                                article.data.thumbnail
+                                  ? framingStyle(
+                                      article.data.thumbnailFocus,
+                                      article.data.thumbnailZoom,
+                                    )
+                                  : undefined
+                              }
+                            />
+                          </span>
+                        )}
+                        <div class="feed-card-body">
+                          <p class="feed-card-eyebrow">
+                            {article.data.eyebrow || article.data.pillar}
+                          </p>
+                          <p class="feed-card-byline">{article.data.byline || author.data.name}</p>
+                          <h3 class="feed-card-title">
+                            <a class="feed-card-link" href={getArticleRoute(article.id)}>
+                              {article.data.title}
+                            </a>
+                          </h3>
+                          <p class="feed-card-dek">
+                            {article.data.dek ||
+                              article.data.description ||
+                              article.data.metaDescription}
+                          </p>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            </>
+          )}
         </>
       ) : (
         <section class="section" aria-labelledby="author-missing-title">
@@ -231,7 +237,9 @@ const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief'
     gap: 1rem;
   }
 
+  /* The whole card opens the article: the title link is stretched over the card. */
   .feed-card {
+    position: relative;
     display: grid;
     grid-template-columns: minmax(180px, 240px) 1fr;
     gap: 1rem;
@@ -240,6 +248,21 @@ const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief'
     border: 1px solid rgba(14, 143, 184, 0.16);
     border-radius: 0;
     box-shadow: none;
+  }
+  .feed-card-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .feed-card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .feed-card:hover .feed-card-link,
+  .feed-card-link:focus-visible {
+    text-decoration: underline;
   }
 
   .feed-card-featured {
@@ -297,15 +320,6 @@ const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief'
     font-size: clamp(1.1rem, 2vw, 1.35rem);
     line-height: 1.2;
     color: #17272b;
-  }
-
-  .feed-empty-state {
-    margin: 0;
-    color: #46565b;
-    font-style: italic;
-    font-family: 'Source Serif 4', Georgia, serif;
-    font-size: 1.05rem;
-    line-height: 1.7;
   }
 
   @media (max-width: 700px) {

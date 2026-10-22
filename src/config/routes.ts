@@ -14,3 +14,4 @@ export const ROUTES = {
 } as const;
 
 export const getAuthorRoute = (slug: string) => `${ROUTES.authors}/${slug}`;
+export const getArticleRoute = (id: string) => `/articles/${id}/`;

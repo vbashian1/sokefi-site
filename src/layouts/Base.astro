@@ -26,7 +26,8 @@ const authors = await getCollection('authors');
 const personSchemas = authors.map((author) => ({
   '@type': 'Person',
   name: author.data.name,
-  description: author.data.longBio ?? author.data.shortBio,
+  // The confirmed short bio only (longBio holds unconfirmed draft text; never shown).
+  description: author.data.shortBio,
 }));
 
 const organizationSchema = {
