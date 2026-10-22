@@ -94,10 +94,13 @@
 }
 
 /* Optional drop cap: on the first paragraph of the piece (dropCap: true), or on the first
-   paragraph after the first heading (dropCap: 'first-section'), for a piece that opens with a
-   one-line lead-in. */
-.article-body.has-drop-cap:not(.drop-cap-first-section) > p:first-of-type::first-letter,
-.article-body.drop-cap-first-section > h2:first-of-type + p::first-letter {
+   paragraph after the first heading (dropCap: 'first-section'). When the piece opens with a
+   short one- or two-line opener, it goes on the next full paragraph instead
+   (drop-cap-after-opener, set by the article page). */
+.article-body.has-drop-cap:not(.drop-cap-first-section, .drop-cap-after-opener)
+  > p:first-of-type::first-letter,
+.article-body.drop-cap-first-section > h2:first-of-type + p::first-letter,
+.article-body.drop-cap-after-opener > p:nth-of-type(2)::first-letter {
   float: left;
   margin: 0.06em 0.1em 0 0;
   font-family: 'Playfair Display', Georgia, serif;

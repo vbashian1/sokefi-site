@@ -60,6 +60,19 @@ const proposal = proposalLoader
   : undefined;
 const Content = proposal?.default ?? rendered?.Content ?? null;
 const dropCap = proposal?.layout?.dropCap ?? entry?.data.dropCap ?? false;
+// Standing rule (Veronica, 2026-10-22): when an article opens with a short one- or two-line
+// opener, the drop cap goes on the first full paragraph instead. The opener is the first
+// plain paragraph of the body; "short" is up to about two lines of the text column.
+const OPENER_MAX_CHARS = 180;
+const openingParagraph =
+  (entry?.body ?? '')
+    .split(/\n\s*\n/)
+    .map((block) => block.trim())
+    .find((block) => block && !/^(<|\{|#|---|\*\*\[|>|-\s|\*\w)/.test(block)) ?? '';
+const shortOpener =
+  dropCap === true &&
+  openingParagraph.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[*_]/g, '').length <=
+    OPENER_MAX_CHARS;
 const authorRef = entry ? entry.data.author : null;
 const authorEntry = authorRef ? await getEntry(authorRef) : null;
 // Bio with the same curly quotes and dashes as body copy.
@@ -271,6 +284,7 @@ const articleSchema = entry
                 'article-body',
                 dropCap && 'has-drop-cap',
                 dropCap === 'first-section' && 'drop-cap-first-section',
+                shortOpener && 'drop-cap-after-opener',
               ]}
             >
               {Content && <Content components={MDX_COMPONENTS} />}
