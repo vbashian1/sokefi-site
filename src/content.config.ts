@@ -130,6 +130,9 @@ const articles = defineCollection({
         ])
         .optional(),
       series: z.string().optional(),
+      // false: left out of every article listing (author pages, pillar feeds, home page,
+      // featured). The article's own page still exists.
+      listed: z.boolean().default(true),
       featured: z.boolean().default(false),
       firsthand: z.boolean().default(false),
       featuredPriority: z.number().int().positive().optional(),

@@ -13,7 +13,8 @@ if (!author || author.data.hasOwnPage === false) {
   Astro.response.status = 404;
 }
 
-const allArticles = await getCollection('articles');
+// Articles marked listed: false are left out of every listing.
+const allArticles = await getCollection('articles', ({ data }) => data.listed !== false);
 
 const columnLabelMap: Record<string, string> = {
   'Musings from the Corner Office': 'Corner Office',
