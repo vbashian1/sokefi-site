@@ -12,6 +12,8 @@ import type { Shape } from '../../utils/framing';
 
 interface Props {
   side?: 'left' | 'right';
+  /** 'large': about half the column (55%, up to 400px) for a photo that needs more room. */
+  size?: 'standard' | 'large';
   pick?: number;
   image?: { src: string; width: number; height: number };
   shape?: Shape;
@@ -20,13 +22,15 @@ interface Props {
   alt?: string;
 }
 
-const { side = 'left', ...photo } = Astro.props;
+const { side = 'left', size = 'standard', ...photo } = Astro.props;
 if (side !== 'left' && side !== 'right') {
   throw new Error(`Inset side "${side}" must be "left" or "right"`);
 }
 ---
 
-<figure class:list={['block-inset', `block-inset-${side}`]}>
+<figure
+  class:list={['block-inset', `block-inset-${side}`, size === 'large' && 'block-inset-large']}
+>
   <FramedImage {...photo} fit="fill" />
 </figure>
 
@@ -38,6 +42,11 @@ if (side !== 'left' && side !== 'right') {
     /* Top edge level with the top of the first line of text beside it (measured). */
     margin-top: 0.475rem;
     margin-bottom: 1rem;
+  }
+
+  .block-inset-large {
+    width: 55%;
+    max-width: 400px;
   }
 
   .block-inset-left {

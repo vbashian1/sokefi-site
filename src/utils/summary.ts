@@ -1,5 +1,6 @@
 import { Marked } from 'marked';
 import { markedSmartypants } from 'marked-smartypants';
+import { fixTypography } from '../plugins/typography.mjs';
 
 // A dedicated instance rather than the shared singleton, so page code can never be
 // affected by options set elsewhere. GFM matches the flavour used for body copy;
@@ -19,7 +20,7 @@ export const renderSummaryHtml = async (source?: string): Promise<string> => {
   const trimmed = (source ?? '').trim();
   if (!trimmed) return '';
 
-  return (await markdown.parse(trimmed)).trim();
+  return (await markdown.parse(fixTypography(trimmed))).trim();
 };
 
 /**
@@ -28,7 +29,7 @@ export const renderSummaryHtml = async (source?: string): Promise<string> => {
  * carry links (e.g. Blues Highway's festival links) and would otherwise show raw markdown.
  */
 export const renderInlineHtml = async (source?: string): Promise<string> =>
-  (await markdown.parseInline((source ?? '').trim())).trim();
+  (await markdown.parseInline(fixTypography((source ?? '').trim()))).trim();
 
 const NAMED_ENTITIES: Record<string, string> = {
   '&nbsp;': ' ',

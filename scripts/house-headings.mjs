@@ -63,8 +63,9 @@ export function checkHouseHeadings(body) {
     const label = line.match(/^\*\*([^*[][^*]*?)\*\*(.*)$/);
     if (label) {
       const [, text, after] = label;
-      // Text running on after the label on the same line: the label must sit on its own line.
-      if (after.trim()) {
+      // A label followed by a space and its sentence on the same line must move to its own
+      // line. (A bold place name followed by a colon, "**Cleveland**: our base…", is not a label.)
+      if (/^\s+\S/.test(after)) {
         mismatches.push(
           `${at}: label "**${text}**" runs into its text; put the label on its own line, with the text on the next line`,
         );

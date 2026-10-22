@@ -6,6 +6,7 @@ import { satteri } from '@astrojs/markdown-satteri';
 import { detailsBoxes } from './src/plugins/details-boxes.mjs';
 import { labelParagraphs } from './src/plugins/label-paragraphs.mjs';
 import { layoutRules } from './src/plugins/layout-rules.mjs';
+import { typography } from './src/plugins/typography.mjs';
 
 export default defineConfig({
   site: 'https://sokefi.com',
@@ -20,6 +21,6 @@ export default defineConfig({
   // labels on their own line sit above their text, and article layouts are checked against
   // the layout rules (src/plugins/layout-rules.mjs).
   markdown: {
-    processor: satteri({ mdastPlugins: [detailsBoxes, labelParagraphs, layoutRules] }),
+    processor: satteri({ mdastPlugins: [typography, detailsBoxes, labelParagraphs, layoutRules] }),
   },
 });

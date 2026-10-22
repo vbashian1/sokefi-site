@@ -108,7 +108,9 @@ const articles = defineCollection({
       thumbnailFocus: focusPoint.optional(),
       thumbnailZoom: zoomLevel.optional(),
       // Layout: a drop cap on the first paragraph of the piece (off unless set).
-      dropCap: z.boolean().default(false),
+      // true: drop cap on the first paragraph. 'first-section': on the first paragraph after
+      // the first heading, for a piece that opens with a one-line lead-in (Blues Highway).
+      dropCap: z.union([z.boolean(), z.literal('first-section')]).default(false),
       // Pull-quote lines from the article file; each also appears in the body text.
       callouts: z.array(z.string()).optional(),
       gallery: z.array(image()).optional(),

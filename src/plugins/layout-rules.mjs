@@ -4,6 +4,8 @@
 //
 //   1. Insets sit within a run of text: an <Inset> comes straight after a paragraph (never
 //      at the start of a section), and two insets have at least 3 paragraphs between them.
+//      Exceptions (2026-10-21): an inset may open a section when a paragraph follows it,
+//      and closer insets are fine across a section heading when they're on opposite sides.
 //   2. An <ImagePair> holds two photos of the same shape (never a portrait with a landscape).
 //   3. <WideImage> and <FullBleed> use a wide shape (16:9 or 2:1), and an article has at
 //      most one wide-or-full-width block. (Their height is capped at the banner's in CSS.)
@@ -63,14 +65,25 @@ export function checkLayout(children, ctx) {
     }
 
     if (node.name === 'Inset') {
-      if (!children[i - 1] || !isProse(children[i - 1], ctx)) {
+      // Exception (approved by Veronica 2026-10-21): an inset may open a
+      // section — straight after its heading — when a paragraph follows for it to sit beside
+      // (e.g. a section that is a single paragraph).
+      const opensSection =
+        children[i - 1]?.type === 'heading' && children[i + 1] && isProse(children[i + 1], ctx);
+      if (!opensSection && (!children[i - 1] || !isProse(children[i - 1], ctx))) {
         problems.push(
           `<Inset>${where(node)} must sit within a run of text: put it after a paragraph, not at the start of a section`,
         );
       }
       if (lastInset >= 0) {
-        const between = children.slice(lastInset + 1, i).filter((n) => isProse(n, ctx)).length;
-        if (between < MIN_PARAGRAPHS_BETWEEN_INSETS) {
+        const span = children.slice(lastInset + 1, i);
+        const between = span.filter((n) => isProse(n, ctx)).length;
+        // Exception (approved 2026-10-21): closer insets are fine when a section
+        // heading separates them and they sit on opposite sides.
+        const separated =
+          span.some((n) => n.type === 'heading') &&
+          (attr(node, 'side') ?? 'left') !== (attr(children[lastInset], 'side') ?? 'left');
+        if (between < MIN_PARAGRAPHS_BETWEEN_INSETS && !separated) {
           problems.push(
             `<Inset>${where(node)} is only ${between} paragraph(s) after the previous inset — keep at least ${MIN_PARAGRAPHS_BETWEEN_INSETS} between them`,
           );

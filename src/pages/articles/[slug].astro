@@ -55,7 +55,7 @@ const proposalLoader =
 const proposal = proposalLoader
   ? ((await proposalLoader()) as {
       default: typeof import('*.mdx').default;
-      layout?: { dropCap?: boolean };
+      layout?: { dropCap?: boolean | 'first-section' };
     })
   : undefined;
 const Content = proposal?.default ?? rendered?.Content ?? null;
@@ -125,6 +125,13 @@ const wordCount = entry ? (entry.body ?? '').trim().split(/\s+/).filter(Boolean)
 const readTimeMinutes = Math.max(1, Math.round(wordCount / 200));
 
 // FAQ text can carry links and needs the same quotes and dashes as the body copy.
+// A title with a colon is shown in two parts, broken after the colon (wording unchanged).
+const colonAt = entry ? entry.data.title.indexOf(': ') : -1;
+const titleParts =
+  entry && colonAt > 0
+    ? [entry.data.title.slice(0, colonAt + 1), entry.data.title.slice(colonAt + 2)]
+    : null;
+
 const faqItems = await Promise.all(
   (entry?.data.faq ?? []).map(async (item) => ({
     question: await renderInlineHtml(item.question),
@@ -191,7 +198,14 @@ const articleSchema = entry
             <header class="article-header">
               {eyebrowText && <p class="article-eyebrow">{eyebrowText}</p>}
               <h1 class="article-title" id="article-title">
-                {entry.data.title}
+                {titleParts ? (
+                  <>
+                    <span class="article-title-part">{titleParts[0]}</span>{' '}
+                    <span class="article-title-part">{titleParts[1]}</span>
+                  </>
+                ) : (
+                  entry.data.title
+                )}
               </h1>
               {entry.data.dek && <p class="article-dek">{entry.data.dek}</p>}
 
@@ -250,7 +264,13 @@ const articleSchema = entry
                 Local preview: proposed layout (not saved in the article)
               </p>
             )}
-            <div class:list={['article-body', dropCap && 'has-drop-cap']}>
+            <div
+              class:list={[
+                'article-body',
+                dropCap && 'has-drop-cap',
+                dropCap === 'first-section' && 'drop-cap-first-section',
+              ]}
+            >
               {Content && <Content components={MDX_COMPONENTS} />}
             </div>
 
@@ -341,6 +361,13 @@ const articleSchema = entry
     color: var(--teal-deep);
     font-size: clamp(2.1rem, 4vw, 3rem);
     line-height: 1.15;
+  }
+
+  /* A title with a colon breaks after it ("On Highway 61:" / "Driving the Blues Highway…");
+     each part then wraps evenly on its own. */
+  .article-title-part {
+    display: block;
+    text-wrap: balance;
   }
 
   .article-dek {

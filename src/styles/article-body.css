@@ -93,8 +93,11 @@
   color: inherit;
 }
 
-/* Optional drop cap on the first paragraph of the piece (frontmatter dropCap: true). */
-.article-body.has-drop-cap > p:first-of-type::first-letter {
+/* Optional drop cap: on the first paragraph of the piece (dropCap: true), or on the first
+   paragraph after the first heading (dropCap: 'first-section'), for a piece that opens with a
+   one-line lead-in. */
+.article-body.has-drop-cap:not(.drop-cap-first-section) > p:first-of-type::first-letter,
+.article-body.drop-cap-first-section > h2:first-of-type + p::first-letter {
   float: left;
   margin: 0.06em 0.1em 0 0;
   font-family: 'Playfair Display', Georgia, serif;
