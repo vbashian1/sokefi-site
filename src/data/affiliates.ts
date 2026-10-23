@@ -279,7 +279,7 @@ export const AFFILIATES: Record<string, GoLink> = {
       'https://www.getyourguide.com/memphis-l1700/memphis-big-mojo-sun-studio-music-history-3-hour-bus-tour-t292470/',
     partner: 'getyourguide.com',
   },
-  'gyg-darwin-audio-tour': {
+  'voicemap-darwin-audio-tour': {
     destination:
       'https://voicemap.me/tour/shropshire/on-the-origins-of-charles-darwin-a-shrewsbury-walking-tour',
     partner: 'voicemap.me',
@@ -292,8 +292,9 @@ export const AFFILIATES: Record<string, GoLink> = {
     referral: true,
   },
   'booking-darwins-townhouse': {
-    destination: 'https://www.booking.com/',
-    partner: 'booking.com',
+    destination: 'https://darwinstownhouse.com/',
+    partner: 'darwinstownhouse.com',
+    referral: true,
   },
   'travel-insurance': {
     destination: {

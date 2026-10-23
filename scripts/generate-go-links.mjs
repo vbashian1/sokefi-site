@@ -17,8 +17,12 @@ const SPECIAL = {
     partner: 'karmagroup.com',
     referral: true,
   },
-  // Provider home page until the Booking.com listing is chosen.
-  'booking-darwins-townhouse': { destination: 'https://www.booking.com/', partner: 'booking.com' },
+  // The hotel's own website for now (Veronica, 2026-10-23) — no commission, so referral.
+  'booking-darwins-townhouse': {
+    destination: 'https://darwinstownhouse.com/',
+    partner: 'darwinstownhouse.com',
+    referral: true,
+  },
   // Region split, resolved per reader in src/pages/go/[slug].astro: Allianz only sells to
   // US residents and Staysure only to UK residents; anyone else gets "link unavailable".
   'travel-insurance': {
@@ -33,6 +37,9 @@ const SPECIAL = {
 /** @type {Record<string, string>} key → destination, when it must differ from the table. */
 const OVERRIDES = {};
 
+/** Keys Veronica has marked as referral (no commission) although the table doesn't say so. */
+const REFERRAL = new Set([]);
+
 const source = process.argv[2];
 if (!source) {
   console.error('Usage: node scripts/generate-go-links.mjs <path to sokefi_go_links_launch15.md>');
@@ -44,7 +51,11 @@ const end = md.indexOf('## Needs a decision');
 if (start < 0 || end < 0) throw new Error('Could not find the "Ready to set up" table');
 
 const rows = [...md.slice(start, end).matchAll(/^\| `([^`]+)` \| (\S+) \| ([^|]*)\|/gm)].map(
-  ([, key, url, programme]) => ({ key, url, referral: /referral/i.test(programme) }),
+  ([, key, url, programme]) => ({
+    key,
+    url,
+    referral: /referral/i.test(programme) || REFERRAL.has(key),
+  }),
 );
 const keys = rows.map((r) => r.key);
 const dupes = keys.filter((k, i) => keys.indexOf(k) !== i);

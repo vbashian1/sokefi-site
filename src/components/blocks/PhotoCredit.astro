@@ -1,0 +1,30 @@
+---
+// A photo's reader-facing credit, shown directly under that photo. Only for images whose
+// licence requires one (e.g. CC BY-SA: title, author, source and licence, linked); firsthand
+// and Unsplash/Pexels photos carry no credit (image-rights standard, 2026-09-25).
+//   <Gallery pick={[0]} credit="[“Title”](source) by Author, licensed under [CC BY-SA 2.0](licence)" />
+import { renderInlineHtml } from '../../utils/summary';
+
+interface Props {
+  credit?: string;
+}
+
+const html = Astro.props.credit ? await renderInlineHtml(Astro.props.credit) : '';
+---
+
+{html && <p class="photo-credit" set:html={html} />}
+
+<style>
+  .photo-credit {
+    margin: 0.4rem 0 0;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: rgba(23, 39, 43, 0.7);
+  }
+
+  .photo-credit :global(a) {
+    color: inherit;
+    text-decoration: underline;
+  }
+</style>
