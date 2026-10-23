@@ -155,7 +155,6 @@ const faqItems = await Promise.all(
     answer: await renderInlineHtml(item.answer),
   })),
 );
-const tags = entry?.data.tags ?? [];
 // Titles, deks and eyebrows get the same curly quotes as body copy.
 const subtitleText = smartQuotes(entry?.data.subtitle ?? '');
 const eyebrowText = smartQuotes(entry ? entry.data.eyebrow || entry.data.pillar : '');
@@ -346,16 +345,6 @@ const articleSchema = entry
               <PillarTeamBar pillar={entry.data.pillar} name={authorEntry.data.name} />
             </div>
           )}
-
-          <div class="article-column">
-            {tags.length > 0 && (
-              <div class="article-tags" aria-label="Article tags">
-                {tags.map((tag) => (
-                  <span class="article-tag">{tag}</span>
-                ))}
-              </div>
-            )}
-          </div>
         </article>
       ) : (
         <section class="section" aria-labelledby="article-missing-title">
@@ -588,27 +577,6 @@ const articleSchema = entry
 
   .author-card-link {
     align-self: flex-start;
-  }
-
-  .article-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    margin: 0 0 0.5rem;
-  }
-
-  .article-tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.42rem 0.9rem;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--brand-teal) 8%, transparent);
-    color: var(--teal-deep);
-    font-family: 'Lato', Arial, sans-serif;
-    font-size: 0.76rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
   }
 
   @media (max-width: 700px) {
