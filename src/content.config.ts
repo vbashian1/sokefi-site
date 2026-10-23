@@ -91,6 +91,11 @@ const articles = defineCollection({
         'Reservation for One',
       ]),
       eyebrow: z.string().optional(),
+      // The search-engine and browser-tab title, when it should differ from the page title
+      // (e.g. "Tresco, Isles of Scilly — A Bygone-Era Escape | Sokéfi"). Shown with curly quotes.
+      titleTag: z.string().optional(),
+      // A line shown below the title (e.g. "Escape to Tresco"), above the dek.
+      subtitle: z.string().optional(),
       byline: z.string().default(''),
       dek: z.string().default(''),
       // GEO summary — metadata only, never rendered on the page. It feeds the
@@ -105,12 +110,18 @@ const articles = defineCollection({
       // Zoom enlarges the photo around the focal point (1 = none), still from the original.
       heroFocus: focusPoint.optional(),
       heroZoom: zoomLevel.optional(),
+      // Phones normally show the whole hero photo (no zoom); true keeps the zoomed crop there
+      // too, for a photo whose edges shouldn't show (Tresco's plane-window aerial).
+      heroZoomOnPhones: z.boolean().default(false),
       thumbnailFocus: focusPoint.optional(),
       thumbnailZoom: zoomLevel.optional(),
       // Layout: a drop cap on the first paragraph of the piece (off unless set).
       // true: drop cap on the first paragraph. 'first-section': on the first paragraph after
       // the first heading, for a piece that opens with a one-line lead-in (Blues Highway).
-      dropCap: z.union([z.boolean(), z.literal('first-section')]).default(false),
+      // 'second-paragraph': on the second paragraph, when the first is better left plain.
+      dropCap: z
+        .union([z.boolean(), z.literal('first-section'), z.literal('second-paragraph')])
+        .default(false),
       // Pull-quote lines from the article file; each also appears in the body text.
       callouts: z.array(z.string()).optional(),
       gallery: z.array(image()).optional(),

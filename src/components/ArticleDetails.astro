@@ -12,6 +12,7 @@
 // Older boxes written as <Details title lines links /> still work: `lines` is a free
 // label/value list and `links` can carry more than one button.
 import { getReaderMarket } from '../utils/visitorRegion';
+import { AFFILIATES } from '../data/affiliates';
 
 interface DetailLine {
   label: string;
@@ -95,6 +96,16 @@ const buttons = links.map((link) => ({
   text: BUTTON_WORDING[link.label.trim().toLowerCase()] ?? link.label,
 }));
 
+// Referral links (no commission: official sites, the hotel's own site) keep "Recommended by
+// Sokéfi." but drop the commission sentence (Veronica, 2026-10-22). Read from the /go/ list.
+const goKey = (href: string) => href.match(/^\/go\/([^/?#]+)/)?.[1];
+const referralOnly =
+  buttons.length > 0 &&
+  buttons.every((b) => {
+    const key = goKey(b.href);
+    return key !== undefined && Object.hasOwn(AFFILIATES, key) && AFFILIATES[key].referral === true;
+  });
+
 // The commission note uses the first button's action: "if you book / buy / get a quote".
 const firstButton = buttons[0]?.text.toLowerCase() ?? '';
 const verb = firstButton.startsWith('buy')
@@ -130,8 +141,9 @@ const verb = firstButton.startsWith('buy')
           ))}
         </div>
         <p class="article-details-note">
-          Recommended by Sokéfi. We may earn a small commission if you {verb} through this link, at
-          no extra cost to you.
+          {referralOnly
+            ? 'Recommended by Sokéfi.'
+            : `Recommended by Sokéfi. We may earn a small commission if you ${verb} through this link, at no extra cost to you.`}
         </p>
       </div>
     </aside>

@@ -5,6 +5,7 @@ import { framingStyle } from '../../utils/framing';
 import Base from '../../layouts/Base.astro';
 import { renderInlineHtml } from '../../utils/summary';
 import { getArticleRoute } from '../../config/routes';
+import { smartQuotes } from '../../plugins/typography.mjs';
 
 const slug = Astro.params.slug ?? '';
 const author = await getEntry('authors', slug);
@@ -125,18 +126,20 @@ const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief'
                         )}
                         <div class="feed-card-body">
                           <p class="feed-card-eyebrow">
-                            {article.data.eyebrow || article.data.pillar}
+                            {smartQuotes(article.data.eyebrow || article.data.pillar)}
                           </p>
                           <p class="feed-card-byline">{article.data.byline || author.data.name}</p>
                           <h3 class="feed-card-title">
                             <a class="feed-card-link" href={getArticleRoute(article.id)}>
-                              {article.data.title}
+                              {smartQuotes(article.data.title)}
                             </a>
                           </h3>
                           <p class="feed-card-dek">
-                            {article.data.dek ||
-                              article.data.description ||
-                              article.data.metaDescription}
+                            {smartQuotes(
+                              article.data.dek ||
+                                article.data.description ||
+                                article.data.metaDescription,
+                            )}
                           </p>
                         </div>
                       </article>

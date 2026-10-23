@@ -77,7 +77,7 @@ if (heroLine && !/^thumbnail:/m.test(frontmatter)) {
 }
 
 const SCHEMA_FIELDS = new Set(
-  'title date description metaDescription author pillar eyebrow byline dek summary updatedDate thumbnail heroImage heroFocus heroZoom thumbnailFocus thumbnailZoom gallery column secondaryPillar series featured firsthand featuredPriority featuredDate crossPostToSubstack cover tags region interest faq affiliateDisclosure callouts dropCap'.split(
+  'title date description metaDescription author pillar eyebrow byline dek summary updatedDate thumbnail heroImage heroFocus heroZoom thumbnailFocus thumbnailZoom gallery column secondaryPillar series featured firsthand featuredPriority featuredDate crossPostToSubstack cover tags region interest faq affiliateDisclosure callouts dropCap titleTag subtitle heroZoomOnPhones listed'.split(
     ' ',
   ),
 );

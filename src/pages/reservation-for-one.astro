@@ -5,6 +5,7 @@ import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import { getThumbnailSrc } from '../utils/pillarFallback';
 import { framingStyle } from '../utils/framing';
 import { getAuthorRoute } from '../config/routes';
+import { smartQuotes } from '../plugins/typography.mjs';
 
 // Articles marked listed: false are left out of every listing.
 const allArticles = await getCollection('articles', ({ data }) => data.listed !== false);
@@ -87,11 +88,17 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
                     </span>
                   )}
                   <div class="feed-card-body">
-                    <p class="feed-card-eyebrow">{article.data.eyebrow || 'Reservation for One'}</p>
+                    <p class="feed-card-eyebrow">
+                      {smartQuotes(article.data.eyebrow || 'Reservation for One')}
+                    </p>
                     <p class="feed-card-byline">{byline}</p>
-                    <h3 class="feed-card-title">{article.data.title}</h3>
+                    <h3 class="feed-card-title">{smartQuotes(article.data.title)}</h3>
                     <p class="feed-card-dek">
-                      {article.data.dek || article.data.description || article.data.metaDescription}
+                      {smartQuotes(
+                        article.data.dek ||
+                          article.data.description ||
+                          article.data.metaDescription,
+                      )}
                     </p>
                   </div>
                 </article>

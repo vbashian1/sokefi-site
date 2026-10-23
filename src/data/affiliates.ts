@@ -22,7 +22,7 @@ export interface GoLink {
 }
 
 export const AFFILIATES: Record<string, GoLink> = {
-  // --- Ready to set up (57) ---
+  // --- Ready to set up (56) ---
   'bb-king-museum': {
     destination: 'https://bbkingmuseum.org/',
     partner: 'bbkingmuseum.org',
@@ -36,12 +36,6 @@ export const AFFILIATES: Record<string, GoLink> = {
   'booking-lion-pheasant': {
     destination: 'https://www.booking.com/hotel/gb/lion-pheasant.en-gb.html',
     partner: 'booking.com',
-  },
-  'center-for-brainhealth': {
-    destination:
-      'https://centerforbrainhealth.org/article/nature-scientific-reports-study-challenges-inevitability-of-cognitive-decline',
-    partner: 'centerforbrainhealth.org',
-    referral: true,
   },
   'delta-blues-museum': {
     destination: 'https://deltabluesmuseum.org/',
@@ -293,8 +287,9 @@ export const AFFILIATES: Record<string, GoLink> = {
 
   // --- Special setup (3) ---
   'booking-karma-st-martins': {
-    destination: 'https://www.booking.com/',
-    partner: 'booking.com',
+    destination: 'https://www.karmagroup.com/find-destination/karma-resorts/karma-st-martins/',
+    partner: 'karmagroup.com',
+    referral: true,
   },
   'booking-darwins-townhouse': {
     destination: 'https://www.booking.com/',

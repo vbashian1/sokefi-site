@@ -11,8 +11,13 @@
 import fs from 'node:fs';
 
 const SPECIAL = {
+  // The hotel's own website for now (Veronica, 2026-10-22) — no commission, so referral.
+  'booking-karma-st-martins': {
+    destination: 'https://www.karmagroup.com/find-destination/karma-resorts/karma-st-martins/',
+    partner: 'karmagroup.com',
+    referral: true,
+  },
   // Provider home page until the Booking.com listing is chosen.
-  'booking-karma-st-martins': { destination: 'https://www.booking.com/', partner: 'booking.com' },
   'booking-darwins-townhouse': { destination: 'https://www.booking.com/', partner: 'booking.com' },
   // Region split, resolved per reader in src/pages/go/[slug].astro: Allianz only sells to
   // US residents and Staysure only to UK residents; anyone else gets "link unavailable".
@@ -71,6 +76,7 @@ const special = Object.entries(SPECIAL).map(([key, value]) =>
       ? `    destination: ${quote(value.destination)},`
       : `    destination: {\n      us: ${quote(value.destination.us)},\n      uk: ${quote(value.destination.uk)},\n    },`,
     `    partner: ${quote(value.partner)},`,
+    ...(value.referral ? ['    referral: true,'] : []),
     '  },',
   ].join('\n'),
 );

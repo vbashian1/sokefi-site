@@ -18,6 +18,7 @@ import ImagePair from '../../components/blocks/ImagePair.astro';
 import Inset from '../../components/blocks/Inset.astro';
 import PullQuote from '../../components/blocks/PullQuote.astro';
 import ReaderInvitation from '../../components/blocks/ReaderInvitation.astro';
+import { smartQuotes } from '../../plugins/typography.mjs';
 
 // Components an article body can use (photos, layout blocks, Details boxes).
 const MDX_COMPONENTS = {
@@ -55,7 +56,7 @@ const proposalLoader =
 const proposal = proposalLoader
   ? ((await proposalLoader()) as {
       default: typeof import('*.mdx').default;
-      layout?: { dropCap?: boolean | 'first-section' };
+      layout?: { dropCap?: boolean | 'first-section' | 'second-paragraph' };
     })
   : undefined;
 const Content = proposal?.default ?? rendered?.Content ?? null;
@@ -139,14 +140,15 @@ const isoDate = displayDate ? new Date(displayDate).toISOString() : '';
 const wordCount = entry ? (entry.body ?? '').trim().split(/\s+/).filter(Boolean).length : 0;
 const readTimeMinutes = Math.max(1, Math.round(wordCount / 200));
 
-// FAQ text can carry links and needs the same quotes and dashes as the body copy.
-// A title with a colon is shown in two parts, broken after the colon (wording unchanged).
-const colonAt = entry ? entry.data.title.indexOf(': ') : -1;
-const titleParts =
-  entry && colonAt > 0
-    ? [entry.data.title.slice(0, colonAt + 1), entry.data.title.slice(colonAt + 2)]
-    : null;
+const displayTitle = entry?.data.title ?? '';
+const displayDek = entry?.data.dek ?? '';
 
+// A title with a colon is shown in two parts, broken after the colon (wording unchanged).
+const colonAt = displayTitle.indexOf(': ');
+const titleParts =
+  colonAt > 0 ? [displayTitle.slice(0, colonAt + 1), displayTitle.slice(colonAt + 2)] : null;
+
+// FAQ text can carry links and needs the same quotes and dashes as the body copy.
 const faqItems = await Promise.all(
   (entry?.data.faq ?? []).map(async (item) => ({
     question: await renderInlineHtml(item.question),
@@ -154,7 +156,9 @@ const faqItems = await Promise.all(
   })),
 );
 const tags = entry?.data.tags ?? [];
-const eyebrowText = entry ? entry.data.eyebrow || entry.data.pillar : '';
+// Titles, deks and eyebrows get the same curly quotes as body copy.
+const subtitleText = smartQuotes(entry?.data.subtitle ?? '');
+const eyebrowText = smartQuotes(entry ? entry.data.eyebrow || entry.data.pillar : '');
 const monogram = getMonogram(authorEntry);
 const authorHref = authorEntry ? getAuthorRoute(authorEntry.id) : null;
 // Team pieces close with the pillar team bar rather than a personal author card.
@@ -186,7 +190,9 @@ const articleSchema = entry
 ---
 
 <Base
-  title={entry ? `${entry.data.title} — Sokéfi` : 'Article not found — Sokéfi'}
+  title={entry
+    ? smartQuotes(entry.data.titleTag ?? `${entry.data.title} — Sokéfi`)
+    : 'Article not found — Sokéfi'}
   description={entry ? entry.data.metaDescription : 'This article could not be found.'}
   image={heroMeta?.src ?? entry?.data.cover ?? defaultArticleImage.src}
   structuredData={articleSchema}
@@ -196,7 +202,13 @@ const articleSchema = entry
       entry ? (
         <article class="article" aria-labelledby="article-title">
           {heroMeta && (
-            <div class="hero-media article-hero">
+            <div
+              class:list={[
+                'hero-media',
+                'article-hero',
+                entry.data.heroZoomOnPhones && 'hero-zoom-on-phones',
+              ]}
+            >
               <img
                 src={heroMeta.src}
                 width={heroMeta.width}
@@ -215,14 +227,15 @@ const articleSchema = entry
               <h1 class="article-title" id="article-title">
                 {titleParts ? (
                   <>
-                    <span class="article-title-part">{titleParts[0]}</span>{' '}
-                    <span class="article-title-part">{titleParts[1]}</span>
+                    <span class="article-title-part">{smartQuotes(titleParts[0])}</span>{' '}
+                    <span class="article-title-part">{smartQuotes(titleParts[1])}</span>
                   </>
                 ) : (
-                  entry.data.title
+                  smartQuotes(displayTitle)
                 )}
               </h1>
-              {entry.data.dek && <p class="article-dek">{entry.data.dek}</p>}
+              {subtitleText && <p class="article-subtitle">{subtitleText}</p>}
+              {displayDek && <p class="article-dek">{smartQuotes(displayDek)}</p>}
 
               {isEditorialTeam ? (
                 <div class="article-byline">
@@ -284,7 +297,7 @@ const articleSchema = entry
                 'article-body',
                 dropCap && 'has-drop-cap',
                 dropCap === 'first-section' && 'drop-cap-first-section',
-                shortOpener && 'drop-cap-after-opener',
+                (shortOpener || dropCap === 'second-paragraph') && 'drop-cap-after-opener',
               ]}
             >
               {Content && <Content components={MDX_COMPONENTS} />}
@@ -383,6 +396,17 @@ const articleSchema = entry
      each part then wraps evenly on its own. */
   .article-title-part {
     display: block;
+    text-wrap: balance;
+  }
+
+  /* A line below the title, above the dek (subtitle field): Playfair like the title, smaller. */
+  .article-subtitle {
+    margin: -0.3rem 0 0.95rem;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.45rem, 2.6vw, 1.95rem);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--teal-deep);
     text-wrap: balance;
   }
 
