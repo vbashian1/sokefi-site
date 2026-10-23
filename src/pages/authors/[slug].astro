@@ -95,7 +95,7 @@ const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief'
               <div class="author-divider" aria-hidden="true" />
 
               <section class="author-feed" aria-labelledby="author-feed-title">
-                <h2 id="author-feed-title">Bylined articles</h2>
+                <h2 id="author-feed-title">Articles by {author.data.name.split(' ')[0]}</h2>
 
                 <div class="feed-list">
                   {authorArticles.map((article) => {
@@ -128,7 +128,6 @@ const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief'
                           <p class="feed-card-eyebrow">
                             {smartQuotes(article.data.eyebrow || article.data.pillar)}
                           </p>
-                          <p class="feed-card-byline">{article.data.byline || author.data.name}</p>
                           <h3 class="feed-card-title">
                             <a class="feed-card-link" href={getArticleRoute(article.id)}>
                               {smartQuotes(article.data.title)}
@@ -192,11 +191,12 @@ const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief'
 
   .author-eyebrow {
     margin: 0;
+    font-family: 'Lato', Arial, sans-serif;
     color: #c9a227;
     text-transform: uppercase;
     letter-spacing: 0.2em;
     font-size: 0.85rem;
-    font-weight: 800;
+    font-weight: 700;
   }
 
   .author-name {
@@ -303,7 +303,6 @@ const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief'
   }
 
   .feed-card-eyebrow,
-  .feed-card-byline,
   .feed-card-dek {
     margin: 0;
     color: #46565b;
@@ -311,8 +310,10 @@ const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief'
     line-height: 1.5;
   }
 
+  /* Gold Lato eyebrow and teal title, as on the other article cards (homepage). */
   .feed-card-eyebrow {
-    color: var(--brand-teal);
+    font-family: 'Lato', Arial, sans-serif;
+    color: var(--amber);
     text-transform: uppercase;
     letter-spacing: 0.16em;
     font-size: 0.74rem;
@@ -323,7 +324,7 @@ const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief'
     margin: 0;
     font-size: clamp(1.1rem, 2vw, 1.35rem);
     line-height: 1.2;
-    color: #17272b;
+    color: var(--brand-teal);
   }
 
   @media (max-width: 700px) {
@@ -334,10 +335,6 @@ const authorRole = author?.id === 'charlotte-mowbray-greene' ? 'Editor in Chief'
 
     .feed-card {
       grid-template-columns: 1fr;
-    }
-
-    .feed-card-frame {
-      max-width: 220px;
     }
   }
 </style>

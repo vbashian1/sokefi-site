@@ -65,6 +65,37 @@
   margin: 0 0 0.25rem;
 }
 
+/* Sources at the foot of an article, as a footnote (Veronica, 2026-10-23): a small muted
+   label instead of a bold heading, and the citations below it in smaller muted type.
+   "**Sources**" gets article-sources in src/plugins/label-paragraphs.mjs. */
+.article-body .article-sources {
+  margin-top: 2.2rem;
+}
+
+.article-body .article-sources .article-label {
+  margin: 0 0 0.35rem;
+  font-family: 'Lato', Arial, sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(23, 39, 43, 0.72);
+}
+
+.article-body .article-sources .article-label strong {
+  font-weight: 700;
+}
+
+.article-body .article-sources + ul {
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: rgba(23, 39, 43, 0.72);
+}
+
+.article-body .article-sources + ul a {
+  color: inherit;
+}
+
 /* The amber-bar pull quote (a Markdown "> …" quote, or <PullQuote>). */
 .article-body blockquote {
   margin: 2.2rem 0;

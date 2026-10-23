@@ -206,8 +206,10 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
     line-height: 1.5;
   }
 
+  /* Gold Lato eyebrow and teal title, as on every article card on the site. */
   .feed-card-eyebrow {
-    color: var(--brand-teal);
+    font-family: 'Lato', Arial, sans-serif;
+    color: var(--amber);
     text-transform: uppercase;
     letter-spacing: 0.16em;
     font-size: 0.74rem;
@@ -218,7 +220,7 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
     margin: 0;
     font-size: clamp(1.1rem, 2vw, 1.35rem);
     line-height: 1.2;
-    color: #17272b;
+    color: var(--brand-teal);
   }
 
   .feed-empty-state {

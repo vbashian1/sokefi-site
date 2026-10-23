@@ -331,7 +331,7 @@ const articleSchema = entry
                   <p class="author-card-bio" set:html={authorBioHtml} />
                   {authorHref && (
                     <a class="author-card-link inline-link" href={authorHref}>
-                      View profile &rarr;
+                      More from {authorEntry.data.name.split(' ')[0]} &rarr;
                     </a>
                   )}
                 </div>

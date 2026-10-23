@@ -43,6 +43,17 @@ export const labelParagraphs = {
       const body = [text, ...rest].filter((c) => !(c.type === 'text' && c.value === ''));
       if (body.length) children.push({ type: 'paragraph', children: body });
     }
-    ctx.replaceNode(node, element('div', 'article-labelled', children));
+    // "**Sources**" above the citations list is styled as a quiet footnote (Veronica,
+    // 2026-10-23): article-sources on the label, and the list right after it, in article-body.css.
+    const isSources =
+      labelOnly &&
+      first.children
+        .map((c) => c.value)
+        .join('')
+        .trim() === 'Sources';
+    ctx.replaceNode(
+      node,
+      element('div', isSources ? 'article-labelled article-sources' : 'article-labelled', children),
+    );
   },
 };
