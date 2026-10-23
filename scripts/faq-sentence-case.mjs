@@ -76,7 +76,8 @@ export function sentenceCaseFaq(frontmatter, body) {
   const updated = frontmatter.replace(
     /^( {2}- question:\s*)(['"]?)(.*?)\2(\s*(?:#.*)?)$/gm,
     (line, lead, quote, question, tail) => {
-      if (/\p{Ll}/u.test(question)) return line; // already mixed case
+      // Already mixed case, ignoring decades written "70s" inside an all-caps question.
+      if (/\p{Ll}/u.test(question.replace(/\d+s\b/g, ''))) return line;
       const after = sentenceCaseQuestion(question, { phrases, words });
       changes.push([question, after]);
       return `${lead}${quote}${after}${quote}${tail}`;

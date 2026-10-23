@@ -14,6 +14,21 @@ export const prerender = false;
 const entry = import.meta.env.DEV ? await getEntry('articles', Astro.params.slug ?? '') : undefined;
 if (!entry) return new Response('Not found', { status: 404 });
 
+// With ?proposal=1 the in-article photos come from the proposed layout
+// (src/proposals/<article>.mdx, or .<name>.mdx for ?proposal=<name>), so they can be framed
+// before that layout is saved into the article.
+const proposalSources = import.meta.glob('../../../proposals/*.mdx', {
+  query: '?raw',
+  import: 'default',
+});
+const proposalName = Astro.url.searchParams.get('proposal');
+const proposalSource = Astro.url.searchParams.has('proposal')
+  ? proposalSources[
+      `../../../proposals/${entry.id}${proposalName && proposalName !== '1' ? `.${proposalName}` : ''}.mdx`
+    ]
+  : undefined;
+const body = proposalSource ? ((await proposalSource()) as string) : (entry.body ?? '');
+
 const articleUrl = `/articles/${entry.id}/`;
 const authorUrl = getAuthorRoute(entry.data.author.id);
 
@@ -73,7 +88,7 @@ const SHAPE_CHOICES = [
 ] as const;
 const attr = (attrs: string, re: RegExp) => attrs.match(re)?.[1];
 const galleryImages = entry.data.gallery ?? [];
-const placements = [...(entry.body ?? '').matchAll(/<Gallery\b([^>]*?)\/>/g)]
+const placements = [...body.matchAll(/<Gallery\b([^>]*?)\/>/g)]
   .map((m, i) => {
     const attrs = m[1];
     const pick = Number(attr(attrs, /pick=\{\[\s*(\d+)\s*\]\}/));
@@ -102,6 +117,11 @@ const placements = [...(entry.body ?? '').matchAll(/<Gallery\b([^>]*?)\/>/g)]
       the outlines show exactly what each screen width shows of your original. When it looks right,
       copy the values and send them to me. Nothing here is saved.
     </p>
+    {
+      proposalSource && (
+        <p class="framing-intro">In-article photos are placed as in the proposed layout.</p>
+      )
+    }
 
     {
       PLACEMENTS.map((p) => (
