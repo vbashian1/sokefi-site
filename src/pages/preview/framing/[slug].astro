@@ -8,6 +8,7 @@ import { getEntry } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 import { getAuthorRoute } from '../../../config/routes';
 import ArticleGallery from '../../../components/ArticleGallery.astro';
+import Inset from '../../../components/blocks/Inset.astro';
 
 export const prerender = false;
 
@@ -88,15 +89,21 @@ const SHAPE_CHOICES = [
 ] as const;
 const attr = (attrs: string, re: RegExp) => attrs.match(re)?.[1];
 const galleryImages = entry.data.gallery ?? [];
-const placements = [...body.matchAll(/<Gallery\b([^>]*?)\/>/g)]
+// <Inset pick={n} … /> markers are included too (Veronica, 2026-10-23), drawn by the Inset
+// component at its own width, and keep their side and size in the copied marker.
+const placements = [...body.matchAll(/<(Gallery|Inset)\b([^>]*?)\/>/g)]
   .map((m, i) => {
-    const attrs = m[1];
-    const pick = Number(attr(attrs, /pick=\{\[\s*(\d+)\s*\]\}/));
+    const inset = m[1] === 'Inset';
+    const attrs = m[2];
+    const pick = Number(attr(attrs, inset ? /pick=\{\s*(\d+)\s*\}/ : /pick=\{\[\s*(\d+)\s*\]\}/));
     const image = galleryImages[pick];
     if (!image) return null;
     return {
       n: i + 1,
       pick,
+      inset,
+      side: (attr(attrs, /side="([^"]+)"/) ?? 'left') as 'left' | 'right',
+      size: (attr(attrs, /size="([^"]+)"/) ?? 'standard') as 'standard' | 'large',
       image,
       file: decodeURIComponent(image.src.split('?')[0].split('/').pop() ?? ''),
       shape: (attr(attrs, /shape="([^"]+)"/) ??
@@ -219,9 +226,11 @@ const placements = [...body.matchAll(/<Gallery\b([^>]*?)\/>/g)]
           class="framing-section framing-gallery"
           data-pick={g.pick}
           data-saved-shape={g.shape}
+          data-inset={g.inset ? `${g.side},${g.size}` : undefined}
         >
           <h2>
             Photo {g.n}: {g.file}
+            {g.inset && ` (inset, ${g.side}${g.size === 'large' ? ', large' : ''})`}
           </h2>
 
           <fieldset class="framing-shapes">
@@ -282,13 +291,28 @@ const placements = [...body.matchAll(/<Gallery\b([^>]*?)\/>/g)]
               <ul class="framing-legend" />
             </div>
             <div class="framing-column">
-              <p class="framing-column-label">In the article column ({ARTICLE_COLUMN}px)</p>
-              <ArticleGallery
-                images={[g.image]}
-                shape={g.shape}
-                focus={`${g.focus.x}% ${g.focus.y}%`}
-                zoom={g.zoom}
-              />
+              <p class="framing-column-label">
+                {g.inset
+                  ? `As an inset beside the text, in the article column (${ARTICLE_COLUMN}px)`
+                  : `In the article column (${ARTICLE_COLUMN}px)`}
+              </p>
+              {g.inset ? (
+                <Inset
+                  image={g.image}
+                  side={g.side}
+                  size={g.size}
+                  shape={g.shape}
+                  focus={`${g.focus.x}% ${g.focus.y}%`}
+                  zoom={g.zoom}
+                />
+              ) : (
+                <ArticleGallery
+                  images={[g.image]}
+                  shape={g.shape}
+                  focus={`${g.focus.x}% ${g.focus.y}%`}
+                  zoom={g.zoom}
+                />
+              )}
             </div>
           </div>
         </section>
@@ -477,6 +501,16 @@ const placements = [...body.matchAll(/<Gallery\b([^>]*?)\/>/g)]
     const legend = section.querySelector<HTMLElement>('.framing-legend')!;
     const valuesOut = section.querySelector<HTMLElement>('[data-values]')!;
     const pick = section.dataset.pick;
+    // Insets: "side,size". On phones an inset is a centred photo at 70% of the column
+    // (up to 340px), whatever its shape (Inset.astro).
+    const [insetSide, insetSize] = section.dataset.inset?.split(',') ?? [];
+    const inset = insetSide ? { side: insetSide, size: insetSize } : undefined;
+    const phoneWidth = (kind: string) =>
+      inset
+        ? Math.round(Math.min(PHONE_COLUMN * 0.7, 340))
+        : kind === 'portrait'
+          ? PHONE_PORTRAIT
+          : PHONE_COLUMN;
     const inputs = {
       x: section.querySelector<HTMLInputElement>('[data-control="x"]')!,
       y: section.querySelector<HTMLInputElement>('[data-control="y"]')!,
@@ -512,21 +546,27 @@ const placements = [...body.matchAll(/<Gallery\b([^>]*?)\/>/g)]
       frame.style.aspectRatio = String(ratio);
       frame.style.setProperty('--focus', `${f.x}% ${f.y}%`);
       frame.style.setProperty('--zoom', String(f.z));
-      frame.classList.remove(
-        'gallery-frame-landscape',
-        'gallery-frame-portrait',
-        'gallery-frame-square',
-      );
-      frame.classList.add(`gallery-frame-${kind}`);
+      // An inset's frame always fills the inset; a gallery frame's width follows its shape.
+      if (!inset) {
+        frame.classList.remove(
+          'gallery-frame-landscape',
+          'gallery-frame-portrait',
+          'gallery-frame-square',
+        );
+        frame.classList.add(`gallery-frame-${kind}`);
+      }
 
       section.querySelector('[data-out="x"]')!.textContent = `${f.x}%`;
       section.querySelector('[data-out="y"]')!.textContent = `${f.y}%`;
       section.querySelector('[data-out="z"]')!.textContent = `${f.z.toFixed(2)}×`;
 
       const untouched = shape === 'original' && f.x === 50 && f.y === 50 && f.z === 1;
-      valuesOut.textContent = untouched
-        ? `<Gallery pick={[${pick}]} />`
-        : `<Gallery pick={[${pick}]}${shape === 'original' ? '' : ` shape="${shape}"`} focus="${f.x}% ${f.y}%"${f.z > 1 ? ` zoom={${f.z.toFixed(2)}}` : ''} />`;
+      const framing = untouched
+        ? ''
+        : `${shape === 'original' ? '' : ` shape="${shape}"`} focus="${f.x}% ${f.y}%"${f.z > 1 ? ` zoom={${f.z.toFixed(2)}}` : ''}`;
+      valuesOut.textContent = inset
+        ? `<Inset side="${inset.side}"${inset.size === 'large' ? ' size="large"' : ''} pick={${pick}}${framing} />`
+        : `<Gallery pick={[${pick}]}${framing} />`;
 
       const area = visibleArea(img, f);
       overlay.replaceChildren();
@@ -542,8 +582,8 @@ const placements = [...body.matchAll(/<Gallery\b([^>]*?)\/>/g)]
       const lines = [
         { label: `Desktop: ${img.offsetWidth}px wide`, density: area.density },
         {
-          label: `Phone: ${kind === 'portrait' ? PHONE_PORTRAIT : PHONE_COLUMN}px wide`,
-          density: (area.width * nw) / (kind === 'portrait' ? PHONE_PORTRAIT : PHONE_COLUMN),
+          label: `Phone: ${phoneWidth(kind)}px wide`,
+          density: (area.width * nw) / phoneWidth(kind),
         },
       ];
       legend.replaceChildren();
@@ -789,6 +829,8 @@ const placements = [...body.matchAll(/<Gallery\b([^>]*?)\/>/g)]
   /* The article column at the site's real width (680px), so the gallery component sizes
      its frame exactly as in the article. */
   .framing-column {
+    /* flow-root: the column wraps an inset, which floats like it does in the article. */
+    display: flow-root;
     width: 680px;
     max-width: 100%;
     padding: 0 0 0.5rem;
