@@ -1,11 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
+import ArticleCard from '../components/ArticleCard.astro';
 import reservationSelfieHat from '../assets/images/reservation-selfie-hat.webp';
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
-import { getThumbnailSrc } from '../utils/pillarFallback';
-import { framingStyle } from '../utils/framing';
 import { getAuthorRoute } from '../config/routes';
-import { smartQuotes } from '../plugins/typography.mjs';
 
 // Articles marked listed: false are left out of every listing.
 const allArticles = await getCollection('articles', ({ data }) => data.listed !== false);
@@ -64,46 +62,12 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
       {
         orderedArticles.length > 0 ? (
           <div class="feed-list">
-            {orderedArticles.map((article) => {
-              const thumbnailSrc = getThumbnailSrc(article);
-              const byline =
-                article.data.byline || authorNameMap[article.data.author.id] || 'Sokéfi';
-
-              return (
-                <article class:list={['feed-card', article.data.featured && 'feed-card-featured']}>
-                  {thumbnailSrc && (
-                    <span class="feed-card-frame">
-                      <img
-                        class="feed-card-image"
-                        src={thumbnailSrc}
-                        alt={article.data.title}
-                        loading="lazy"
-                        decoding="async"
-                        style={
-                          article.data.thumbnail
-                            ? framingStyle(article.data.thumbnailFocus, article.data.thumbnailZoom)
-                            : undefined
-                        }
-                      />
-                    </span>
-                  )}
-                  <div class="feed-card-body">
-                    <p class="feed-card-eyebrow">
-                      {smartQuotes(article.data.eyebrow || 'Reservation for One')}
-                    </p>
-                    <p class="feed-card-byline">{byline}</p>
-                    <h3 class="feed-card-title">{smartQuotes(article.data.title)}</h3>
-                    <p class="feed-card-dek">
-                      {smartQuotes(
-                        article.data.dek ||
-                          article.data.description ||
-                          article.data.metaDescription,
-                      )}
-                    </p>
-                  </div>
-                </article>
-              );
-            })}
+            {orderedArticles.map((article) => (
+              <ArticleCard
+                article={article}
+                byline={article.data.byline || authorNameMap[article.data.author.id] || 'Sokéfi'}
+              />
+            ))}
           </div>
         ) : (
           <div class="feed-empty-state">
@@ -145,82 +109,14 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
     font-size: 0.76rem;
     color: var(--brand-teal);
     font-weight: 700;
+    /* Balanced lines, so a short last word doesn't sit alone on phones. */
+    text-wrap: balance;
   }
 
   .feed-list {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1rem;
-  }
-
-  .feed-card {
-    display: grid;
-    grid-template-columns: minmax(180px, 240px) 1fr;
-    gap: 1rem;
-    padding: 1rem;
-    background: #fff;
-    border: 1px solid rgba(14, 143, 184, 0.16);
-    border-radius: 0;
-    box-shadow: none;
-  }
-
-  .feed-card-featured {
-    border-color: rgba(201, 162, 39, 0.45);
-    background: #fdf8eb;
-    transform: translateY(-1px);
-  }
-
-  /* The frame sets the card image size and clips it, so the article's framing (focus and
-     zoom, from thumbnailFocus / thumbnailZoom) can scale the photo inside it. */
-  .feed-card-frame {
-    display: block;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
-    border: 1px solid rgba(14, 143, 184, 0.16);
-  }
-
-  .feed-card-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: var(--focus, center center);
-    transform: scale(var(--zoom, 1));
-    transform-origin: var(--focus, center center);
-    display: block;
-    border-radius: 0;
-  }
-
-  .feed-card-body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.45rem;
-  }
-
-  .feed-card-eyebrow,
-  .feed-card-byline,
-  .feed-card-dek {
-    margin: 0;
-    color: #46565b;
-    font-size: 0.95rem;
-    line-height: 1.5;
-  }
-
-  /* Gold Lato eyebrow and teal title, as on every article card on the site. */
-  .feed-card-eyebrow {
-    font-family: 'Lato', Arial, sans-serif;
-    color: var(--amber);
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    font-size: 0.74rem;
-    font-weight: 700;
-  }
-
-  .feed-card-title {
-    margin: 0;
-    font-size: clamp(1.1rem, 2vw, 1.35rem);
-    line-height: 1.2;
-    color: var(--brand-teal);
   }
 
   .feed-empty-state {
@@ -290,15 +186,5 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
     margin: 0;
     color: #f7f4ef;
     line-height: 1.5;
-  }
-
-  @media (max-width: 700px) {
-    .feed-card {
-      grid-template-columns: 1fr;
-    }
-
-    .feed-card-frame {
-      max-width: 220px;
-    }
   }
 </style>

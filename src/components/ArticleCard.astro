@@ -1,0 +1,153 @@
+---
+// One article card for every article list on the site — author profiles, pillar pages and
+// the homepage (Veronica, 2026-10-25), so they all look and behave the same: the card photo
+// with the article's own framing (thumbnailFocus / thumbnailZoom), full width on phones;
+// a gold Lato eyebrow; a teal title; the dek. The whole card opens the article.
+//   <ArticleCard article={entry} />                       (author profile: no byline)
+//   <ArticleCard article={entry} byline="Sophie Westbrooke" />   (pillar pages)
+// Place cards inside a .feed-list (or any grid/stack) on the page.
+import type { CollectionEntry } from 'astro:content';
+import { getThumbnailSrc } from '../utils/pillarFallback';
+import { framingStyle } from '../utils/framing';
+import { getArticleRoute } from '../config/routes';
+import { smartQuotes } from '../plugins/typography.mjs';
+
+interface Props {
+  article: CollectionEntry<'articles'>;
+  /** Shown under the eyebrow when given (not on the author's own profile). */
+  byline?: string;
+}
+
+const { article, byline } = Astro.props;
+const thumbnailSrc = getThumbnailSrc(article);
+---
+
+<article class:list={['feed-card', article.data.featured && 'feed-card-featured']}>
+  {
+    thumbnailSrc && (
+      <span class="feed-card-frame">
+        <img
+          class="feed-card-image"
+          src={thumbnailSrc}
+          alt={article.data.title}
+          loading="lazy"
+          decoding="async"
+          style={
+            article.data.thumbnail
+              ? framingStyle(article.data.thumbnailFocus, article.data.thumbnailZoom)
+              : undefined
+          }
+        />
+      </span>
+    )
+  }
+  <div class="feed-card-body">
+    <p class="feed-card-eyebrow">{smartQuotes(article.data.eyebrow || article.data.pillar)}</p>
+    {byline && <p class="feed-card-byline">{byline}</p>}
+    <h3 class="feed-card-title">
+      <a class="feed-card-link" href={getArticleRoute(article.id)}>
+        {smartQuotes(article.data.title)}
+      </a>
+    </h3>
+    <p class="feed-card-dek">
+      {smartQuotes(article.data.dek || article.data.description || article.data.metaDescription)}
+    </p>
+  </div>
+</article>
+
+<style>
+  /* The whole card opens the article: the title link is stretched over the card. */
+  .feed-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(180px, 240px) 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid rgba(14, 143, 184, 0.16);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .feed-card-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .feed-card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .feed-card:hover .feed-card-link,
+  .feed-card-link:focus-visible {
+    text-decoration: underline;
+  }
+
+  .feed-card-featured {
+    border-color: rgba(201, 162, 39, 0.45);
+    background: #fdf8eb;
+    transform: translateY(-1px);
+  }
+
+  /* The frame sets the card image size and clips it, so the article's framing (focus and
+     zoom) can scale the photo inside it. */
+  .feed-card-frame {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border: 1px solid rgba(14, 143, 184, 0.16);
+  }
+
+  .feed-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--focus, center center);
+    transform: scale(var(--zoom, 1));
+    transform-origin: var(--focus, center center);
+    display: block;
+    border-radius: 0;
+  }
+
+  .feed-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .feed-card-eyebrow,
+  .feed-card-byline,
+  .feed-card-dek {
+    margin: 0;
+    color: #46565b;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  /* Gold Lato eyebrow and teal title, on every article card on the site. */
+  .feed-card-eyebrow {
+    font-family: 'Lato', Arial, sans-serif;
+    color: var(--amber);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.74rem;
+    font-weight: 700;
+  }
+
+  .feed-card-title {
+    margin: 0;
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    line-height: 1.2;
+    color: var(--brand-teal);
+  }
+
+  /* Phones: photo above the text, across the card's full width. */
+  @media (max-width: 700px) {
+    .feed-card {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
