@@ -7,7 +7,7 @@ _Running list of every hotel / accommodation link on the site (Veronica, 2026-10
 - **Link** — `/go/<key>` links are redirects set in `src/data/affiliates.ts` (generated from `sokefi_go_links_launch15.md`); switching one to Booking.com is a one-line change there. "Direct" links go straight to the site written in the article and would need the article edited.
 - **Earns** — _Affiliate_: the programme pays commission (tracking is added in Phase B; until then the link is a plain URL). _Referral_: earns nothing (the hotel's own site, or a direct link).
 
-Last updated: 2026-10-26 (Cairo, "60", Blues Highway, Iceland, Tresco, Darwin, Confessions, Colon cancer screening, Cognitive, Tourist Dad, Plumbers, Surfer, Wearables, Solo cruising).
+Last updated: 2026-10-26 (Cairo, "60", Blues Highway, Iceland, Tresco, Darwin, Confessions, Colon cancer screening, Cognitive, Tourist Dad, Plumbers, Surfer, Wearables, Solo cruising, Modern Nomad Q&A).
 
 | Article       | Hotel                                                                   | Link                                      | Current destination                                      | Earns                                               |
 | ------------- | ----------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------- | --------------------------------------------------- |
@@ -31,7 +31,7 @@ Last updated: 2026-10-26 (Cairo, "60", Blues Highway, Iceland, Tresco, Darwin, C
 | Surfer        | Marriott's Newport Coast Villas                                         | `/go/marriott-newport-coast-villas`       | marriott.com — Marriott's Newport Coast Villas           | Affiliate (Marriott)                                |
 | Surfer        | Riviera Beach & Shores, a Hilton Vacation Club (Capistrano Beach)       | `/go/hilton-riviera-beach`                | hilton.com — Hilton Vacation Club Riviera Beach & Shores | Affiliate (Hilton)                                  |
 
-"What Does It Mean to Be 60?", "Confessions of a Modern Nomad", "A New At-Home Way to Screen for Colon Cancer", "How We Can Optimise Our Cognitive Abilities As We Age", "The Tourist Dad Uniform", "Why My Daughters Are Great Plumbers" and "What's New in Wearable Devices and Biomarker Tracking" have no hotel links.
+"What Does It Mean to Be 60?", "Confessions of a Modern Nomad", "A New At-Home Way to Screen for Colon Cancer", "How We Can Optimise Our Cognitive Abilities As We Age", "The Tourist Dad Uniform", "Why My Daughters Are Great Plumbers", "What's New in Wearable Devices and Biomarker Tracking" and "A Modern Nomad's Answers to Questions about Solo Travel" have no hotel links.
 
 **Cruise lines** (Solo cruising piece — not hotels, so not part of the Booking.com switch; listed so every booking link is in one place)
 
