@@ -17,6 +17,7 @@ export const ESSENTIALS_LABELS = [
   'Where to base yourself',
   'Tipping and cash',
   'Local laws',
+  'On the water',
 ];
 
 // Words left lower case inside a title-case heading.
@@ -42,9 +43,16 @@ export function checkHouseHeadings(body) {
   const mismatches = [];
   const lines = body.split('\n');
   const canonical = (list, text) => list.find((c) => c.toLowerCase() === text.toLowerCase());
+  // Inside a labelled section (a label on its own line, e.g. "Where to stay" or "On the
+  // water"), a paragraph may open with a bold lead-in ending in a colon — "**A room with a
+  // view:** our favourites are…" — and that is not a label (Veronica, 2026-10-25). The section
+  // runs until the next heading, rule, Details box or label of its own.
+  let inLabelledSection = false;
 
   lines.forEach((line, i) => {
     const at = `body line ${i + 1}`;
+
+    if (/^(#{1,6}\s|---\s*$|\*\*\[THE DETAILS)/.test(line)) inLabelledSection = false;
 
     const heading = line.match(/^(#{2,4})\s+(.+?)\s*$/);
     if (heading) {
@@ -63,6 +71,9 @@ export function checkHouseHeadings(body) {
     const label = line.match(/^\*\*([^*[][^*]*?)\*\*(.*)$/);
     if (label) {
       const [, text, after] = label;
+      if (inLabelledSection && text.endsWith(':') && /^\s+\S/.test(after)) return; // lead-in
+      // A label on its own line starts a labelled section.
+      inLabelledSection = after.trim() === '';
       // A label followed by a space and its sentence on the same line must move to its own
       // line. (A bold place name followed by a colon, "**Cleveland**: our base…", is not a label.)
       if (/^\s+\S/.test(after)) {
