@@ -22,7 +22,7 @@ export interface GoLink {
 }
 
 export const AFFILIATES: Record<string, GoLink> = {
-  // --- Ready to set up (56) ---
+  // --- Ready to set up (55) ---
   'bb-king-museum': {
     destination: 'https://bbkingmuseum.org/',
     partner: 'bbkingmuseum.org',
@@ -125,10 +125,6 @@ export const AFFILIATES: Record<string, GoLink> = {
     destination:
       'https://www.getyourguide.com/reykjavik-l30/half-day-snorkeling-in-silfra-fissure-in-thingvellir-t26046/',
     partner: 'getyourguide.com',
-  },
-  'hilo-aktiia': {
-    destination: 'https://us.hilo.com/products/hilo-core',
-    partner: 'hilo.com',
   },
   'hilton-riviera-beach': {
     destination:
@@ -285,7 +281,7 @@ export const AFFILIATES: Record<string, GoLink> = {
     partner: 'voicemap.me',
   },
 
-  // --- Special setup (3) ---
+  // --- Special setup (4) ---
   'booking-karma-st-martins': {
     destination: 'https://www.karmagroup.com/find-destination/karma-resorts/karma-st-martins/',
     partner: 'karmagroup.com',
@@ -302,6 +298,13 @@ export const AFFILIATES: Record<string, GoLink> = {
       uk: 'https://www.staysure.co.uk/',
     },
     partner: 'allianztravelinsurance.com / staysure.co.uk',
+  },
+  'hilo-aktiia': {
+    destination: {
+      us: 'https://us.hilo.com/products/hilo-core',
+      uk: 'https://hilo.com/en-gb/products/blood-pressure-monitor',
+    },
+    partner: 'us.hilo.com / hilo.com',
   },
 };
 

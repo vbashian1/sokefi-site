@@ -32,6 +32,15 @@ const SPECIAL = {
     },
     partner: 'allianztravelinsurance.com / staysure.co.uk',
   },
+  // Region split (Veronica, 2026-10-26): the band is sold as Hilo Core in the US and Hilo
+  // Band in the UK, each from its own shop; anyone else gets "link unavailable".
+  'hilo-aktiia': {
+    destination: {
+      us: 'https://us.hilo.com/products/hilo-core',
+      uk: 'https://hilo.com/en-gb/products/blood-pressure-monitor',
+    },
+    partner: 'us.hilo.com / hilo.com',
+  },
 };
 
 /** @type {Record<string, string>} key → destination, when it must differ from the table. */
