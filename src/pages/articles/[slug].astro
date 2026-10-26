@@ -19,6 +19,7 @@ import Inset from '../../components/blocks/Inset.astro';
 import PullQuote from '../../components/blocks/PullQuote.astro';
 import ReaderInvitation from '../../components/blocks/ReaderInvitation.astro';
 import { smartQuotes } from '../../plugins/typography.mjs';
+import { AFFILIATES } from '../../data/affiliates';
 
 // Components an article body can use (photos, layout blocks, Details boxes).
 const MDX_COMPONENTS = {
@@ -147,6 +148,20 @@ const displayDek = entry?.data.dek ?? '';
 const colonAt = displayTitle.indexOf(': ');
 const titleParts =
   colonAt > 0 ? [displayTitle.slice(0, colonAt + 1), displayTitle.slice(colonAt + 2)] : null;
+// Phrases kept on one line (titleKeepTogether): the title is split into plain text and
+// phrases, and each phrase is shown in a no-wrap span (Veronica, 2026-10-26: "Tourist Dad").
+const keepTogether = entry?.data.titleKeepTogether ?? [];
+const titleSegments = (text: string) => {
+  const quoted = smartQuotes(text);
+  const phrases = keepTogether.map((p) => smartQuotes(p)).filter((p) => quoted.includes(p));
+  if (!phrases.length) return [{ text: quoted, keep: false }];
+  const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(`(${phrases.map(escape).join('|')})`);
+  return quoted
+    .split(pattern)
+    .filter(Boolean)
+    .map((part) => ({ text: part, keep: phrases.includes(part) }));
+};
 
 // FAQ text can carry links and needs the same quotes and dashes as the body copy.
 const faqItems = await Promise.all(
@@ -154,6 +169,13 @@ const faqItems = await Promise.all(
     question: await renderInlineHtml(item.question),
     answer: await renderInlineHtml(item.answer),
   })),
+);
+// Affiliate disclosure (Veronica, 2026-10-26, publisher norms): one short note under the
+// byline on every article with an affiliate link — a /go/ link in a box or in the text whose
+// programme pays commission (referral links don't count). Worked out from the links
+// themselves, so it can't fall out of step with the article.
+const hasAffiliateLinks = [...(entry?.body ?? '').matchAll(/\/go\/([a-z0-9-]+)/g)].some(
+  ([, key]) => Object.hasOwn(AFFILIATES, key) && AFFILIATES[key].referral !== true,
 );
 // Titles, deks and eyebrows get the same curly quotes as body copy.
 const subtitleText = smartQuotes(entry?.data.subtitle ?? '');
@@ -226,11 +248,21 @@ const articleSchema = entry
               <h1 class="article-title" id="article-title">
                 {titleParts ? (
                   <>
-                    <span class="article-title-part">{smartQuotes(titleParts[0])}</span>{' '}
-                    <span class="article-title-part">{smartQuotes(titleParts[1])}</span>
+                    {titleParts.map((part, i) => (
+                      <>
+                        {i > 0 && ' '}
+                        <span class="article-title-part">
+                          {titleSegments(part).map((s) =>
+                            s.keep ? <span class="title-keep">{s.text}</span> : s.text,
+                          )}
+                        </span>
+                      </>
+                    ))}
                   </>
                 ) : (
-                  smartQuotes(displayTitle)
+                  titleSegments(displayTitle).map((s) =>
+                    s.keep ? <span class="title-keep">{s.text}</span> : s.text,
+                  )
                 )}
               </h1>
               {subtitleText && <p class="article-subtitle">{subtitleText}</p>}
@@ -282,6 +314,11 @@ const articleSchema = entry
                   </div>
                 </div>
               )}
+              {hasAffiliateLinks && (
+                <div class="article-disclosure">
+                  <AffiliateDisclosure />
+                </div>
+              )}
             </header>
 
             <div class="article-rule" aria-hidden="true" />
@@ -301,12 +338,6 @@ const articleSchema = entry
             >
               {Content && <Content components={MDX_COMPONENTS} />}
             </div>
-
-            {entry.data.affiliateDisclosure && (
-              <div class="article-disclosure">
-                <AffiliateDisclosure />
-              </div>
-            )}
 
             {faqItems.length > 0 && (
               <section class="article-faq" aria-labelledby="article-faq-heading">
@@ -386,6 +417,11 @@ const articleSchema = entry
   .article-title-part {
     display: block;
     text-wrap: balance;
+  }
+
+  /* A phrase that must not be split across lines (titleKeepTogether). */
+  .title-keep {
+    white-space: nowrap;
   }
 
   /* A line below the title, above the dek (subtitle field): Playfair like the title, smaller. */
@@ -472,8 +508,9 @@ const articleSchema = entry
     color: var(--text);
   }
 
+  /* Sits under the byline, before the rule. */
   .article-disclosure {
-    margin: 0 0 1.85rem;
+    margin: -0.6rem 0 1.4rem;
   }
 
   .article-faq {

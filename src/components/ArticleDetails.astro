@@ -1,7 +1,8 @@
 ---
 // Renders the booking/affiliate "Details" boxes from article bodies as a magazine-style
 // info panel: a short label (e.g. "The tour"), the place or product as a Playfair
-// headline, an optional provider line, the detail lines, a button and a commission note.
+// headline, an optional provider line, the detail lines and a button. (No commission line in
+// the box: the article's one affiliate disclosure sits under the byline — Veronica, 2026-10-26.)
 //
 // Articles write boxes in the Details Box Standard (Label / Headline / Provider / Price /
 // Includes / Tip / Button / Link); src/plugins/details-boxes.mjs turns each one into
@@ -12,7 +13,6 @@
 // Older boxes written as <Details title lines links /> still work: `lines` is a free
 // label/value list and `links` can carry more than one button.
 import { getReaderMarket } from '../utils/visitorRegion';
-import { AFFILIATES } from '../data/affiliates';
 
 interface DetailLine {
   label: string;
@@ -95,24 +95,6 @@ const buttons = links.map((link) => ({
   href: link.href,
   text: BUTTON_WORDING[link.label.trim().toLowerCase()] ?? link.label,
 }));
-
-// Referral links (no commission: official sites, the hotel's own site) keep "Recommended by
-// Sokéfi." but drop the commission sentence (Veronica, 2026-10-22). Read from the /go/ list.
-const goKey = (href: string) => href.match(/^\/go\/([^/?#]+)/)?.[1];
-const referralOnly =
-  buttons.length > 0 &&
-  buttons.every((b) => {
-    const key = goKey(b.href);
-    return key !== undefined && Object.hasOwn(AFFILIATES, key) && AFFILIATES[key].referral === true;
-  });
-
-// The commission note uses the first button's action: "if you book / buy / get a quote".
-const firstButton = buttons[0]?.text.toLowerCase() ?? '';
-const verb = firstButton.startsWith('buy')
-  ? 'buy'
-  : firstButton.includes('quote')
-    ? 'get a quote'
-    : 'book';
 ---
 
 {
@@ -140,11 +122,6 @@ const verb = firstButton.startsWith('buy')
             </a>
           ))}
         </div>
-        <p class="article-details-note">
-          {referralOnly
-            ? 'Recommended by Sokéfi.'
-            : `Recommended by Sokéfi. We may earn a small commission if you ${verb} through this link, at no extra cost to you.`}
-        </p>
       </div>
     </aside>
   )
@@ -257,13 +234,5 @@ const verb = firstButton.startsWith('buy')
   .article-details .article-details-cta:focus-visible {
     color: var(--brand-teal);
     background: color-mix(in srgb, var(--amber) 18%, transparent);
-  }
-
-  .article-details .article-details-note {
-    margin: 0.75rem 0 0;
-    font-family: 'Lato', Arial, sans-serif;
-    font-size: 0.78rem;
-    line-height: 1.5;
-    color: rgba(23, 39, 43, 0.62);
   }
 </style>

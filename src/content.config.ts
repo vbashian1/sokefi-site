@@ -96,6 +96,9 @@ const articles = defineCollection({
       titleTag: z.string().optional(),
       // A line shown below the title (e.g. "Escape to Tresco"), above the dek.
       subtitle: z.string().optional(),
+      // Words in the page title that must stay on one line at every width (e.g.
+      // ["Tourist Dad"]). Only the article page's title; the text itself is unchanged.
+      titleKeepTogether: z.array(z.string()).optional(),
       byline: z.string().default(''),
       dek: z.string().default(''),
       // GEO summary — metadata only, never rendered on the page. It feeds the
