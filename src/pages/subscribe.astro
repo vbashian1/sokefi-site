@@ -1,24 +1,197 @@
 ---
+// Subscribe to The Sokéfi Edit (Veronica, 2026-10-27). The form is built and shown, but its
+// button is switched off (like "Tell us") until an email provider is chosen. To switch it on:
+// set the form's `action` (and any hidden fields) from the provider, and remove `disabled`
+// from the button — see PROVIDER below. With the button disabled, pressing Enter in a field
+// doesn't send anything either.
 import Base from '../layouts/Base.astro';
+import { ROUTES } from '../config/routes';
+import '../styles/article-body.css';
+
+// The provider's form address goes here once chosen; until then nothing is sent anywhere.
+const PROVIDER = { action: '', enabled: false };
+const standfirst = 'A monthly edit of travel, lifestyle and living well, for midlife and beyond.';
 ---
 
-<Base title="Subscribe — Sokéfi">
+<Base title="Subscribe | Sokéfi" description={standfirst}>
   <main>
-    <section class="pillar-header-card" aria-labelledby="subscribe-title">
-      <div class="pillar-header-text">
-        <p class="pillar-eyebrow">Sokéfi</p>
-        <h1 class="pillar-title" id="subscribe-title">Subscribe</h1>
-        <p class="pillar-tagline">Coming soon.</p>
-      </div>
-    </section>
+    <div class="article-column subscribe-page">
+      <header class="subscribe-header">
+        <p class="subscribe-eyebrow">The Sokéfi Edit</p>
+        <h1 class="subscribe-title">Subscribe</h1>
+        <p class="subscribe-dek">{standfirst}</p>
+      </header>
 
-    <section class="section pillar-intro" aria-label="Subscribe content">
-      <div class="pillar-intro-text">
-        <p>
-          Sign-up for The Sokéfi Edit newsletter isn't live yet. Check back soon, or reach us
-          directly at <a href="mailto:hello@sokefi.com">hello@sokefi.com</a>.
+      <div class="subscribe-rule" aria-hidden="true"></div>
+
+      <form
+        class="subscribe-form"
+        method="post"
+        action={PROVIDER.action || undefined}
+        data-subscribe-form
+        data-connected={PROVIDER.enabled ? 'true' : 'false'}
+        aria-label="Subscribe to The Sokéfi Edit"
+      >
+        <label class="subscribe-field">
+          <span class="subscribe-label">Email address</span>
+          <input type="email" name="email" autocomplete="email" required />
+        </label>
+        <label class="subscribe-field">
+          <span class="subscribe-label"
+            >First name <span class="subscribe-optional">(optional)</span></span
+          >
+          <input type="text" name="first_name" autocomplete="given-name" />
+        </label>
+        <p class="subscribe-consent">
+          By subscribing, you agree to receive The Sokéfi Edit by email. You can unsubscribe at any
+          time. See our{' '}
+          <a href={ROUTES.privacyPolicy}>Privacy Policy</a>.
         </p>
-      </div>
-    </section>
+        <button class="subscribe-button" type="submit" disabled={!PROVIDER.enabled}>
+          Subscribe
+        </button>
+      </form>
+    </div>
   </main>
 </Base>
+
+<script>
+  // Until a provider is connected, the form never sends anything, however it's submitted.
+  const form = document.querySelector<HTMLFormElement>('[data-subscribe-form]');
+  form?.addEventListener('submit', (event) => {
+    if (form.dataset.connected !== 'true') event.preventDefault();
+  });
+</script>
+
+<style>
+  .subscribe-page {
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+  }
+
+  /* Header, as on the articles and the Edit. */
+  .subscribe-header {
+    margin: 1.85rem 0 0;
+  }
+
+  .subscribe-eyebrow {
+    margin: 0 0 0.85rem;
+    font-family: 'Lato', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--amber);
+  }
+
+  .subscribe-title {
+    margin: 0 0 0.85rem;
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--teal-deep);
+    font-size: clamp(2.1rem, 4vw, 3rem);
+    line-height: 1.15;
+  }
+
+  .subscribe-dek {
+    margin: 0 0 1.5rem;
+    font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+    font-size: clamp(1.1rem, 1.7vw, 1.25rem);
+    line-height: 1.55;
+    color: rgba(23, 39, 43, 0.72);
+  }
+
+  .subscribe-rule {
+    height: 1.5px;
+    background: var(--teal);
+    margin: 0 0 2rem;
+  }
+
+  .subscribe-form {
+    display: grid;
+    gap: 1.2rem;
+    max-width: 460px;
+  }
+
+  .subscribe-field {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .subscribe-label {
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand-teal);
+  }
+
+  .subscribe-optional {
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    color: #7a7870;
+  }
+
+  .subscribe-field input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid rgba(26, 95, 110, 0.35);
+    border-radius: 0;
+    background: #fff;
+    font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+    font-size: 1.05rem;
+    color: var(--text);
+  }
+
+  .subscribe-field input:focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 1px;
+    border-color: var(--brand-teal);
+  }
+
+  .subscribe-consent {
+    margin: 0;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: rgba(23, 39, 43, 0.72);
+  }
+
+  .subscribe-consent a {
+    color: var(--brand-teal);
+    text-decoration: underline;
+  }
+
+  /* The site's gold button (as "Tell us"). Until a provider is connected it looks finished
+     but isn't clickable. */
+  .subscribe-button {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 999px;
+    padding: 0.78rem 1.6rem;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: var(--gold-button-size);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.7;
+    text-transform: uppercase;
+    color: #fffdf8;
+    background: #c9a227;
+    cursor: pointer;
+  }
+
+  .subscribe-button:disabled {
+    cursor: default;
+    opacity: 1;
+  }
+
+  @media (max-width: 700px) {
+    .subscribe-button {
+      justify-self: stretch;
+    }
+  }
+</style>
