@@ -6,3 +6,5 @@ dist/
 .vercel/
 # Article content stays exactly as written (Details Box Standard, Veronica's wording).
 src/content/articles/
+public/img/
+src/data/image-manifest.json

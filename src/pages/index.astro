@@ -2,7 +2,8 @@
 import Base from '../layouts/Base.astro';
 import { getCollection, getEntry } from 'astro:content';
 import { ROUTES, getArticleRoute } from '../config/routes';
-import { getThumbnailSrc } from '../utils/pillarFallback';
+import { getThumbnailImage } from '../utils/pillarFallback';
+import { aspectStyle, responsiveImage, SLOTS } from '../utils/responsiveImage';
 import { framingStyle } from '../utils/framing';
 import { smartQuotes } from '../plugins/typography.mjs';
 import positanoHero from '../assets/images/positano-new.webp';
@@ -13,7 +14,7 @@ import reservationSelfieHat from '../assets/images/reservation-selfie-hat.webp';
 import aboutPlane from '../assets/images/about-brand-plane.webp';
 
 const heroImage = {
-  src: positanoHero.src,
+  ...responsiveImage(positanoHero, SLOTS.banner()),
   alt: 'A panoramic Amalfi Coast view in Positano with a colorful cliffside village on the left, a domed church near the middle, lush green foliage in the foreground, and a bright blue bay opening to the sea on the right with boats visible in crisp daylight.',
 };
 
@@ -41,7 +42,8 @@ const featuredItems = await Promise.all(
       title: smartQuotes(pick.title ?? article.data.title),
       description: smartQuotes(article.data.dek),
       href: getArticleRoute(article.id),
-      image: getThumbnailSrc(article),
+      image: getThumbnailImage(article),
+      zoom: article.data.thumbnail ? article.data.thumbnailZoom : undefined,
       imageStyle: article.data.thumbnail
         ? framingStyle(article.data.thumbnailFocus, article.data.thumbnailZoom)
         : undefined,
@@ -56,7 +58,7 @@ const brands = [
     noteLine2: '(inspiration) and vida (life).',
     tagline: 'The inspired' + String.fromCharCode(160) + 'life.',
     href: ROUTES.awenvida,
-    image: awenvidaBalcony.src,
+    image: awenvidaBalcony,
     imageAlt:
       'A breakfast table on an ocean-view balcony seen through a window frame, with wicker chairs and a wooden ceiling beam overhead.',
     imagePosition: 'center 80%',
@@ -66,7 +68,7 @@ const brands = [
     taglineLine1: 'The world.',
     taglineLine2: 'Seen differently.',
     href: ROUTES.beyondTheGuidebook,
-    image: beyondCamels.src,
+    image: beyondCamels,
     imageAlt:
       'A camel caravan led by a walking guide in the desert with strong sun flare and long shadows on the sand.',
   },
@@ -74,7 +76,7 @@ const brands = [
     name: 'The' + String.fromCharCode(160) + 'Uncommon Traveller',
     tagline: 'Wander intelligently. Live' + String.fromCharCode(160) + 'curiously.',
     href: ROUTES.theUncommonTraveller,
-    image: uncommonLanterns.src,
+    image: uncommonLanterns,
     imageAlt:
       'Rows of hanging paper lanterns with Japanese text in a warm lit interior, with no person in frame.',
   },
@@ -83,7 +85,7 @@ const brands = [
     titleLines: ['Reservation', 'for One'],
     tagline: 'The intentional' + String.fromCharCode(160) + 'adventure.',
     href: ROUTES.reservationForOne,
-    image: reservationSelfieHat.src,
+    image: reservationSelfieHat,
     imageAlt:
       'A woman in a tan fedora hat photographing a neon-lit night market street on her phone, with a backpack visible and a tuk-tuk in the background.',
   },
@@ -93,7 +95,16 @@ const brands = [
 <Base title="Sokéfi - Experience It">
   <main>
     <section class="hero-media" aria-label="Featured destination">
-      <img src={heroImage.src} alt={heroImage.alt} loading="eager" decoding="async" />
+      <img
+        src={heroImage.src}
+        srcset={heroImage.srcset}
+        sizes={heroImage.sizes}
+        alt={heroImage.alt}
+        style={aspectStyle(positanoHero)}
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+      />
       <span class="hero-media-rule" aria-hidden="true"></span>
     </section>
 
@@ -102,7 +113,16 @@ const brands = [
         <div class="brand-intro-media">
           <span class="brand-intro-rule" aria-hidden="true"></span>
           <img
-            src={aboutPlane.src}
+            {...responsiveImage(aboutPlane, [
+              {
+                media: '(max-width: 1060px)',
+                width: 'min(calc(100vw - 2rem), 680px)',
+                maxPx: 680,
+                cover: true,
+                frameRatio: 540 / 350,
+              },
+              { width: '540px', maxPx: 540, cover: true, frameRatio: 540 / 350 },
+            ])}
             alt="Guests boarding a small propeller plane on a sunlit airstrip under a clear blue sky."
             loading="lazy"
             decoding="async"
@@ -138,7 +158,23 @@ const brands = [
                 <span class="edit-card-frame">
                   <img
                     class="edit-card-image"
-                    src={article.image}
+                    {...responsiveImage(article.image, [
+                      {
+                        media: '(max-width: 700px)',
+                        width: 'calc(100vw - 4rem)',
+                        maxPx: 640,
+                        cover: true,
+                        frameRatio: 16 / 9,
+                        zoom: article.zoom,
+                      },
+                      {
+                        width: '510px',
+                        maxPx: 510,
+                        cover: true,
+                        frameRatio: 16 / 9,
+                        zoom: article.zoom,
+                      },
+                    ])}
                     alt=""
                     loading="lazy"
                     decoding="async"
@@ -210,7 +246,23 @@ const brands = [
                 <div class="brand-image-wrap">
                   <img
                     class="brand-image"
-                    src={brand.image}
+                    {...responsiveImage(brand.image, [
+                      {
+                        media: '(max-width: 640px)',
+                        width: 'calc(100vw - 2rem)',
+                        maxPx: 640,
+                        cover: true,
+                        frameRatio: 4 / 3,
+                      },
+                      {
+                        media: '(max-width: 1100px)',
+                        width: 'calc(50vw - 2rem)',
+                        maxPx: 540,
+                        cover: true,
+                        frameRatio: 4 / 3,
+                      },
+                      { width: '290px', maxPx: 290, cover: true, frameRatio: 4 / 3 },
+                    ])}
                     alt={brand.imageAlt || brand.name}
                     loading="lazy"
                     decoding="async"

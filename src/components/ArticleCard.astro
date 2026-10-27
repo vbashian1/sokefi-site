@@ -7,7 +7,8 @@
 //   <ArticleCard article={entry} byline="Sophie Westbrooke" />   (pillar pages)
 // Place cards inside a .feed-list (or any grid/stack) on the page.
 import type { CollectionEntry } from 'astro:content';
-import { getThumbnailSrc } from '../utils/pillarFallback';
+import { getThumbnailImage } from '../utils/pillarFallback';
+import { responsiveImage } from '../utils/responsiveImage';
 import { framingStyle } from '../utils/framing';
 import { getArticleRoute } from '../config/routes';
 import { smartQuotes } from '../plugins/typography.mjs';
@@ -21,7 +22,26 @@ interface Props {
 }
 
 const { article, byline, stacked = false } = Astro.props;
-const thumbnailSrc = getThumbnailSrc(article);
+const thumbnail = getThumbnailImage(article);
+// Card photo box (4:3): across the card on phones; 240px beside the text, or about a third
+// of the page in a grid (stacked), on larger screens.
+const zoom = article.data.thumbnail ? article.data.thumbnailZoom : undefined;
+const card = { cover: true, frameRatio: 4 / 3, zoom };
+const web = thumbnail
+  ? responsiveImage(
+      thumbnail,
+      stacked
+        ? [
+            { media: '(max-width: 700px)', width: 'calc(100vw - 4rem)', maxPx: 640, ...card },
+            { media: '(max-width: 1023px)', width: 'calc(50vw - 3rem)', maxPx: 470, ...card },
+            { width: '380px', maxPx: 380, ...card },
+          ]
+        : [
+            { media: '(max-width: 700px)', width: 'calc(100vw - 4rem)', maxPx: 640, ...card },
+            { width: '240px', maxPx: 240, ...card },
+          ],
+    )
+  : null;
 ---
 
 <article
@@ -32,11 +52,13 @@ const thumbnailSrc = getThumbnailSrc(article);
   ]}
 >
   {
-    thumbnailSrc && (
+    web && (
       <span class="feed-card-frame">
         <img
           class="feed-card-image"
-          src={thumbnailSrc}
+          src={web.src}
+          srcset={web.srcset}
+          sizes={web.sizes}
           alt={article.data.title}
           loading="lazy"
           decoding="async"

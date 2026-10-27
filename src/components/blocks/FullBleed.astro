@@ -23,7 +23,7 @@ if (!(WIDE_SHAPES as readonly string[]).includes(props.shape ?? '')) {
 ---
 
 <figure class="block-full-bleed">
-  <FramedImage {...props} fit="fill" />
+  <FramedImage {...props} fit="fill" slots={[{ width: '100vw', maxPx: 2560 }]} />
 </figure>
 
 <style>

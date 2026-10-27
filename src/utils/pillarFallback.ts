@@ -37,3 +37,17 @@ export const getThumbnailSrc = (article: {
   if (thumbnail?.src) return thumbnail.src;
   return getPillarFallback(article.data.pillar)?.src ?? null;
 };
+
+/**
+ * Like getThumbnailSrc, but the photo itself (so its web-sized copies can be used): the
+ * article's own thumbnail, else its pillar's fallback; a plain address when that's all
+ * there is; null when neither exists.
+ */
+export const getThumbnailImage = (article: {
+  data: { thumbnail?: ImageMetadata | string; pillar?: string };
+}): ImageMetadata | { src: string; width: number; height: number } | null => {
+  const thumbnail = article.data.thumbnail;
+  if (typeof thumbnail === 'string') return { src: thumbnail, width: 1600, height: 1200 };
+  if (thumbnail?.src) return thumbnail;
+  return getPillarFallback(article.data.pillar);
+};

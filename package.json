@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "images": "node scripts/build-images.mjs",
+    "predev": "npm run images",
     "dev": "astro dev",
+    "prebuild": "npm run images",
     "build": "astro build",
     "preview": "astro preview",
     "format": "prettier --write .",

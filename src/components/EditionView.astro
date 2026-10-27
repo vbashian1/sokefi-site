@@ -12,6 +12,7 @@ import { getEntries, render, type CollectionEntry } from 'astro:content';
 import ArticleCard from './ArticleCard.astro';
 import PullQuote from './blocks/PullQuote.astro';
 import { framingStyle } from '../utils/framing';
+import { aspectStyle, responsiveImage, SLOTS } from '../utils/responsiveImage';
 import { compareArticles } from '../utils/articleOrder';
 import { ROUTES } from '../config/routes';
 import { SOCIAL_LINKS } from '../config/social';
@@ -58,13 +59,14 @@ const followHref = SOCIAL_LINKS.instagram || SOCIAL_LINKS.facebook || '';
   <figure class="edition-banner">
     <div class="hero-media">
       <img
-        src={data.headerImage.src}
+        {...responsiveImage(data.headerImage, SLOTS.banner(data.headerZoom))}
         width={data.headerImage.width}
         height={data.headerImage.height}
         alt={data.headerAlt}
         loading="eager"
+        fetchpriority="high"
         decoding="async"
-        style={framingStyle(data.headerFocus, data.headerZoom)}
+        style={aspectStyle(data.headerImage, framingStyle(data.headerFocus, data.headerZoom))}
       />
     </div>
     {data.caption && <figcaption class="edition-caption">{data.caption}</figcaption>}

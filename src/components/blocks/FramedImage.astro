@@ -9,6 +9,7 @@
 import type { ImageMetadata } from 'astro';
 import type { ArticleGalleryImage } from '../../types/gallery';
 import { frameKind, frameRatio, isShape, type Shape } from '../../utils/framing';
+import { responsiveImage, type Slot } from '../../utils/responsiveImage';
 
 type Source = ImageMetadata | ArticleGalleryImage | { src: string; width: number; height: number };
 
@@ -22,6 +23,10 @@ interface Props {
   alt?: string;
   fit?: 'gallery' | 'fill';
   loading?: 'lazy' | 'eager';
+  /** How wide the frame is on each screen (for the web-sized copies). Blocks that place the
+      frame at their own width (insets, wide, full-bleed, pairs) pass theirs; the frame adds
+      its crop and zoom. Defaults to the article column, by frame shape. */
+  slots?: Omit<Slot, 'cover' | 'frameRatio' | 'zoom'>[];
 }
 
 const {
@@ -33,6 +38,7 @@ const {
   alt = '',
   fit = 'gallery',
   loading = 'lazy',
+  slots,
 } = Astro.props;
 if (shape !== undefined && !isShape(shape)) {
   throw new Error(`Photo shape "${shape}" must be one of: original, 3:2, 4:3, 1:1, 4:5`);
@@ -44,7 +50,33 @@ if (!photo) {
 }
 
 const ratio = frameRatio(shape, photo.width, photo.height);
-const sizeClass = fit === 'fill' ? 'gallery-frame-fill' : `gallery-frame-${frameKind(ratio)}`;
+const kind = frameKind(ratio);
+const sizeClass = fit === 'fill' ? 'gallery-frame-fill' : `gallery-frame-${kind}`;
+
+// Frame widths in the article column, matching the CSS below (column 680px; phones the
+// column less its gutters).
+const COLUMN = 'calc(100vw - 2rem)';
+const defaultSlots: Omit<Slot, 'cover' | 'frameRatio' | 'zoom'>[] =
+  fit === 'fill' || kind === 'landscape'
+    ? [
+        { media: '(max-width: 720px)', width: COLUMN, maxPx: 720 },
+        { width: '680px', maxPx: 680 },
+      ]
+    : kind === 'square'
+      ? [
+          { media: '(max-width: 480px)', width: COLUMN, maxPx: 480 },
+          { media: '(max-width: 700px)', width: `calc(${COLUMN} * 0.85)`, maxPx: 600 },
+          { width: '476px', maxPx: 476 },
+        ]
+      : [
+          { media: '(max-width: 480px)', width: `min(${COLUMN}, 260px)`, maxPx: 260 },
+          { media: '(max-width: 700px)', width: `calc(${COLUMN} * 0.7)`, maxPx: 490 },
+          { width: '340px', maxPx: 340 },
+        ];
+const web = responsiveImage(
+  photo,
+  (slots ?? defaultSlots).map((slot) => ({ ...slot, cover: true, frameRatio: ratio, zoom })),
+);
 ---
 
 <div
@@ -53,7 +85,9 @@ const sizeClass = fit === 'fill' ? 'gallery-frame-fill' : `gallery-frame-${frame
 >
   <img
     class="gallery-frame-image"
-    src={photo.src}
+    src={web.src}
+    srcset={web.srcset}
+    sizes={web.sizes}
     width={photo.width}
     height={photo.height}
     alt={alt}

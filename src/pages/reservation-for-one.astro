@@ -5,6 +5,7 @@ import PillarEditors from '../components/PillarEditors.astro';
 import reservationSelfieHat from '../assets/images/reservation-selfie-hat.webp';
 import { getEntry } from 'astro:content';
 import { getAuthorRoute } from '../config/routes';
+import { responsiveImage, SLOTS } from '../utils/responsiveImage';
 
 const authorEntry = await getEntry('authors', 'sophie-westbrooke');
 // Meant to differ from her author bio (Veronica, 2026-10-25).
@@ -17,9 +18,10 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
     <section class="pillar-header-card" aria-labelledby="reservation-title">
       <div class="pillar-header-media">
         <img
-          src={reservationSelfieHat.src}
+          {...responsiveImage(reservationSelfieHat, SLOTS.pillarHeader())}
           alt="A woman in a tan fedora hat photographing a neon-lit night market street on her phone, with a backpack visible and a tuk-tuk in the background."
           loading="eager"
+          fetchpriority="high"
           decoding="async"
         />
       </div>

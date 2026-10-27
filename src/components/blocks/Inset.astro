@@ -34,7 +34,16 @@ if (side !== 'left' && side !== 'right') {
 <figure
   class:list={['block-inset', `block-inset-${side}`, size === 'large' && 'block-inset-large']}
 >
-  <FramedImage {...photo} fit="fill" />
+  <FramedImage
+    {...photo}
+    fit="fill"
+    slots={[
+      // Phones: a centred photo, 70% of the column (up to 340px). Above: 42% / 55% of the
+      // column, up to 300px / 400px (large).
+      { media: '(max-width: 700px)', width: 'min(calc((100vw - 2rem) * 0.7), 340px)', maxPx: 340 },
+      size === 'large' ? { width: '400px', maxPx: 400 } : { width: '300px', maxPx: 300 },
+    ]}
+  />
   <PhotoCredit credit={credit} />
 </figure>
 

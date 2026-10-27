@@ -11,6 +11,7 @@ import defaultArticleImage from '../../assets/images/positano-new.avif';
 import { getAuthorRoute } from '../../config/routes';
 import { renderInlineHtml, renderSummaryHtml, summaryToPlainText } from '../../utils/summary';
 import { framingStyle } from '../../utils/framing';
+import { aspectStyle, responsiveImage, SLOTS } from '../../utils/responsiveImage';
 import '../../styles/article-body.css';
 import FullBleed from '../../components/blocks/FullBleed.astro';
 import WideImage from '../../components/blocks/WideImage.astro';
@@ -95,15 +96,20 @@ const getMonogram = (author: CollectionEntry<'authors'> | null | undefined) => {
   return initials || 'SO';
 };
 
-type ImageMeta = { src: string; width: number; height: number };
+type ImageMeta = { src: string; width: number; height: number; fsPath?: string };
 
+// fsPath is carried along so the photo's web-sized copies can be found (responsiveImage).
 const getImageMeta = (img: ImageMetadata | string | undefined): ImageMeta | null => {
   if (!img) return null;
   if (typeof img === 'string') return { src: img, width: 1600, height: 1000 };
-  return { src: img.src, width: img.width, height: img.height };
+  const fsPath = (img as { fsPath?: string }).fsPath;
+  return { src: img.src, width: img.width, height: img.height, fsPath };
 };
 
 const heroMeta = entry ? getImageMeta(entry.data.heroImage) : null;
+const heroImg = heroMeta
+  ? responsiveImage(heroMeta, SLOTS.banner(entry?.data.heroZoom, entry?.data.heroZoomOnPhones))
+  : null;
 
 const galleryImages = entry
   ? (entry.data.gallery ?? [])
@@ -234,13 +240,19 @@ const articleSchema = entry
               ]}
             >
               <img
-                src={heroMeta.src}
+                src={heroImg?.src ?? heroMeta.src}
+                srcset={heroImg?.srcset}
+                sizes={heroImg?.sizes}
                 width={heroMeta.width}
                 height={heroMeta.height}
                 alt={entry.data.title}
                 loading="eager"
+                fetchpriority="high"
                 decoding="async"
-                style={framingStyle(entry.data.heroFocus, entry.data.heroZoom)}
+                style={aspectStyle(
+                  heroMeta,
+                  framingStyle(entry.data.heroFocus, entry.data.heroZoom),
+                )}
               />
             </div>
           )}

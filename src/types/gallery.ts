@@ -5,4 +5,6 @@ export interface ArticleGalleryImage {
   height: number;
   landscape: boolean;
   isLastOdd: boolean;
+  /** The original file's path, for the web-sized copies (src/utils/responsiveImage.ts). */
+  fsPath?: string;
 }

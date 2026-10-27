@@ -1,0 +1,940 @@
+{
+  "src/content/articles/2026-09-01-at-home-colon-cancer-screening/bike .jpg": {
+    "hash": "004304053ca9",
+    "width": 5472,
+    "height": 3648,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-blues-highway-highway-61/blue front cafe .jpg": {
+    "hash": "ec0c6e576f88",
+    "width": 4096,
+    "height": 1864,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-blues-highway-highway-61/crossroads.jpg": {
+    "hash": "9245cf4d3d6b",
+    "width": 2096,
+    "height": 4608,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2096
+    ]
+  },
+  "src/content/articles/2026-09-01-blues-highway-highway-61/dockery farms .jpg": {
+    "hash": "9a556aac4dde",
+    "width": 4096,
+    "height": 1864,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-blues-highway-highway-61/dockery services station - coca cola.jpg": {
+    "hash": "8fdac68e038a",
+    "width": 4096,
+    "height": 1864,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-blues-highway-highway-61/muddy waters.jpg": {
+    "hash": "1d61f0407904",
+    "width": 1864,
+    "height": 4096,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      1864
+    ]
+  },
+  "src/content/articles/2026-09-01-blues-highway-highway-61/parchment .jpg": {
+    "hash": "6674d95d28b2",
+    "width": 4096,
+    "height": 1864,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-blues-highway-highway-61/Po monkey.jpg": {
+    "hash": "169c974cf3bd",
+    "width": 4000,
+    "height": 1816,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-cairo-long-weekend/heiroglyphics.jpg": {
+    "hash": "ea48b760e711",
+    "width": 2096,
+    "height": 4608,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2096
+    ]
+  },
+  "src/content/articles/2026-09-01-cairo-long-weekend/hero- .jpg": {
+    "hash": "cbc8b8f3e0ee",
+    "width": 6000,
+    "height": 4000,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-cairo-long-weekend/market.webp": {
+    "hash": "26dd3b863ea0",
+    "width": 896,
+    "height": 1344,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      896
+    ]
+  },
+  "src/content/articles/2026-09-01-cairo-long-weekend/painted figure.webp": {
+    "hash": "a6d9415b70d8",
+    "width": 1322,
+    "height": 896,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1322
+    ]
+  },
+  "src/content/articles/2026-09-01-cairo-long-weekend/shopfront.jpg": {
+    "hash": "791ae3441891",
+    "width": 4071,
+    "height": 3316,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-confessions-of-a-modern-nomad/open road.jpg": {
+    "hash": "a3deeb168297",
+    "width": 1500,
+    "height": 1500,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1500
+    ]
+  },
+  "src/content/articles/2026-09-01-darwin-trail-shrewsbury/boat house .jpg": {
+    "hash": "92ad2413e3b7",
+    "width": 2688,
+    "height": 1520,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-darwin-trail-shrewsbury/Charles_Darwin_Statue,_.jpg": {
+    "hash": "f4a1093cd2a7",
+    "width": 2000,
+    "height": 1334,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000
+    ]
+  },
+  "src/content/articles/2026-09-01-darwin-trail-shrewsbury/footbridge .jpg": {
+    "hash": "fad2f3cb0a18",
+    "width": 2688,
+    "height": 1520,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-darwin-trail-shrewsbury/tanners .jpg": {
+    "hash": "7fec29aa7b98",
+    "width": 2688,
+    "height": 1520,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-modern-nomads-answers-solo-travel-questions/jimmy-woo-aEO0KSuBF6o-unsplash.jpg": {
+    "hash": "caf5f74fef71",
+    "width": 3889,
+    "height": 5834,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-modern-nomads-answers-solo-travel-questions/passport .jpg": {
+    "hash": "c6ac2624062c",
+    "width": 6000,
+    "height": 4000,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-modern-nomads-answers-solo-travel-questions/plane - hero.jpg": {
+    "hash": "47ad81c85578",
+    "width": 4000,
+    "height": 3000,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-optimising-cognitive-abilities/hero .jpg": {
+    "hash": "8b409b38d619",
+    "width": 6000,
+    "height": 4000,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-optimising-cognitive-abilities/salad.jpg": {
+    "hash": "e38b3e77857f",
+    "width": 5168,
+    "height": 3445,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-optimising-cognitive-abilities/sunset .jpg": {
+    "hash": "d960ccd64bb9",
+    "width": 3875,
+    "height": 2180,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-solo-cruising-midlife/antarctica .jpg": {
+    "hash": "c98fe70904d5",
+    "width": 13000,
+    "height": 8667,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-solo-cruising-midlife/expedition .jpg": {
+    "hash": "3f45e8ba9aed",
+    "width": 6000,
+    "height": 4000,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-solo-cruising-midlife/scarlet .jpg": {
+    "hash": "285ebcc38f5a",
+    "width": 4032,
+    "height": 3024,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-tasty-waves-cool-buzz-socal-surfer/amanda-vick-ZPpVObKlmgk-unsplash.jpg": {
+    "hash": "765fb0d45883",
+    "width": 9000,
+    "height": 5041,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-tasty-waves-cool-buzz-socal-surfer/cars n coffee.jpg": {
+    "hash": "28dd7ee58cbf",
+    "width": 4000,
+    "height": 3000,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-tasty-waves-cool-buzz-socal-surfer/coast.jpg": {
+    "hash": "cc9aa3bd9e43",
+    "width": 4032,
+    "height": 3024,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-tasty-waves-cool-buzz-socal-surfer/fish tacos.jpg": {
+    "hash": "0e35b1dc1e54",
+    "width": 4000,
+    "height": 3000,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-tasty-waves-cool-buzz-socal-surfer/surfing .jpg": {
+    "hash": "9076f821bc3c",
+    "width": 3264,
+    "height": 1472,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-the-tourist-dad-uniform/hero .jpg": {
+    "hash": "9b4f6802f38c",
+    "width": 5472,
+    "height": 3648,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-the-tourist-dad-uniform/sneakers .jpg": {
+    "hash": "81b8b427c17f",
+    "width": 3024,
+    "height": 4032,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-tresco-isles-of-scilly/boat schedule.jpg": {
+    "hash": "59bc3ed53248",
+    "width": 3024,
+    "height": 4032,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-tresco-isles-of-scilly/cromwell with boats .jpg": {
+    "hash": "9bef4fbefdaa",
+    "width": 4608,
+    "height": 2096,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-tresco-isles-of-scilly/gig race.jpg": {
+    "hash": "d8a99c1f1b7c",
+    "width": 3264,
+    "height": 2448,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-tresco-isles-of-scilly/island.jpg": {
+    "hash": "3a08a74cf4b1",
+    "width": 4000,
+    "height": 1816,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-tresco-isles-of-scilly/path.jpg": {
+    "hash": "88402226180c",
+    "width": 4608,
+    "height": 3456,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-what-does-it-mean-to-be-60/IMG20240721223424 - mick .jpg": {
+    "hash": "86dbc4cc6892",
+    "width": 3456,
+    "height": 4608,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-what-does-it-mean-to-be-60/titus-blair-qZ1NeXY4tKA-unsplash - hero 60 sign .jpg": {
+    "hash": "49f88b902a33",
+    "width": 5184,
+    "height": 3456,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-whats-new-wearable-devices-biomarker-tracking/hero .jpg": {
+    "hash": "5934a2a8d557",
+    "width": 5824,
+    "height": 4368,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-why-my-daughters-are-great-plumbers/hero .jpg": {
+    "hash": "84ac1a76ff06",
+    "width": 5059,
+    "height": 2898,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-why-my-daughters-are-great-plumbers/taps.jpg": {
+    "hash": "fa86923964dd",
+    "width": 6000,
+    "height": 3376,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-winter-weekend-in-iceland/broad shot of waterfall .jpg": {
+    "hash": "81fe750429bd",
+    "width": 4096,
+    "height": 1862,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-winter-weekend-in-iceland/full crater.jpg": {
+    "hash": "40c78a2a1160",
+    "width": 4000,
+    "height": 1818,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-winter-weekend-in-iceland/sunrise road.jpg": {
+    "hash": "9ca5c4dd606b",
+    "width": 6000,
+    "height": 4000,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-09-01-winter-weekend-in-iceland/sydney-russakov-XU_MYbgspMI-unsplash.jpg": {
+    "hash": "a1a31a781d3c",
+    "width": 2448,
+    "height": 3264,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2448
+    ]
+  },
+  "src/content/articles/2026-09-01-winter-weekend-in-iceland/waterfall - drop back shot - people in front .jpg": {
+    "hash": "3cee23615785",
+    "width": 2094,
+    "height": 4608,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2094
+    ]
+  },
+  "src/content/editions/edition-1/beach.jpg": {
+    "hash": "ddbd4f274878",
+    "width": 4096,
+    "height": 1864,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/assets/images/about-brand-plane.webp": {
+    "hash": "c62a87e328f4",
+    "width": 4032,
+    "height": 3024,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/assets/images/awenvida-breakfast-balcony.avif": {
+    "hash": "0d35d6c36c60",
+    "width": 3024,
+    "height": 4032,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/assets/images/beyond-camels-stable.webp": {
+    "hash": "2ad64e2e777d",
+    "width": 900,
+    "height": 601,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      900
+    ]
+  },
+  "src/assets/images/fallback-awenvida.webp": {
+    "hash": "509941ef9973",
+    "width": 1000,
+    "height": 750,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000
+    ]
+  },
+  "src/assets/images/fallback-beyond-the-guidebook.webp": {
+    "hash": "53c8993ee0af",
+    "width": 1000,
+    "height": 750,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000
+    ]
+  },
+  "src/assets/images/fallback-reservation-for-one.webp": {
+    "hash": "b2a1b1b3d35c",
+    "width": 1000,
+    "height": 750,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000
+    ]
+  },
+  "src/assets/images/fallback-the-uncommon-traveller.webp": {
+    "hash": "1f153873905d",
+    "width": 1000,
+    "height": 750,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000
+    ]
+  },
+  "src/assets/images/positano-new.avif": {
+    "hash": "bc213100ec96",
+    "width": 3000,
+    "height": 2003,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/assets/images/positano-new.webp": {
+    "hash": "cbd107f2a10c",
+    "width": 3000,
+    "height": 2003,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/assets/images/reservation-selfie-hat.webp": {
+    "hash": "4e300f7bc203",
+    "width": 900,
+    "height": 600,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      900
+    ]
+  },
+  "src/assets/images/uncommon-lanterns.webp": {
+    "hash": "ddc3a8f6b8a3",
+    "width": 900,
+    "height": 600,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      900
+    ]
+  }
+}

@@ -6,3 +6,6 @@ dist/
 .env
 .env.*
 .vscode/
+
+# Web-sized photo copies, made by scripts/build-images.mjs before every build
+public/img/

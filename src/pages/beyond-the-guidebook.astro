@@ -4,6 +4,7 @@ import PillarArticles from '../components/PillarArticles.astro';
 import PillarEditors from '../components/PillarEditors.astro';
 import { getAuthorRoute } from '../config/routes';
 import beyondCamels from '../assets/images/beyond-camels-stable.webp';
+import { responsiveImage, SLOTS } from '../utils/responsiveImage';
 ---
 
 <Base title="Beyond the Guidebook — Sokéfi">
@@ -11,9 +12,10 @@ import beyondCamels from '../assets/images/beyond-camels-stable.webp';
     <section class="pillar-header-card" aria-labelledby="guidebook-title">
       <div class="pillar-header-media">
         <img
-          src={beyondCamels.src}
+          {...responsiveImage(beyondCamels, SLOTS.pillarHeader())}
           alt="A camel caravan led by a walking guide in the desert with strong sun flare and long shadows on the sand."
           loading="eager"
+          fetchpriority="high"
           decoding="async"
         />
       </div>

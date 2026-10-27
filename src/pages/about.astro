@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import aboutPlane from '../assets/images/about-brand-plane.webp';
+import { responsiveImage, SLOTS } from '../utils/responsiveImage';
 ---
 
 <Base title="About — Sokéfi">
@@ -8,9 +9,10 @@ import aboutPlane from '../assets/images/about-brand-plane.webp';
     <section class="pillar-header-card" aria-labelledby="about-title">
       <div class="pillar-header-media">
         <img
-          src={aboutPlane.src}
+          {...responsiveImage(aboutPlane, SLOTS.pillarHeader())}
           alt="Guests boarding a small propeller plane on a sunlit airstrip under a clear blue sky."
           loading="eager"
+          fetchpriority="high"
           decoding="async"
         />
       </div>

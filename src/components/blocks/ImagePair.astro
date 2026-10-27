@@ -39,7 +39,14 @@ if (Math.abs(items[0].ratio - items[1].ratio) > 0.01) {
   {
     items.map((item) => (
       <div class="block-pair-item" style={`--grow: ${item.ratio}`}>
-        <FramedImage {...item.props} fit="fill" />
+        <FramedImage
+          {...item.props}
+          fit="fill"
+          slots={[
+            { media: '(max-width: 700px)', width: 'calc(100vw - 2rem)', maxPx: 700 },
+            { width: 'min(576px, 50vw)', maxPx: 576 },
+          ]}
+        />
       </div>
     ))
   }

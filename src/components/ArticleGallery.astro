@@ -4,9 +4,10 @@ import type { ArticleGalleryImage } from '../types/gallery';
 import FramedImage from './blocks/FramedImage.astro';
 import PhotoCredit from './blocks/PhotoCredit.astro';
 import { isShape, type Shape } from '../utils/framing';
+import { aspectStyle, responsiveImage, type Slot } from '../utils/responsiveImage';
 
 type GallerySource = ImageMetadata | ArticleGalleryImage | string;
-type ImageMeta = { src: string; width: number; height: number };
+type ImageMeta = { src: string; width: number; height: number; fsPath?: string };
 
 interface Props {
   pick?: number[];
@@ -39,7 +40,8 @@ const selected: (GallerySource | undefined)[] =
 const getImageMeta = (img: GallerySource | undefined): ImageMeta | null => {
   if (!img) return null;
   if (typeof img === 'string') return { src: img, width: 1600, height: 1000 };
-  return { src: img.src, width: img.width, height: img.height };
+  const fsPath = (img as { fsPath?: string }).fsPath;
+  return { src: img.src, width: img.width, height: img.height, fsPath };
 };
 
 const items = selected
@@ -51,6 +53,20 @@ const items = selected
     isLastOdd: arr.length % 2 === 1 && index === arr.length - 1,
     alt: alt[index] ?? `Photo ${index + 1}`,
   }));
+
+// Web-sized copies: a single landscape photo spans the column; a portrait one is half the
+// column (up to 340px); in a grid each photo is half the column.
+const COLUMN = 'calc(100vw - 2rem)';
+const SINGLE_LANDSCAPE: Slot[] = [
+  { media: '(max-width: 720px)', width: COLUMN, maxPx: 720 },
+  { width: '680px', maxPx: 680 },
+];
+const SINGLE_PORTRAIT: Slot[] = [{ width: `min(calc(${COLUMN} * 0.5), 340px)`, maxPx: 340 }];
+const GRID: Slot[] = [
+  { media: '(max-width: 720px)', width: `calc(${COLUMN} * 0.5)`, maxPx: 360 },
+  { width: '340px', maxPx: 340 },
+];
+const web = (img: ImageMeta, slots: Slot[]) => responsiveImage(img, slots);
 
 // A single photo with any framing set is shown in a frame of the chosen shape (see
 // FramedImage): the photo fills it at the focal point and zoom, from the original file.
@@ -74,9 +90,10 @@ const framed = items.length === 1 && Boolean(shape || focus || zoom) ? items[0] 
           'gallery-image',
           items[0].landscape ? 'gallery-image-landscape' : 'gallery-image-portrait',
         ]}
-        src={items[0].src}
+        {...web(items[0], items[0].landscape ? SINGLE_LANDSCAPE : SINGLE_PORTRAIT)}
         width={items[0].width}
         height={items[0].height}
+        style={aspectStyle(items[0])}
         alt={items[0].alt}
         loading="lazy"
         decoding="async"
@@ -92,9 +109,10 @@ const framed = items.length === 1 && Boolean(shape || focus || zoom) ? items[0] 
       {items.map((img) => (
         <img
           class:list={['gallery-image', img.isLastOdd && 'gallery-image-full']}
-          src={img.src}
+          {...web(img, img.isLastOdd ? SINGLE_LANDSCAPE : GRID)}
           width={img.width}
           height={img.height}
+          style={aspectStyle(img)}
           alt={img.alt}
           loading="lazy"
           decoding="async"

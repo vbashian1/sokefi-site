@@ -4,6 +4,7 @@ import awenvidaBalcony from '../assets/images/awenvida-breakfast-balcony.avif';
 import { getAuthorRoute } from '../config/routes';
 import PillarArticles from '../components/PillarArticles.astro';
 import PillarEditors from '../components/PillarEditors.astro';
+import { responsiveImage, SLOTS } from '../utils/responsiveImage';
 ---
 
 <Base title="Awenvida — Sokéfi">
@@ -11,9 +12,10 @@ import PillarEditors from '../components/PillarEditors.astro';
     <section class="pillar-header-card awenvida-header-card" aria-labelledby="awenvida-title">
       <div class="pillar-header-media">
         <img
-          src={awenvidaBalcony.src}
+          {...responsiveImage(awenvidaBalcony, SLOTS.pillarHeader())}
           alt="A breakfast table on an ocean-view balcony seen through a window frame, with wicker chairs and a wooden ceiling beam overhead."
           loading="eager"
+          fetchpriority="high"
           decoding="async"
         />
       </div>
