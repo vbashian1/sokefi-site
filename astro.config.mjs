@@ -17,6 +17,11 @@ export default defineConfig({
   // No developer toolbar on local previews: it sat over the article text and read as part
   // of the page. (It never appears on the live site.)
   devToolbar: { enabled: false },
+  // Old addresses that moved (Veronica, 2026-10-27): the pillar page now uses the British
+  // spelling. A permanent (301) redirect keeps old links and bookmarks working.
+  redirects: {
+    '/the-uncommon-traveler': { status: 301, destination: '/the-uncommon-traveller' },
+  },
   // Details boxes written to the Details Box Standard become <Details> components, bold
   // labels on their own line sit above their text, and article layouts are checked against
   // the layout rules (src/plugins/layout-rules.mjs).

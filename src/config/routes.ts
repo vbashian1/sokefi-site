@@ -5,7 +5,7 @@ export const ROUTES = {
   authorProfilePattern: '/authors/[slug]',
   awenvida: '/awenvida',
   beyondTheGuidebook: '/beyond-the-guidebook',
-  theUncommonTraveller: '/the-uncommon-traveler',
+  theUncommonTraveller: '/the-uncommon-traveller',
   reservationForOne: '/reservation-for-one',
   privacyPolicy: '/privacy-policy',
   termsOfUse: '/terms-of-use',
