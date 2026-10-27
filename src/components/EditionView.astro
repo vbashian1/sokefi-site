@@ -1,0 +1,297 @@
+---
+// One edition of The Sokéfi Edit as a web page, styled like an article (Veronica,
+// 2026-10-27); the email keeps the newsletter spec's own design. Top to bottom: the
+// edition's banner photo (optional caption), the header (eyebrow "The Sokéfi Edit", the
+// edition's title, the standfirst as the dek), the editor's letter in the article column
+// (with its pull quotes), the sign-off (valediction, signature, name and title, "Sokéfi.
+// Experience It."), Subscribe and Follow, then "In this edition": every article in the
+// edition as cards, grouped by pillar, in a grid. No "you're receiving this…" or
+// unsubscribe text: the sending platform adds that to the email only.
+// Used by /the-sokefi-edit/<edition> and by /the-sokefi-edit (latest edition).
+import { getEntries, render, type CollectionEntry } from 'astro:content';
+import ArticleCard from './ArticleCard.astro';
+import PullQuote from './blocks/PullQuote.astro';
+import { framingStyle } from '../utils/framing';
+import { ROUTES } from '../config/routes';
+import { SOCIAL_LINKS } from '../config/social';
+import '../styles/article-body.css';
+
+interface Props {
+  edition: CollectionEntry<'editions'>;
+}
+
+const { edition } = Astro.props;
+const { Content } = await render(edition);
+const data = edition.data;
+
+// A title with a colon breaks after it, as on the articles ("Edition 1:" / "The Launch").
+const colonAt = data.title.indexOf(': ');
+const titleParts =
+  colonAt > 0 ? [data.title.slice(0, colonAt + 1), data.title.slice(colonAt + 2)] : null;
+
+const PILLARS = [
+  'Awenvida',
+  'Beyond the Guidebook',
+  'The Uncommon Traveller',
+  'Reservation for One',
+];
+const slug = (value: string) => value.trim().toLowerCase().replace(/\s+/g, '-');
+const articles = await getEntries(data.articles);
+const authors = await getEntries(articles.map((article) => article.data.author));
+const authorName = (article: CollectionEntry<'articles'>) =>
+  article.data.byline ||
+  authors.find((author) => author.id === article.data.author.id)?.data.name ||
+  'Sokéfi';
+const groups = PILLARS.map((pillar) => ({
+  pillar,
+  articles: articles.filter((article) => slug(article.data.pillar) === slug(pillar)),
+})).filter((group) => group.articles.length > 0);
+// "Follow" links to the main social account once there is one.
+const followHref = SOCIAL_LINKS.instagram || SOCIAL_LINKS.facebook || '';
+---
+
+<article class="edition" aria-labelledby="edition-title">
+  <figure class="edition-banner">
+    <div class="hero-media">
+      <img
+        src={data.headerImage.src}
+        width={data.headerImage.width}
+        height={data.headerImage.height}
+        alt={data.headerAlt}
+        loading="eager"
+        decoding="async"
+        style={framingStyle(data.headerFocus, data.headerZoom)}
+      />
+    </div>
+    {data.caption && <figcaption class="edition-caption">{data.caption}</figcaption>}
+  </figure>
+
+  <div class="article-column">
+    <header class="article-header">
+      <p class="article-eyebrow">The Sokéfi Edit</p>
+      <h1 class="article-title" id="edition-title">
+        {
+          titleParts ? (
+            <>
+              <span class="article-title-part">{titleParts[0]}</span>{' '}
+              <span class="article-title-part">{titleParts[1]}</span>
+            </>
+          ) : (
+            data.title
+          )
+        }
+      </h1>
+      <p class="article-dek">{data.standfirst}</p>
+    </header>
+
+    <div class="article-rule" aria-hidden="true"></div>
+
+    <div class="article-body has-drop-cap">
+      <Content components={{ PullQuote }} />
+    </div>
+
+    <div class="edition-signoff">
+      <p class="edition-valediction">{data.valediction}</p>
+      <img
+        class="edition-signature"
+        src={data.signature.src}
+        width={Math.round(data.signature.width / 3)}
+        height={Math.round(data.signature.height / 3)}
+        alt={data.signatureAlt}
+      />
+      <p class="edition-signed-by">{data.signedBy}</p>
+      <p class="edition-stamp">
+        Sokéfi<span class="edition-stop">.</span> Experience It<span class="edition-stop">.</span>
+      </p>
+    </div>
+
+    {
+      /* The site's gold subscribe button, as on the homepage. "Follow" appears only once the
+        footer's Instagram/Facebook address is set (src/config/social.ts). */
+    }
+    <div class="edition-actions">
+      <a class="button button-secondary" href={ROUTES.subscribe}>
+        Get the Sokéfi Edit in your inbox
+      </a>
+      {
+        followHref && (
+          <a class="edition-follow" href={followHref}>
+            Follow
+          </a>
+        )
+      }
+    </div>
+  </div>
+
+  <section class="edition-contents" aria-labelledby="in-this-edition-title">
+    <h2 class="edition-contents-title" id="in-this-edition-title">In this edition</h2>
+    {
+      groups.map((group) => (
+        <section class="edition-group" aria-label={group.pillar}>
+          <h3 class="edition-group-title">{group.pillar}</h3>
+          <div class="edition-grid">
+            {group.articles.map((article) => (
+              <ArticleCard article={article} byline={authorName(article)} stacked />
+            ))}
+          </div>
+        </section>
+      ))
+    }
+  </section>
+</article>
+
+<style>
+  .edition-banner {
+    margin: 0;
+  }
+
+  /* Optional per edition: small and muted, under the photo. */
+  .edition-caption {
+    margin: -0.9rem 0 1.2rem;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    color: #7a7870;
+  }
+
+  /* Header, as on the articles. */
+  .article-header {
+    margin: 1.85rem 0 0;
+  }
+
+  .article-eyebrow {
+    margin: 0 0 0.85rem;
+    font-family: 'Lato', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--amber);
+  }
+
+  .article-title {
+    margin: 0 0 0.85rem;
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--teal-deep);
+    font-size: clamp(2.1rem, 4vw, 3rem);
+    line-height: 1.15;
+  }
+
+  .article-title-part {
+    display: block;
+    text-wrap: balance;
+  }
+
+  .article-dek {
+    margin: 0 0 1.5rem;
+    font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+    font-size: clamp(1.1rem, 1.7vw, 1.25rem);
+    line-height: 1.55;
+    color: rgba(23, 39, 43, 0.72);
+  }
+
+  .article-rule {
+    height: 1.5px;
+    background: var(--teal);
+    margin: 0 0 2rem;
+  }
+
+  /* The sign-off reads as one block: tight gaps, left-aligned. */
+  .edition-signoff {
+    margin-top: 0.4rem;
+  }
+
+  .edition-signoff p {
+    margin: 0;
+    font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+    font-size: 1.08rem;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  .edition-signature {
+    display: block;
+    width: 170px;
+    height: auto;
+    margin: 0.35rem 0 0.2rem -4px;
+  }
+
+  .edition-signoff .edition-stamp {
+    margin-top: 0.3rem;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.15rem;
+    color: var(--brand-teal);
+  }
+
+  .edition-stop {
+    color: #c9a227;
+  }
+
+  .edition-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+    margin: 2rem 0 clamp(2rem, 4vw, 3rem);
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .edition-follow {
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand-teal);
+    text-decoration: none;
+  }
+
+  .edition-follow:hover,
+  .edition-follow:focus-visible {
+    text-decoration: underline;
+  }
+
+  .edition-contents {
+    margin: 0 0 clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  .edition-contents-title {
+    margin: 0 0 1.2rem;
+    color: var(--brand-teal);
+    font-size: clamp(1.5rem, 2.6vw, 2rem);
+  }
+
+  .edition-group + .edition-group {
+    margin-top: 2rem;
+  }
+
+  .edition-group-title {
+    margin: 0 0 0.8rem;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #c9a227;
+  }
+
+  /* Three across on laptops, two on tablets, one on phones. */
+  .edition-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  @media (max-width: 1023px) {
+    .edition-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 700px) {
+    .edition-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

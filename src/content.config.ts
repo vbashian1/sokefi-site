@@ -199,7 +199,38 @@ const articles = defineCollection({
     }),
 });
 
+// The Sokéfi Edit (Veronica, 2026-10-27): one folder per edition, src/content/editions/<id>/
+// index.md, where <id> is the address (/the-sokefi-edit/<id>). The body is the editor's
+// letter, word for word. Adding an edition means adding one folder; articles don't change.
+const editions = defineCollection({
+  loader: glob({ pattern: '*/index.{md,mdx}', base: './src/content/editions' }),
+  schema: ({ image }) =>
+    z.object({
+      /** e.g. "Edition 1 (Launch)" or "The October Edit". */
+      title: z.string(),
+      number: z.number().int().positive(),
+      date: z.coerce.date(),
+      /** The edition's "where are we" banner photo. */
+      headerImage: image(),
+      headerAlt: z.string(),
+      headerFocus: focusPoint.optional(),
+      headerZoom: zoomLevel.optional(),
+      /** Optional small caption under the banner, e.g. "Laguna Beach  © Sokéfi" (per edition). */
+      caption: z.string().optional(),
+      standfirst: z.string(),
+      valediction: z.string(),
+      signature: image(),
+      signatureAlt: z.string(),
+      signedBy: z.string(),
+      /** Every article in the edition; shown under "In this edition", grouped by pillar. */
+      articles: z.array(reference('articles')).min(1),
+      /** The articles the homepage features while this is the latest edition. */
+      homepagePicks: z.array(reference('articles')).default([]),
+    }),
+});
+
 export const collections = {
   authors,
   articles,
+  editions,
 };

@@ -151,9 +151,12 @@ const titleParts =
 // Phrases kept on one line (titleKeepTogether): the title is split into plain text and
 // phrases, and each phrase is shown in a no-wrap span (Veronica, 2026-10-26: "Tourist Dad").
 const keepTogether = entry?.data.titleKeepTogether ?? [];
-const titleSegments = (text: string) => {
-  const quoted = smartQuotes(text);
-  const phrases = keepTogether.map((p) => smartQuotes(p)).filter((p) => quoted.includes(p));
+type TitleSegment = { text: string; keep: boolean };
+const titleSegments = (text: string): TitleSegment[] => {
+  const quoted: string = smartQuotes(text);
+  const phrases: string[] = keepTogether
+    .map((p) => smartQuotes(p) as string)
+    .filter((p) => quoted.includes(p));
   if (!phrases.length) return [{ text: quoted, keep: false }];
   const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const pattern = new RegExp(`(${phrases.map(escape).join('|')})`);

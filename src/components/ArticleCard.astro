@@ -16,13 +16,21 @@ interface Props {
   article: CollectionEntry<'articles'>;
   /** Shown under the eyebrow when given (not on the author's own profile). */
   byline?: string;
+  /** Photo above the text at every width, for cards in a grid (e.g. an edition's list). */
+  stacked?: boolean;
 }
 
-const { article, byline } = Astro.props;
+const { article, byline, stacked = false } = Astro.props;
 const thumbnailSrc = getThumbnailSrc(article);
 ---
 
-<article class:list={['feed-card', article.data.featured && 'feed-card-featured']}>
+<article
+  class:list={[
+    'feed-card',
+    article.data.featured && 'feed-card-featured',
+    stacked && 'feed-card-stacked',
+  ]}
+>
   {
     thumbnailSrc && (
       <span class="feed-card-frame">
@@ -142,6 +150,12 @@ const thumbnailSrc = getThumbnailSrc(article);
     font-size: clamp(1.1rem, 2vw, 1.35rem);
     line-height: 1.2;
     color: var(--brand-teal);
+  }
+
+  /* Stacked cards (in a grid): photo above the text at every width. */
+  .feed-card-stacked {
+    grid-template-columns: 1fr;
+    align-content: start;
   }
 
   /* Phones: photo above the text, across the card's full width. */

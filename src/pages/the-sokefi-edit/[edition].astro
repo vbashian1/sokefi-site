@@ -1,0 +1,17 @@
+---
+// One edition of The Sokéfi Edit at its permanent address, /the-sokefi-edit/<edition>
+// (e.g. /the-sokefi-edit/edition-1). The newsletter's "Read the full edition" link points
+// here, so it keeps working after later editions are published.
+import { getEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import EditionView from '../../components/EditionView.astro';
+
+const edition = await getEntry('editions', Astro.params.edition ?? '');
+if (!edition) return new Response('Not found', { status: 404 });
+---
+
+<Base title={`${edition.data.title} | Sokéfi`} description={edition.data.standfirst}>
+  <main>
+    <EditionView edition={edition} />
+  </main>
+</Base>
