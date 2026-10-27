@@ -148,6 +148,9 @@ const articles = defineCollection({
       // featured). The article's own page still exists.
       listed: z.boolean().default(true),
       featured: z.boolean().default(false),
+      // Fixed order among articles with the same date (the 15 launch articles share one
+      // placeholder date). Lists sort newest first, then by this number (src/utils/articleOrder.ts).
+      launchOrder: z.number().int().positive().optional(),
       firsthand: z.boolean().default(false),
       featuredPriority: z.number().int().positive().optional(),
       featuredDate: z.coerce.date().optional(),
@@ -224,8 +227,13 @@ const editions = defineCollection({
       signedBy: z.string(),
       /** Every article in the edition; shown under "In this edition", grouped by pillar. */
       articles: z.array(reference('articles')).min(1),
-      /** The articles the homepage features while this is the latest edition. */
-      homepagePicks: z.array(reference('articles')).default([]),
+      /** The two articles the homepage's Edit strip shows while this is the latest edition,
+          chosen by hand (no rotation). `title` replaces the card title when a shorter one is
+          wanted; the dek, photo and crop come from the article. */
+      homepagePicks: z
+        .array(z.object({ article: reference('articles'), title: z.string().optional() }))
+        .max(2)
+        .default([]),
     }),
 });
 

@@ -1,6 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
-import { ROUTES } from '../config/routes';
+import { getCollection, getEntry } from 'astro:content';
+import { ROUTES, getArticleRoute } from '../config/routes';
+import { getThumbnailSrc } from '../utils/pillarFallback';
+import { framingStyle } from '../utils/framing';
+import { smartQuotes } from '../plugins/typography.mjs';
 import positanoHero from '../assets/images/positano-new.webp';
 import awenvidaBalcony from '../assets/images/awenvida-breakfast-balcony.avif';
 import beyondCamels from '../assets/images/beyond-camels-stable.webp';
@@ -13,18 +17,37 @@ const heroImage = {
   alt: 'A panoramic Amalfi Coast view in Positano with a colorful cliffside village on the left, a domed church near the middle, lush green foliage in the foreground, and a bright blue bay opening to the sea on the right with boats visible in crisp daylight.',
 };
 
-const featuredItems = [
-  {
-    title: 'A new way to read the world',
-    description: 'Placeholder editorial copy for the latest Sokéfi Edit preview.',
-    section: 'Awenvida',
-  },
-  {
-    title: 'The quiet luxury of going slowly',
-    description: 'A sample preview to show how featured content will appear on the homepage.',
-    section: 'The Uncommon Traveller',
-  },
-];
+// The Sokéfi Edit strip: the latest edition's two hand-picked articles (homepagePicks in
+// src/content/editions/<edition>/index.mdx), each with its card photo and crop. No rotation:
+// the pair changes only when the edition file is edited (Veronica, 2026-10-27).
+const editions = (await getCollection('editions')).sort((a, b) => b.data.number - a.data.number);
+const latestEdition = editions[0];
+const editHref = latestEdition
+  ? `${ROUTES.theSokefiEdit}/${latestEdition.id}`
+  : ROUTES.theSokefiEdit;
+const PILLAR_NAMES: Record<string, string> = {
+  awenvida: 'Awenvida',
+  'beyond-the-guidebook': 'Beyond the Guidebook',
+  'the-uncommon-traveller': 'The Uncommon Traveller',
+  'reservation-for-one': 'Reservation for One',
+};
+const featuredItems = await Promise.all(
+  (latestEdition?.data.homepagePicks ?? []).map(async (pick) => {
+    const article = await getEntry(pick.article);
+    if (!article) throw new Error(`Homepage pick not found: ${pick.article.id}`);
+    const pillar = article.data.pillar;
+    return {
+      section: PILLAR_NAMES[pillar.trim().toLowerCase().replace(/\s+/g, '-')] ?? pillar,
+      title: smartQuotes(pick.title ?? article.data.title),
+      description: smartQuotes(article.data.dek),
+      href: getArticleRoute(article.id),
+      image: getThumbnailSrc(article),
+      imageStyle: article.data.thumbnail
+        ? framingStyle(article.data.thumbnailFocus, article.data.thumbnailZoom)
+        : undefined,
+    };
+  }),
+);
 
 const brands = [
   {
@@ -104,18 +127,30 @@ const brands = [
           <p class="section-label">The Sokéfi Edit</p>
           <h2 id="edit-title">Fresh from the latest edition</h2>
         </div>
-        <a class="button" href={ROUTES.theSokefiEdit}>READ THE FULL EDIT</a>
+        <a class="button" href={editHref}>READ THE FULL EDIT</a>
       </div>
 
       <div class="feature-grid">
         {
           featuredItems.map((article) => (
-            <article class="card">
+            <article class="card edit-card">
+              {article.image && (
+                <span class="edit-card-frame">
+                  <img
+                    class="edit-card-image"
+                    src={article.image}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    style={article.imageStyle}
+                  />
+                </span>
+              )}
               <p class="card-meta">{article.section}</p>
               <h3>{article.title}</h3>
               <p>{article.description}</p>
-              <a class="button" href={ROUTES.theSokefiEdit}>
-                READ PREVIEW
+              <a class="button" href={article.href}>
+                Read the story
               </a>
             </article>
           ))
@@ -205,6 +240,35 @@ const brands = [
 </Base>
 
 <style>
+  /* The Edit strip's cards: the article's card photo (with its crop) above the text. */
+  .edit-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .edit-card-frame {
+    display: block;
+    aspect-ratio: 16 / 9;
+    margin: 0 0 1rem;
+    overflow: hidden;
+    border: 1px solid rgba(14, 143, 184, 0.16);
+  }
+
+  .edit-card-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--focus, center center);
+    transform: scale(var(--zoom, 1));
+    transform-origin: var(--focus, center center);
+  }
+
+  .edit-card .button {
+    align-self: flex-start;
+    margin-top: auto;
+  }
+
   .hero-media-rule {
     display: block;
     width: 100%;

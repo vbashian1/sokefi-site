@@ -12,6 +12,7 @@ import { getEntries, render, type CollectionEntry } from 'astro:content';
 import ArticleCard from './ArticleCard.astro';
 import PullQuote from './blocks/PullQuote.astro';
 import { framingStyle } from '../utils/framing';
+import { compareArticles } from '../utils/articleOrder';
 import { ROUTES } from '../config/routes';
 import { SOCIAL_LINKS } from '../config/social';
 import '../styles/article-body.css';
@@ -44,7 +45,10 @@ const authorName = (article: CollectionEntry<'articles'>) =>
   'Sokéfi';
 const groups = PILLARS.map((pillar) => ({
   pillar,
-  articles: articles.filter((article) => slug(article.data.pillar) === slug(pillar)),
+  // Same order as the pillar pages.
+  articles: articles
+    .filter((article) => slug(article.data.pillar) === slug(pillar))
+    .sort(compareArticles),
 })).filter((group) => group.articles.length > 0);
 // "Follow" links to the main social account once there is one.
 const followHref = SOCIAL_LINKS.instagram || SOCIAL_LINKS.facebook || '';

@@ -16,10 +16,13 @@ const {
   description = defaultDescription,
   image = defaultShareImage,
   structuredData = [],
+  // A page that repeats another page's content (e.g. /the-sokefi-edit showing the latest
+  // edition) names that page as the original for search engines.
+  canonicalPath,
 } = Astro.props;
 
 const siteUrl = Astro.site ?? new URL('https://sokefi.com');
-const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
+const canonicalUrl = new URL(canonicalPath ?? Astro.url.pathname, siteUrl).toString();
 const socialImageUrl = new URL(image, siteUrl).toString();
 
 const authors = await getCollection('authors');

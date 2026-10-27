@@ -1,7 +1,8 @@
 ---
-import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
+import { compareArticles } from '../../utils/articleOrder';
 import { renderInlineHtml } from '../../utils/summary';
 
 const slug = Astro.params.slug ?? '';
@@ -46,16 +47,10 @@ const getDisplayMonogram = () => {
   return initials || 'SO';
 };
 
-const getArticleDateValue = (article: CollectionEntry<'articles'>) => {
-  const rawDate = article.data.updatedDate ?? article.data.date;
-  const parsedDate = rawDate ? new Date(rawDate) : null;
-  return parsedDate ? parsedDate.getTime() : 0;
-};
-
 const authorArticles = allArticles
   // `author` is a collection reference ({ id, collection }), not a string.
   .filter((article) => author && article.data.author.id === author.id)
-  .sort((a, b) => getArticleDateValue(b) - getArticleDateValue(a));
+  .sort(compareArticles);
 
 const eyebrow = getDisplayEyebrow();
 const monogram = getDisplayMonogram();

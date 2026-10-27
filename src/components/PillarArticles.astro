@@ -3,8 +3,9 @@
 // each article's own `pillar`), newest first, as shared ArticleCards, under the heading
 // "The latest from <pillar>". The heading and the cards share one edge, so they line up.
 //   <PillarArticles pillar="Awenvida" />
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import ArticleCard from './ArticleCard.astro';
+import { compareArticles } from '../utils/articleOrder';
 
 interface Props {
   /** The pillar's display name, e.g. "The Uncommon Traveller". */
@@ -15,11 +16,6 @@ const { pillar } = Astro.props;
 const slug = (value: string | undefined) =>
   (value ?? '').trim().toLowerCase().replace(/\s+/g, '-').replace(/-+/g, '-');
 
-const time = (article: CollectionEntry<'articles'>) => {
-  const raw = article.data.updatedDate ?? article.data.date;
-  return raw ? new Date(raw).getTime() : 0;
-};
-
 // Articles marked listed: false are left out of every listing.
 const articles = (
   await getCollection(
@@ -27,8 +23,8 @@ const articles = (
     ({ data }) => data.listed !== false && slug(data.pillar) === slug(pillar),
   )
 )
-  // Newest first; articles with the same date in title order, so the list is stable.
-  .sort((a, b) => time(b) - time(a) || a.data.title.localeCompare(b.data.title));
+  // Newest first; the launch articles (same date) in their fixed launch order.
+  .sort(compareArticles);
 
 const authors = Object.fromEntries(
   (await getCollection('authors')).map((author) => [author.id, author.data.name]),

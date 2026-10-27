@@ -1,25 +1,87 @@
 ---
+// The Sokéfi Edit (Veronica, 2026-10-27): always the latest edition (highest number), then
+// "Earlier editions", which appears from the second edition on. Each edition also has its
+// own permanent page at /the-sokefi-edit/<edition>, named here as the original for search.
+import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import EditionView from '../components/EditionView.astro';
+import { ROUTES } from '../config/routes';
+
+const editions = (await getCollection('editions')).sort((a, b) => b.data.number - a.data.number);
+const [latest, ...earlier] = editions;
+const dateLabel = (date: Date) =>
+  date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 ---
 
-<Base title="The Sokéfi Edit — Sokéfi">
+<Base
+  title="The Sokéfi Edit | Sokéfi"
+  description={latest?.data.standfirst}
+  canonicalPath={latest ? `${ROUTES.theSokefiEdit}/${latest.id}` : undefined}
+>
   <main>
-    <section class="pillar-header-card" aria-labelledby="edit-title">
-      <div class="pillar-header-text">
-        <p class="pillar-eyebrow">Sokéfi</p>
-        <h1 class="pillar-title" id="edit-title">The Sokéfi Edit</h1>
-        <p class="pillar-tagline">Coming soon.</p>
-      </div>
-    </section>
-
-    <section class="section pillar-intro" aria-label="The Sokéfi Edit content">
-      <div class="pillar-intro-text">
-        <p>
-          The Sokéfi Edit, our roundup of the latest editorial picks across Awenvida, Beyond the
-          Guidebook, The Uncommon Traveller, and Reservation for One, is on its way. Check back
-          soon.
-        </p>
-      </div>
-    </section>
+    {latest && <EditionView edition={latest} />}
+    {
+      earlier.length > 0 && (
+        <section class="earlier-editions" aria-labelledby="earlier-editions-title">
+          <h2 id="earlier-editions-title">Earlier editions</h2>
+          <ul>
+            {earlier.map((edition) => (
+              <li>
+                <a href={`${ROUTES.theSokefiEdit}/${edition.id}`}>{edition.data.title}</a>
+                <span class="earlier-date">{dateLabel(edition.data.date)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
   </main>
 </Base>
+
+<style>
+  .earlier-editions {
+    margin: 0 0 clamp(1.5rem, 3vw, 2.25rem);
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .earlier-editions h2 {
+    margin: 0 0 1rem;
+    color: var(--brand-teal);
+    font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  }
+
+  .earlier-editions ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .earlier-editions li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+
+  .earlier-editions a {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--brand-teal);
+    text-decoration: none;
+  }
+
+  .earlier-editions a:hover,
+  .earlier-editions a:focus-visible {
+    text-decoration: underline;
+  }
+
+  .earlier-date {
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.85rem;
+    color: #7a7870;
+  }
+</style>
