@@ -2,6 +2,8 @@
 import Base from '../layouts/Base.astro';
 import awenvidaBalcony from '../assets/images/awenvida-breakfast-balcony.avif';
 import { getAuthorRoute } from '../config/routes';
+import PillarArticles from '../components/PillarArticles.astro';
+import PillarEditors from '../components/PillarEditors.astro';
 ---
 
 <Base title="Awenvida — Sokéfi">
@@ -26,20 +28,31 @@ import { getAuthorRoute } from '../config/routes';
       </div>
     </section>
 
-    <section class="awenvida-bio-bar" aria-label="Awenvida contributors">
-      <a class="awenvida-bio-lane" href={getAuthorRoute('alice-wellesley')}>
-        <p class="awenvida-bio-eyebrow">Living Well</p>
-        <p class="awenvida-bio-name">Alice Wellesley</p>
-      </a>
-      <a class="awenvida-bio-lane" href={getAuthorRoute('jake-martin')}>
-        <p class="awenvida-bio-eyebrow">Jake's Take</p>
-        <p class="awenvida-bio-name">Jake Martin</p>
-      </a>
-      <a class="awenvida-bio-lane" href={getAuthorRoute('charlotte-mowbray-greene')}>
-        <p class="awenvida-bio-eyebrow">Corner Office</p>
-        <p class="awenvida-bio-name">Charlotte Mowbray-Greene</p>
-      </a>
-    </section>
+    <PillarArticles pillar="Awenvida" />
+
+    <PillarEditors
+      label="Awenvida editors"
+      editors={[
+        {
+          eyebrow: 'Living Well',
+          name: 'Alice Wellesley',
+          href: getAuthorRoute('alice-wellesley'),
+          more: 'Alice',
+        },
+        {
+          eyebrow: "Jake's Take",
+          name: 'Jake Martin',
+          href: getAuthorRoute('jake-martin'),
+          more: 'Jake',
+        },
+        {
+          eyebrow: 'Corner Office',
+          name: 'Charlotte Mowbray-Greene',
+          href: getAuthorRoute('charlotte-mowbray-greene'),
+          more: 'Charlotte',
+        },
+      ]}
+    />
   </main>
 </Base>
 
@@ -67,60 +80,5 @@ import { getAuthorRoute } from '../config/routes';
     width: 2px;
     height: calc(100% - 0.4rem);
     background: #c9a227;
-  }
-
-  .awenvida-bio-bar {
-    margin: 0 0 clamp(1.5rem, 3vw, 2.25rem);
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0;
-    background: var(--brand-teal);
-  }
-
-  .awenvida-bio-lane {
-    margin: 0;
-    padding: 1.2rem 1.75rem;
-    position: relative;
-    text-decoration: none;
-  }
-
-  .awenvida-bio-lane:not(:first-child)::before {
-    content: '';
-    position: absolute;
-    top: 0.6rem;
-    bottom: 0.6rem;
-    left: 0;
-    width: 2px;
-    background: #c9a227;
-  }
-
-  .awenvida-bio-eyebrow {
-    margin: 0 0 0.35rem;
-    color: #c9a227;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    font-size: 0.76rem;
-    font-weight: 700;
-  }
-
-  .awenvida-bio-name {
-    margin: 0;
-    color: #f7f4ef;
-    font-weight: 700;
-  }
-
-  @media (max-width: 900px) {
-    .awenvida-bio-bar {
-      grid-template-columns: 1fr;
-    }
-
-    .awenvida-bio-lane {
-      border-left: 0;
-      border-top: 2px solid #c9a227;
-    }
-
-    .awenvida-bio-lane:first-child {
-      border-top: 0;
-    }
   }
 </style>

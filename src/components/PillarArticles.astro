@@ -1,0 +1,87 @@
+---
+// The article list on every pillar page (Veronica, 2026-10-26): the pillar's articles (by
+// each article's own `pillar`), newest first, as shared ArticleCards, under the heading
+// "The latest from <pillar>". The heading and the cards share one edge, so they line up.
+//   <PillarArticles pillar="Awenvida" />
+import { getCollection, type CollectionEntry } from 'astro:content';
+import ArticleCard from './ArticleCard.astro';
+
+interface Props {
+  /** The pillar's display name, e.g. "The Uncommon Traveller". */
+  pillar: string;
+}
+
+const { pillar } = Astro.props;
+const slug = (value: string | undefined) =>
+  (value ?? '').trim().toLowerCase().replace(/\s+/g, '-').replace(/-+/g, '-');
+
+const time = (article: CollectionEntry<'articles'>) => {
+  const raw = article.data.updatedDate ?? article.data.date;
+  return raw ? new Date(raw).getTime() : 0;
+};
+
+// Articles marked listed: false are left out of every listing.
+const articles = (
+  await getCollection(
+    'articles',
+    ({ data }) => data.listed !== false && slug(data.pillar) === slug(pillar),
+  )
+)
+  // Newest first; articles with the same date in title order, so the list is stable.
+  .sort((a, b) => time(b) - time(a) || a.data.title.localeCompare(b.data.title));
+
+const authors = Object.fromEntries(
+  (await getCollection('authors')).map((author) => [author.id, author.data.name]),
+);
+const headingId = `pillar-articles-${slug(pillar)}`;
+---
+
+<section class="pillar-articles" aria-labelledby={headingId}>
+  <h2 class="pillar-articles-heading" id={headingId}>
+    The latest from <span class="pillar-articles-name">{pillar}</span>
+  </h2>
+  {
+    articles.length > 0 ? (
+      <div class="pillar-articles-list">
+        {articles.map((article) => (
+          <ArticleCard
+            article={article}
+            byline={article.data.byline || authors[article.data.author.id] || 'Sokéfi'}
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="pillar-articles-empty">New articles are on their way.</p>
+    )
+  }
+</section>
+
+<style>
+  .pillar-articles {
+    margin: 0 0 clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  .pillar-articles-heading {
+    margin: 0 0 1rem;
+    color: var(--brand-teal);
+    font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+    text-wrap: balance;
+  }
+
+  /* The pillar's name never splits across lines ("The Uncommon / Traveller"). */
+  .pillar-articles-name {
+    white-space: nowrap;
+  }
+
+  .pillar-articles-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .pillar-articles-empty {
+    margin: 0;
+    color: #46565b;
+    font-style: italic;
+  }
+</style>

@@ -13,9 +13,11 @@ interface Props {
   surface?: 'light' | 'teal';
   label?: string;
   href?: string;
+  /** A "More from … →" link under the name (the end-of-article team bar). */
+  more?: { href: string; text: string };
 }
 
-const { name, surface = 'light', label, href } = Astro.props;
+const { name, surface = 'light', label, href, more } = Astro.props;
 const hasMeta = Astro.slots.has('meta');
 ---
 
@@ -30,6 +32,13 @@ const hasMeta = Astro.slots.has('meta');
         </a>
       ) : (
         <p class="team-byline-name">{name}</p>
+      )
+    }
+    {
+      more && (
+        <a class="team-byline-more" href={more.href}>
+          {more.text} &rarr;
+        </a>
       )
     }
     {
@@ -125,5 +134,25 @@ const hasMeta = Astro.slots.has('meta');
   .team-byline-on-teal .team-byline-name {
     color: #f7f4ef;
     font-weight: 700;
+  }
+
+  /* Same style as "More from Alice →" in the pillar-page editor bars. */
+  .team-byline-on-teal .team-byline-more {
+    margin-top: 0.45rem;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #f7f4ef;
+    text-decoration: none;
+    text-wrap: balance;
+  }
+
+  .team-byline-on-teal .team-byline-more:hover,
+  .team-byline-on-teal .team-byline-more:focus-visible {
+    color: #c9a227;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 </style>

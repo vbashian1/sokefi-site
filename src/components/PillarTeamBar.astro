@@ -3,6 +3,7 @@
 // author card and the "This piece was written by…" line. Matches the team bar on
 // the pillar pages: pillar name as the label, team name beneath.
 import EditorialByline from './EditorialByline.astro';
+import { getAuthorRoute } from '../config/routes';
 
 interface Props {
   pillar: string;
@@ -22,7 +23,12 @@ const pillarName = PILLAR_NAMES[pillar.trim().toLowerCase().replace(/\s+/g, '-')
 ---
 
 <section class="pillar-team-bar" aria-label="Written by">
-  <EditorialByline surface="teal" label={pillarName} name={name} />
+  <EditorialByline
+    surface="teal"
+    label={pillarName}
+    name={name}
+    more={{ href: getAuthorRoute('sokefi-editorial-team'), text: 'More from the team' }}
+  />
 </section>
 
 <style>

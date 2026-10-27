@@ -1,0 +1,119 @@
+---
+// The teal editor bar on every pillar page (Veronica, 2026-10-26), after the article list:
+// one lane per editor (Awenvida has three; the other pillars one), each with its column or
+// pillar as the gold label, the name, an optional line, and a "More from <name> →" link to
+// the editor's page, styled like the link on the author cards. The whole lane is the link.
+//   <PillarEditors label="Pillar editors" editors={[{ eyebrow, name, href, more }]} />
+interface Editor {
+  eyebrow: string;
+  name: string;
+  href: string;
+  /** Who "More from …" names, e.g. "Alice" or "the team". */
+  more: string;
+  text?: string;
+}
+
+interface Props {
+  editors: Editor[];
+  label?: string;
+}
+
+const { editors, label = 'Editors' } = Astro.props;
+---
+
+<section
+  class:list={['pillar-editors', editors.length > 1 && 'pillar-editors-multi']}
+  style={`--lanes: ${editors.length}`}
+  aria-label={label}
+>
+  {
+    editors.map((editor) => (
+      <a class="pillar-editors-lane" href={editor.href}>
+        <p class="pillar-editors-eyebrow">{editor.eyebrow}</p>
+        <p class="pillar-editors-name">{editor.name}</p>
+        {editor.text && <p class="pillar-editors-text">{editor.text}</p>}
+        <span class="pillar-editors-more">More from {editor.more} &rarr;</span>
+      </a>
+    ))
+  }
+</section>
+
+<style>
+  .pillar-editors {
+    margin: 0 0 clamp(1.5rem, 3vw, 2.25rem);
+    display: grid;
+    grid-template-columns: repeat(var(--lanes), minmax(0, 1fr));
+    background: var(--brand-teal);
+  }
+
+  .pillar-editors-lane {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 1.2rem 1.75rem 1.2rem 2.3rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Gold rule at the start of each lane. */
+  .pillar-editors-lane::before {
+    content: '';
+    position: absolute;
+    top: 1.3rem;
+    bottom: 1.3rem;
+    left: 1.75rem;
+    width: 2px;
+    background: #c9a227;
+  }
+
+  .pillar-editors-eyebrow {
+    margin: 0 0 0.15rem;
+    font-family: 'Lato', Arial, sans-serif;
+    color: #c9a227;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.76rem;
+    font-weight: 700;
+  }
+
+  .pillar-editors-name {
+    margin: 0;
+    color: #f7f4ef;
+    font-weight: 700;
+  }
+
+  .pillar-editors-text {
+    margin: 0;
+    color: #f7f4ef;
+    line-height: 1.5;
+  }
+
+  .pillar-editors-more {
+    margin-top: 0.45rem;
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #f7f4ef;
+  }
+
+  .pillar-editors-lane:hover .pillar-editors-more,
+  .pillar-editors-lane:focus-visible .pillar-editors-more {
+    color: #c9a227;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  /* Phones and small tablets: lanes stack, with a thin gold line between them. */
+  @media (max-width: 900px) {
+    .pillar-editors {
+      grid-template-columns: 1fr;
+    }
+
+    .pillar-editors-multi .pillar-editors-lane + .pillar-editors-lane {
+      border-top: 1px solid rgba(201, 162, 39, 0.55);
+    }
+  }
+</style>

@@ -1,34 +1,13 @@
 ---
 import Base from '../layouts/Base.astro';
-import ArticleCard from '../components/ArticleCard.astro';
+import PillarArticles from '../components/PillarArticles.astro';
+import PillarEditors from '../components/PillarEditors.astro';
 import reservationSelfieHat from '../assets/images/reservation-selfie-hat.webp';
-import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
+import { getEntry } from 'astro:content';
 import { getAuthorRoute } from '../config/routes';
 
-// Articles marked listed: false are left out of every listing.
-const allArticles = await getCollection('articles', ({ data }) => data.listed !== false);
-const allAuthors = await getCollection('authors');
 const authorEntry = await getEntry('authors', 'sophie-westbrooke');
-
-const normalizePillar = (pillar: string | undefined) =>
-  (pillar ?? '').toLowerCase().replace(/\s+/g, '-').replace(/-+/g, '-');
-
-const getArticleDateValue = (article: CollectionEntry<'articles'>) => {
-  const rawDate = article.data.updatedDate ?? article.data.date;
-  const parsedDate = rawDate ? new Date(rawDate) : null;
-  return parsedDate ? parsedDate.getTime() : 0;
-};
-
-const authorNameMap = Object.fromEntries(allAuthors.map((author) => [author.id, author.data.name]));
-
-const reservationArticles = allArticles
-  .filter((article) => normalizePillar(article.data.pillar) === 'reservation-for-one')
-  .sort((a, b) => getArticleDateValue(b) - getArticleDateValue(a));
-
-const featuredArticles = reservationArticles.filter((article) => article.data.featured);
-const standardArticles = reservationArticles.filter((article) => !article.data.featured);
-const orderedArticles = [...featuredArticles, ...standardArticles];
-
+// Meant to differ from her author bio (Veronica, 2026-10-25).
 const bioText = 'The original modern nomad — travelling solo since her twenties.';
 const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
 ---
@@ -51,140 +30,19 @@ const authorName = authorEntry?.data.name ?? 'Sophie Westbrooke';
       </div>
     </section>
 
-    <section class="feed-section" aria-labelledby="reservation-feed-title">
-      <div class="section-heading">
-        <div>
-          <p class="section-label">The latest from Reservation for One</p>
-          <h2 id="reservation-feed-title">Editorial dispatches</h2>
-        </div>
-      </div>
+    <PillarArticles pillar="Reservation for One" />
 
-      {
-        orderedArticles.length > 0 ? (
-          <div class="feed-list">
-            {orderedArticles.map((article) => (
-              <ArticleCard
-                article={article}
-                byline={article.data.byline || authorNameMap[article.data.author.id] || 'Sokéfi'}
-              />
-            ))}
-          </div>
-        ) : (
-          <div class="feed-empty-state">
-            <p>No articles are currently assigned to this pillar.</p>
-          </div>
-        )
-      }
-    </section>
-
-    <section class="editor-bio-bar" aria-label="Editor bio">
-      <a class="editor-bio-link" href={getAuthorRoute('sophie-westbrooke')}>
-        <div class="editor-bio-copy">
-          <p class="editor-bio-eyebrow">RESERVATION FOR ONE</p>
-          <p class="editor-bio-name">{authorName}</p>
-          <p class="editor-bio-text">{bioText}</p>
-        </div>
-      </a>
-    </section>
+    <PillarEditors
+      label="Reservation for One editor"
+      editors={[
+        {
+          eyebrow: 'Reservation for One',
+          name: authorName,
+          text: bioText,
+          href: getAuthorRoute('sophie-westbrooke'),
+          more: 'Sophie',
+        },
+      ]}
+    />
   </main>
 </Base>
-
-<style>
-  .feed-section {
-    padding: clamp(1.5rem, 3vw, 2.25rem) clamp(1.25rem, 3.6vw, 2.35rem) 0;
-  }
-
-  .section-heading {
-    display: flex;
-    align-items: end;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .section-label {
-    margin: 0 0 0.35rem;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    font-size: 0.76rem;
-    color: var(--brand-teal);
-    font-weight: 700;
-    /* Balanced lines, so a short last word doesn't sit alone on phones. */
-    text-wrap: balance;
-  }
-
-  .feed-list {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .feed-empty-state {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: #46565b;
-    font-style: italic;
-    font-family: 'Source Serif 4', Georgia, serif;
-    font-size: 1.05rem;
-    line-height: 1.7;
-  }
-
-  .editor-bio-bar {
-    margin: 0 0 clamp(1.5rem, 3vw, 2.25rem);
-    display: flex;
-    align-items: center;
-    padding: 1.2rem 1.75rem;
-    border: 0;
-    background: var(--brand-teal);
-    border-radius: 0;
-    position: relative;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .editor-bio-copy {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    position: relative;
-    padding-left: 0.55rem;
-  }
-
-  .editor-bio-link {
-    text-decoration: none;
-    color: inherit;
-  }
-
-  .editor-bio-copy::before {
-    content: '';
-    position: absolute;
-    top: 0.1rem;
-    left: 0;
-    width: 2px;
-    height: calc(100% - 0.2rem);
-    background: #c9a227;
-  }
-
-  .editor-bio-eyebrow {
-    margin: 0 0 0.2rem;
-    color: #c9a227;
-    opacity: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    font-size: 0.9rem;
-    font-weight: 800;
-  }
-
-  .editor-bio-name {
-    margin: 0;
-    font-weight: 700;
-    color: #f7f4ef;
-  }
-
-  .editor-bio-text {
-    margin: 0;
-    color: #f7f4ef;
-    line-height: 1.5;
-  }
-</style>

@@ -1,5 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
+import PillarArticles from '../components/PillarArticles.astro';
+import PillarEditors from '../components/PillarEditors.astro';
+import { getAuthorRoute } from '../config/routes';
 import uncommonLanterns from '../assets/images/uncommon-lanterns.webp';
 ---
 
@@ -23,53 +26,18 @@ import uncommonLanterns from '../assets/images/uncommon-lanterns.webp';
       </div>
     </section>
 
-    <section class="pillar-team-bar" aria-label="Pillar team">
-      <div class="pillar-team-copy">
-        <p class="pillar-team-eyebrow">THE UNCOMMON TRAVELLER</p>
-        <p class="pillar-team-name">Sokéfi Editorial Team</p>
-      </div>
-    </section>
+    <PillarArticles pillar="The Uncommon Traveller" />
+
+    <PillarEditors
+      label="The Uncommon Traveller team"
+      editors={[
+        {
+          eyebrow: 'The Uncommon Traveller',
+          name: 'Sokéfi Editorial Team',
+          href: getAuthorRoute('sokefi-editorial-team'),
+          more: 'the team',
+        },
+      ]}
+    />
   </main>
 </Base>
-
-<style>
-  .pillar-team-bar {
-    margin: 0 0 clamp(1.5rem, 3vw, 2.25rem);
-    padding: 1.2rem 1.75rem;
-    background: var(--brand-teal);
-  }
-
-  .pillar-team-copy {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    position: relative;
-    padding-left: 0.55rem;
-  }
-
-  .pillar-team-copy::before {
-    content: '';
-    position: absolute;
-    top: 0.1rem;
-    left: 0;
-    width: 2px;
-    height: calc(100% - 0.2rem);
-    background: #c9a227;
-  }
-
-  .pillar-team-eyebrow {
-    margin: 0 0 0.2rem;
-    color: #c9a227;
-    opacity: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    font-size: 0.9rem;
-    font-weight: 800;
-  }
-
-  .pillar-team-name {
-    margin: 0;
-    color: #f7f4ef;
-    font-weight: 700;
-  }
-</style>
