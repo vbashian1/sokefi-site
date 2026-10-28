@@ -78,4 +78,16 @@ export const NOT_MINE = [
   `${A}2026-09-01-winter-weekend-in-iceland/sunrise road.jpg`, // Unsplash, Rory Hennessey
   `${A}2026-10-01-the-joy-of-saying-yes/van .jpg`, // Unsplash, Franco De Bartolo
   `${A}2026-10-01-why-an-imperfect-cabin-is-perfect/cabin .jpg`, // Unsplash
+  // Site photos (Veronica, 2026-10-28): the pillar headers, Positano and the pillar
+  // fallbacks are Unsplash (none of the fallbacks is the About plane)
+  'src/assets/images/awenvida-breakfast-balcony.avif',
+  'src/assets/images/beyond-camels-stable.webp',
+  'src/assets/images/uncommon-lanterns.webp',
+  'src/assets/images/reservation-selfie-hat.webp',
+  'src/assets/images/positano-new.avif',
+  'src/assets/images/positano-new.webp',
+  'src/assets/images/fallback-awenvida.webp',
+  'src/assets/images/fallback-beyond-the-guidebook.webp',
+  'src/assets/images/fallback-the-uncommon-traveller.webp',
+  'src/assets/images/fallback-reservation-for-one.webp',
 ];
