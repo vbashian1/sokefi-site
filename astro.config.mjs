@@ -7,7 +7,7 @@ import { detailsBoxes } from './src/plugins/details-boxes.mjs';
 import { labelParagraphs } from './src/plugins/label-paragraphs.mjs';
 import { layoutRules } from './src/plugins/layout-rules.mjs';
 import { typography } from './src/plugins/typography.mjs';
-import { publishedArticlePaths } from './src/utils/sitemapArticles.mjs';
+import { sitemapPagePaths } from './src/utils/sitemapPages.mjs';
 
 const SITE = 'https://sokefi.com';
 
@@ -16,10 +16,10 @@ export default defineConfig({
   base: '/',
   output: 'server',
   adapter: vercel(),
-  // The sitemap lists the fixed pages by itself; article pages are made on request, so the
-  // published ones are added here (drafts left out).
+  // The sitemap lists the fixed pages by itself; article, author and edition pages are made
+  // on request, so they are added here (draft articles left out).
   integrations: [
-    sitemap({ customPages: publishedArticlePaths().map((p) => new URL(p, SITE).toString()) }),
+    sitemap({ customPages: sitemapPagePaths().map((p) => new URL(p, SITE).toString()) }),
     mdx(),
   ],
   // No developer toolbar on local previews: it sat over the article text and read as part
