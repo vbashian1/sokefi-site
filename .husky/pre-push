@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+# Type-check exactly the commits being pushed, in a clean copy; block the push on errors.
+node scripts/pre-push-check.mjs
