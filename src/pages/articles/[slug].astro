@@ -112,7 +112,14 @@ const getImageMeta = (img: ImageMetadata | string | undefined): ImageMeta | null
 const heroMeta = entry ? getImageMeta(entry.data.heroImage) : null;
 const heroCropOnPhones = entry?.data.heroCropOnPhones ?? false;
 const heroImg = heroMeta
-  ? responsiveImage(heroMeta, SLOTS.banner(entry?.data.heroZoom, entry?.data.heroZoomOnPhones))
+  ? responsiveImage(
+      heroMeta,
+      SLOTS.banner(
+        entry?.data.heroZoom,
+        // The phone band (heroCropOnPhones) shows the zoom too.
+        entry?.data.heroZoomOnPhones || heroCropOnPhones,
+      ),
+    )
   : null;
 
 const galleryImages = entry
