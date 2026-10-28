@@ -6,6 +6,7 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import EditionView from '../components/EditionView.astro';
 import { ROUTES } from '../config/routes';
+import { shareImage } from '../utils/responsiveImage';
 
 const editions = (await getCollection('editions')).sort((a, b) => b.data.number - a.data.number);
 const [latest, ...earlier] = editions;
@@ -17,6 +18,7 @@ const dateLabel = (date: Date) =>
   title="The Sokéfi Edit | Sokéfi"
   description={latest?.data.standfirst}
   canonicalPath={latest ? `${ROUTES.theSokefiEdit}/${latest.id}` : undefined}
+  image={latest ? shareImage(latest.data.headerImage) : undefined}
 >
   <main>
     {latest && <EditionView edition={latest} />}

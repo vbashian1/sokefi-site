@@ -5,12 +5,17 @@
 import { getEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import EditionView from '../../components/EditionView.astro';
+import { shareImage } from '../../utils/responsiveImage';
 
 const edition = await getEntry('editions', Astro.params.edition ?? '');
 if (!edition) return new Response('Not found', { status: 404 });
 ---
 
-<Base title={`${edition.data.title} | Sokéfi`} description={edition.data.standfirst}>
+<Base
+  title={`${edition.data.title} | Sokéfi`}
+  description={edition.data.standfirst}
+  image={shareImage(edition.data.headerImage)}
+>
   <main>
     <EditionView edition={edition} />
   </main>

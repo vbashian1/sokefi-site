@@ -11,7 +11,7 @@ import defaultArticleImage from '../../assets/images/positano-new.avif';
 import { getAuthorRoute } from '../../config/routes';
 import { renderInlineHtml, renderSummaryHtml, summaryToPlainText } from '../../utils/summary';
 import { framingStyle } from '../../utils/framing';
-import { aspectStyle, responsiveImage, SLOTS } from '../../utils/responsiveImage';
+import { aspectStyle, responsiveImage, shareImage, SLOTS } from '../../utils/responsiveImage';
 import '../../styles/article-body.css';
 import FullBleed from '../../components/blocks/FullBleed.astro';
 import WideImage from '../../components/blocks/WideImage.astro';
@@ -195,6 +195,11 @@ const authorHref = authorEntry ? getAuthorRoute(authorEntry.id) : null;
 // Team pieces close with the pillar team bar rather than a personal author card.
 const isEditorialTeam = authorEntry?.id === 'sokefi-editorial-team';
 
+// Link previews and structured data use a 1280px web copy, never the original file.
+const shareImageUrl = heroMeta
+  ? shareImage(heroMeta)
+  : (entry?.data.cover ?? shareImage(defaultArticleImage));
+
 const articleSchema = entry
   ? {
       '@type': 'Article',
@@ -202,12 +207,7 @@ const articleSchema = entry
       description: summaryText || entry.data.metaDescription,
       ...(summaryText ? { abstract: summaryText } : {}),
       datePublished: entry.data.date.toISOString(),
-      image: [
-        new URL(
-          heroMeta?.src ?? entry.data.cover ?? defaultArticleImage.src,
-          Astro.site ?? new URL('https://sokefi.com'),
-        ).toString(),
-      ],
+      image: [new URL(shareImageUrl, Astro.site ?? new URL('https://sokefi.com')).toString()],
       ...(authorEntry
         ? {
             author: {
@@ -225,7 +225,7 @@ const articleSchema = entry
     ? smartQuotes(entry.data.titleTag ?? `${entry.data.title} — Sokéfi`)
     : 'Article not found — Sokéfi'}
   description={entry ? entry.data.metaDescription : 'This article could not be found.'}
-  image={heroMeta?.src ?? entry?.data.cover ?? defaultArticleImage.src}
+  image={shareImageUrl}
   structuredData={articleSchema}
 >
   <main>

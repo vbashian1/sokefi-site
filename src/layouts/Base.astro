@@ -6,10 +6,12 @@ import CookieConsentBanner from '../components/CookieConsentBanner.astro';
 import { ROUTES } from '../config/routes';
 import { SOCIAL_LINKS } from '../config/social';
 import defaultShareImageAsset from '../assets/images/positano-new.avif';
+import { shareImage } from '../utils/responsiveImage';
 
 const defaultDescription =
   'Sokéfi is an editorial publication for curious travel, culture, and living well.';
-const defaultShareImage = defaultShareImageAsset.src;
+// Link previews use a 1280px web copy, never an original file (see shareImage).
+const defaultShareImage = shareImage(defaultShareImageAsset);
 
 const {
   title = 'Sokéfi',

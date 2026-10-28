@@ -104,3 +104,13 @@ export const SLOTS = {
     { width: 'min(100vw, 1152px)', maxPx: 1152, cover: true, frameRatio: 2.7 },
   ],
 };
+
+/**
+ * The link-preview image for a photo (og:image and the structured data): its 1280px JPEG
+ * web copy, stamped "© Sokéfi" where the photo is Veronica's, never the original file (whose
+ * metadata can include GPS location). A photo not in the manifest is used as it is.
+ */
+export const shareImage = (image: Source): string => {
+  const entry = entryFor(image);
+  return entry ? `/img/${entry.hash}/share.jpg` : image.src;
+};
