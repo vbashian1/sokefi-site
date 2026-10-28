@@ -358,7 +358,11 @@ const articleSchema = entry
             )}
             {proposal && (
               <p class="article-proposal-flag">
-                Local preview: proposed layout (not saved in the article)
+                Local preview: proposed layout
+                {proposalName &&
+                  proposalName !== '1' &&
+                  ` (option ${proposalName.toUpperCase()})`}{' '}
+                (not saved in the article)
               </p>
             )}
             <div
