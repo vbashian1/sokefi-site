@@ -679,6 +679,14 @@ const showCookieBanner = isEuOrUkVisitor && !hasCookieConsent;
       transform: scale(var(--zoom, 1));
     }
 
+    /* …or shows a 16:9 band cropped at the focal point (heroCropOnPhones), for portrait
+       photos that would otherwise fill the screen. */
+    .hero-media.hero-crop-on-phones img {
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      transform: scale(var(--zoom, 1));
+    }
+
     .section-heading {
       margin-bottom: 0.8rem;
       gap: 0.5rem;

@@ -107,6 +107,7 @@ const getImageMeta = (img: ImageMetadata | string | undefined): ImageMeta | null
 };
 
 const heroMeta = entry ? getImageMeta(entry.data.heroImage) : null;
+const heroCropOnPhones = entry?.data.heroCropOnPhones ?? false;
 const heroImg = heroMeta
   ? responsiveImage(heroMeta, SLOTS.banner(entry?.data.heroZoom, entry?.data.heroZoomOnPhones))
   : null;
@@ -237,6 +238,7 @@ const articleSchema = entry
                 'hero-media',
                 'article-hero',
                 entry.data.heroZoomOnPhones && 'hero-zoom-on-phones',
+                heroCropOnPhones && 'hero-crop-on-phones',
               ]}
             >
               <img
@@ -249,10 +251,11 @@ const articleSchema = entry
                 loading="eager"
                 fetchpriority="high"
                 decoding="async"
-                style={aspectStyle(
-                  heroMeta,
-                  framingStyle(entry.data.heroFocus, entry.data.heroZoom),
-                )}
+                style={
+                  heroCropOnPhones
+                    ? framingStyle(entry.data.heroFocus, entry.data.heroZoom)
+                    : aspectStyle(heroMeta, framingStyle(entry.data.heroFocus, entry.data.heroZoom))
+                }
               />
             </div>
           )}

@@ -116,6 +116,9 @@ const articles = defineCollection({
       // Phones normally show the whole hero photo (no zoom); true keeps the zoomed crop there
       // too, for a photo whose edges shouldn't show (Tresco's plane-window aerial).
       heroZoomOnPhones: z.boolean().default(false),
+      // Phones normally show the whole banner photo. true: phones show a 16:9 band cropped at
+      // heroFocus instead (for portrait photos that would otherwise fill the screen).
+      heroCropOnPhones: z.boolean().default(false),
       thumbnailFocus: focusPoint.optional(),
       thumbnailZoom: zoomLevel.optional(),
       // Layout: a drop cap on the first paragraph of the piece (off unless set).
