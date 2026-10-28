@@ -38,6 +38,14 @@ const parseFocus = (focus?: string) => {
   return { x, y };
 };
 
+// ?hero=<across>,<down>,<zoom> opens the banner at a proposed crop (e.g. ?hero=90,56,2), so
+// a crop can be sent as a link (the reset button then returns to that crop).
+const heroLink = Astro.url.searchParams.get('hero')?.split(',').map(Number);
+const heroProposed =
+  heroLink && heroLink.length >= 2 && heroLink.every((n) => Number.isFinite(n))
+    ? heroLink
+    : undefined;
+
 const PLACEMENTS = [
   entry.data.heroImage && {
     id: 'hero',
@@ -45,8 +53,10 @@ const PLACEMENTS = [
     image: entry.data.heroImage,
     focusField: 'heroFocus',
     zoomField: 'heroZoom',
-    focus: parseFocus(entry.data.heroFocus),
-    zoom: entry.data.heroZoom ?? 1,
+    focus: heroProposed
+      ? { x: heroProposed[0], y: heroProposed[1] }
+      : parseFocus(entry.data.heroFocus),
+    zoom: heroProposed?.[2] ?? entry.data.heroZoom ?? 1,
     saved: Boolean(entry.data.heroFocus),
     url: articleUrl,
     target: '.article-hero img',
