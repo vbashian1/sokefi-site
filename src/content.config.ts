@@ -150,6 +150,10 @@ const articles = defineCollection({
       // false: left out of every article listing (author pages, pillar feeds, home page,
       // featured). The article's own page still exists.
       listed: z.boolean().default(true),
+      // Not yet published (Veronica, 2026-10-28): true keeps the article off the live site
+      // entirely (its page is "not found", and it's in no listing, edition or sitemap), while
+      // local previews still show it. Switched off when Veronica says it's published.
+      draft: z.boolean().default(false),
       featured: z.boolean().default(false),
       // Fixed order among articles with the same date (the 15 launch articles share one
       // placeholder date). Lists sort newest first, then by this number (src/utils/articleOrder.ts).

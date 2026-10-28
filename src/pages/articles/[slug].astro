@@ -21,6 +21,7 @@ import PullQuote from '../../components/blocks/PullQuote.astro';
 import ReaderInvitation from '../../components/blocks/ReaderInvitation.astro';
 import { smartQuotes } from '../../plugins/typography.mjs';
 import { AFFILIATES } from '../../data/affiliates';
+import { isLive } from '../../utils/drafts';
 
 // Components an article body can use (photos, layout blocks, Details boxes).
 const MDX_COMPONENTS = {
@@ -35,7 +36,9 @@ const MDX_COMPONENTS = {
 };
 
 const slug = Astro.params.slug ?? '';
-const entry = await getEntry('articles', slug);
+const found = await getEntry('articles', slug);
+// A draft (not yet published) is "not found" on the live site; local previews show it.
+const entry = found && isLive(found) ? found : undefined;
 
 if (!entry) {
   Astro.response.status = 404;
@@ -341,6 +344,11 @@ const articleSchema = entry
 
             <div class="article-rule" aria-hidden="true" />
 
+            {entry.data.draft && (
+              <p class="article-proposal-flag">
+                Local preview: not yet published (hidden on the live site)
+              </p>
+            )}
             {proposal && (
               <p class="article-proposal-flag">
                 Local preview: proposed layout (not saved in the article)

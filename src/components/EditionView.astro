@@ -12,6 +12,7 @@ import { getEntries, render, type CollectionEntry } from 'astro:content';
 import ArticleCard from './ArticleCard.astro';
 import PullQuote from './blocks/PullQuote.astro';
 import { framingStyle } from '../utils/framing';
+import { isLive } from '../utils/drafts';
 import { aspectStyle, responsiveImage, SLOTS } from '../utils/responsiveImage';
 import { compareArticles } from '../utils/articleOrder';
 import { ROUTES } from '../config/routes';
@@ -38,7 +39,8 @@ const PILLARS = [
   'Reservation for One',
 ];
 const slug = (value: string) => value.trim().toLowerCase().replace(/\s+/g, '-');
-const articles = await getEntries(data.articles);
+// Drafts (not yet published) are left out on the live site.
+const articles = (await getEntries(data.articles)).filter(isLive);
 const authors = await getEntries(articles.map((article) => article.data.author));
 const authorName = (article: CollectionEntry<'articles'>) =>
   article.data.byline ||

@@ -3,6 +3,7 @@ import { getCollection, getEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
 import { compareArticles } from '../../utils/articleOrder';
+import { isLive } from '../../utils/drafts';
 import { renderInlineHtml } from '../../utils/summary';
 
 const slug = Astro.params.slug ?? '';
@@ -12,8 +13,10 @@ if (!author || author.data.hasOwnPage === false) {
   Astro.response.status = 404;
 }
 
-// Articles marked listed: false are left out of every listing.
-const allArticles = await getCollection('articles', ({ data }) => data.listed !== false);
+// Articles marked listed: false, and drafts on the live site, are left out of every listing.
+const allArticles = (await getCollection('articles', ({ data }) => data.listed !== false)).filter(
+  isLive,
+);
 
 const columnLabelMap: Record<string, string> = {
   'Musings from the Corner Office': 'Corner Office',

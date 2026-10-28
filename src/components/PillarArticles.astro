@@ -6,6 +6,7 @@
 import { getCollection } from 'astro:content';
 import ArticleCard from './ArticleCard.astro';
 import { compareArticles } from '../utils/articleOrder';
+import { isLive } from '../utils/drafts';
 
 interface Props {
   /** The pillar's display name, e.g. "The Uncommon Traveller". */
@@ -16,13 +17,14 @@ const { pillar } = Astro.props;
 const slug = (value: string | undefined) =>
   (value ?? '').trim().toLowerCase().replace(/\s+/g, '-').replace(/-+/g, '-');
 
-// Articles marked listed: false are left out of every listing.
+// Articles marked listed: false, and drafts on the live site, are left out of every listing.
 const articles = (
   await getCollection(
     'articles',
     ({ data }) => data.listed !== false && slug(data.pillar) === slug(pillar),
   )
 )
+  .filter(isLive)
   // Newest first; the launch articles (same date) in their fixed launch order.
   .sort(compareArticles);
 

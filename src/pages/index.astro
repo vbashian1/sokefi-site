@@ -6,6 +6,7 @@ import { getThumbnailImage } from '../utils/pillarFallback';
 import { aspectStyle, responsiveImage, SLOTS } from '../utils/responsiveImage';
 import { framingStyle } from '../utils/framing';
 import { smartQuotes } from '../plugins/typography.mjs';
+import { isLive } from '../utils/drafts';
 import positanoHero from '../assets/images/positano-new.webp';
 import awenvidaBalcony from '../assets/images/awenvida-breakfast-balcony.avif';
 import beyondCamels from '../assets/images/beyond-camels-stable.webp';
@@ -32,24 +33,28 @@ const PILLAR_NAMES: Record<string, string> = {
   'the-uncommon-traveller': 'The Uncommon Traveller',
   'reservation-for-one': 'Reservation for One',
 };
-const featuredItems = await Promise.all(
-  (latestEdition?.data.homepagePicks ?? []).map(async (pick) => {
-    const article = await getEntry(pick.article);
-    if (!article) throw new Error(`Homepage pick not found: ${pick.article.id}`);
-    const pillar = article.data.pillar;
-    return {
-      section: PILLAR_NAMES[pillar.trim().toLowerCase().replace(/\s+/g, '-')] ?? pillar,
-      title: smartQuotes(pick.title ?? article.data.title),
-      description: smartQuotes(article.data.dek),
-      href: getArticleRoute(article.id),
-      image: getThumbnailImage(article),
-      zoom: article.data.thumbnail ? article.data.thumbnailZoom : undefined,
-      imageStyle: article.data.thumbnail
-        ? framingStyle(article.data.thumbnailFocus, article.data.thumbnailZoom)
-        : undefined,
-    };
-  }),
-);
+const featuredItems = (
+  await Promise.all(
+    (latestEdition?.data.homepagePicks ?? []).map(async (pick) => {
+      const article = await getEntry(pick.article);
+      if (!article) throw new Error(`Homepage pick not found: ${pick.article.id}`);
+      // A draft (not yet published) is left out on the live site.
+      if (!isLive(article)) return null;
+      const pillar = article.data.pillar;
+      return {
+        section: PILLAR_NAMES[pillar.trim().toLowerCase().replace(/\s+/g, '-')] ?? pillar,
+        title: smartQuotes(pick.title ?? article.data.title),
+        description: smartQuotes(article.data.dek),
+        href: getArticleRoute(article.id),
+        image: getThumbnailImage(article),
+        zoom: article.data.thumbnail ? article.data.thumbnailZoom : undefined,
+        imageStyle: article.data.thumbnail
+          ? framingStyle(article.data.thumbnailFocus, article.data.thumbnailZoom)
+          : undefined,
+      };
+    }),
+  )
+).filter((item): item is NonNullable<typeof item> => item !== null);
 
 const brands = [
   {
