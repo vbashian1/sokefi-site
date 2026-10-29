@@ -773,6 +773,51 @@
       2094
     ]
   },
+  "src/content/articles/2026-10-01-college-towns-oxford-mississippi/courthouse - hero .jpg": {
+    "hash": "9f1c503b0b72",
+    "width": 4096,
+    "height": 1864,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
+  "src/content/articles/2026-10-01-college-towns-oxford-mississippi/department store.jpg": {
+    "hash": "c83cf4335e6f",
+    "width": 1080,
+    "height": 491,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1080
+    ]
+  },
+  "src/content/articles/2026-10-01-college-towns-oxford-mississippi/faulkner sign .jpg": {
+    "hash": "1b1ccfd66c74",
+    "width": 4608,
+    "height": 2096,
+    "widths": [
+      320,
+      480,
+      640,
+      800,
+      1000,
+      1280,
+      1600,
+      2000,
+      2560
+    ]
+  },
   "src/content/articles/2026-10-01-the-joy-of-saying-yes/van .jpg": {
     "hash": "522ace1c5503",
     "width": 2677,

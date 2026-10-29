@@ -45,6 +45,11 @@ export const MINE = [
   `${A}2026-09-01-winter-weekend-in-iceland/broad shot of waterfall .jpg`,
   `${A}2026-09-01-winter-weekend-in-iceland/waterfall - drop back shot - people in front .jpg`,
   `${A}2026-09-01-winter-weekend-in-iceland/full crater.jpg`,
+  // Oxford: all three (the courthouse hero confirmed hers by Veronica, 2026-10-28, which
+  // overrides the ownership map's "not mine")
+  `${A}2026-10-01-college-towns-oxford-mississippi/courthouse - hero .jpg`,
+  `${A}2026-10-01-college-towns-oxford-mississippi/faulkner sign .jpg`,
+  `${A}2026-10-01-college-towns-oxford-mississippi/department store.jpg`,
   // The Sokéfi Edit, Edition 1: beach at dusk
   'src/content/editions/edition-1/beach.jpg',
   // Site photos: the About page plane

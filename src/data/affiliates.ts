@@ -306,6 +306,27 @@ export const AFFILIATES: Record<string, GoLink> = {
     },
     partner: 'us.hilo.com / hilo.com',
   },
+
+  // --- Added after the launch table: October Edit (4) ---
+  'marriott-towneplace-oxford': {
+    destination: 'https://www.marriott.com/en-us/hotels/uoxts-towneplace-suites-oxford/overview/',
+    partner: 'marriott.com',
+  },
+  'square-books': {
+    destination: 'https://www.squarebooks.com/',
+    partner: 'squarebooks.com',
+    referral: true,
+  },
+  'rowan-oak': {
+    destination: 'https://www.rowanoak.com/',
+    partner: 'rowanoak.com',
+    referral: true,
+  },
+  'neilsons-oxford': {
+    destination: 'https://www.neilsonsdepartmentstore.com/',
+    partner: 'neilsonsdepartmentstore.com',
+    referral: true,
+  },
 };
 
 export type AffiliateSlug = keyof typeof AFFILIATES;

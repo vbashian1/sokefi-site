@@ -43,6 +43,32 @@ const SPECIAL = {
   },
 };
 
+// Keys from articles imported after the launch table (the October Edit exports list them in
+// their notes, with destinations confirmed at import). `referral: true` = no commission.
+const LATER = {
+  // Oxford, Mississippi (2026-10-28): the hotel is an inline lodging link (Marriott).
+  'marriott-towneplace-oxford': {
+    destination: 'https://www.marriott.com/en-us/hotels/uoxts-towneplace-suites-oxford/overview/',
+    partner: 'marriott.com',
+  },
+  'square-books': {
+    destination: 'https://www.squarebooks.com/',
+    partner: 'squarebooks.com',
+    referral: true,
+  },
+  // Run by the University of Mississippi.
+  'rowan-oak': {
+    destination: 'https://www.rowanoak.com/',
+    partner: 'rowanoak.com',
+    referral: true,
+  },
+  'neilsons-oxford': {
+    destination: 'https://www.neilsonsdepartmentstore.com/',
+    partner: 'neilsonsdepartmentstore.com',
+    referral: true,
+  },
+};
+
 /** @type {Record<string, string>} key → destination, when it must differ from the table. */
 const OVERRIDES = {};
 
@@ -72,6 +98,9 @@ if (dupes.length) throw new Error(`Duplicate keys in the table: ${dupes.join(', 
 for (const k of Object.keys(SPECIAL)) {
   if (keys.includes(k)) throw new Error(`"${k}" is in the Ready table and also in SPECIAL`);
 }
+for (const k of Object.keys(LATER)) {
+  if (keys.includes(k) || k in SPECIAL) throw new Error(`"${k}" is in LATER and also elsewhere`);
+}
 for (const k of Object.keys(OVERRIDES)) {
   if (!keys.includes(k)) throw new Error(`Override "${k}" is not in the Ready table`);
 }
@@ -89,6 +118,15 @@ const entry = ({ key, url, referral }) => {
     '  },',
   ].join('\n');
 };
+const later = Object.entries(LATER).map(([key, value]) =>
+  [
+    `  ${quote(key)}: {`,
+    `    destination: ${quote(value.destination)},`,
+    `    partner: ${quote(value.partner)},`,
+    ...(value.referral ? ['    referral: true,'] : []),
+    '  },',
+  ].join('\n'),
+);
 const special = Object.entries(SPECIAL).map(([key, value]) =>
   [
     `  ${quote(key)}: {`,
@@ -130,11 +168,14 @@ ${rows.map(entry).join('\n')}
 
   // --- Special setup (${Object.keys(SPECIAL).length}) ---
 ${special.join('\n')}
+
+  // --- Added after the launch table: October Edit (${Object.keys(LATER).length}) ---
+${later.join('\n')}
 };
 
 export type AffiliateSlug = keyof typeof AFFILIATES;
 `;
 fs.writeFileSync('src/data/affiliates.ts', file);
 console.log(
-  `Wrote src/data/affiliates.ts: ${rows.length} ready + ${Object.keys(SPECIAL).length} special = ${rows.length + Object.keys(SPECIAL).length} keys (${rows.filter((r) => r.referral).length} referral, ${Object.keys(OVERRIDES).length} override)`,
+  `Wrote src/data/affiliates.ts: ${rows.length} ready + ${Object.keys(SPECIAL).length} special + ${Object.keys(LATER).length} later = ${rows.length + Object.keys(SPECIAL).length + Object.keys(LATER).length} keys (${rows.filter((r) => r.referral).length} referral, ${Object.keys(OVERRIDES).length} override)`,
 );
